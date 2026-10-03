@@ -1,4 +1,4 @@
-"""The daily pipeline: ingest -> target -> generate -> verify -> dedup -> refill -> images -> export -> report.
+"""The daily pipeline: ingest -> target -> generate -> verify -> dedup -> refill -> images -> guide -> export -> report.
 
 Each stage is a function of (context, run_date) that reads its inputs from the
 warehouse and replaces its own `run_date` partition. That contract is what lets
@@ -16,7 +16,7 @@ from datetime import date
 from pathlib import Path
 from typing import Callable
 
-from ankigen import dedup, export, generate, images, ingest, llm, refill, targeting, verify, visuals
+from ankigen import dedup, export, generate, guide, images, ingest, llm, refill, targeting, verify, visuals
 from ankigen.config import Settings, settings
 from ankigen.profile import Profile, load_profile
 from ankigen.warehouse import Warehouse
@@ -171,6 +171,13 @@ def stage_images(ctx: Context, run_date: date) -> dict:
     }
 
 
+def stage_guide(ctx: Context, run_date: date) -> dict:
+    """A study guide explaining the kept cards in depth. After images, so it
+    can show the drawn tables and diagrams; before export, so the notes can
+    carry their section number."""
+    return guide.run(ctx.wh, run_date, ctx.profile, ctx.out_dir)
+
+
 def stage_export(ctx: Context, run_date: date) -> dict:
     result = export.run(ctx.wh, run_date, ctx.out_dir, ctx.profile,
                         media_dir=ctx.settings.data_path / "media")
@@ -190,6 +197,7 @@ STAGES: dict[str, Callable[[Context, date], dict]] = {
     "dedup": stage_dedup,
     "refill": stage_refill,
     "images": stage_images,
+    "guide": stage_guide,
     "export": stage_export,
     "report": stage_report,
 }
@@ -204,7 +212,7 @@ def run_stage(ctx: Context, name: str, run_date: date) -> dict:
     except Exception as e:
         ctx.wh.finish_stage(run_date, name, "failed", detail={"error": str(e)})
         raise
-    rows = next((detail[k] for k in ("cards", "notes", "requests", "checked", "kept") if k in detail), 0)
+    rows = next((detail[k] for k in ("sections", "cards", "notes", "requests", "checked", "kept") if k in detail), 0)
     ctx.wh.finish_stage(run_date, name, "success", rows_out=rows if isinstance(rows, int) else 0, detail=detail)
     logger.info("stage %-8s ok  %s", name, detail)
     return detail
@@ -217,6 +225,6 @@ def run(ctx: Context, run_date: date, stages: list[str] | None = None, dry_run: 
         raise ValueError(f"Unknown stage(s): {unknown}. Choose from {list(STAGES)}.")
     # Before ingest, not after it: a provider that cannot work at all should
     # say so in a second rather than once per request, ninety seconds in.
-    if {"generate", "verify", "refill"} & set(names):
+    if {"generate", "verify", "refill", "guide"} & set(names):
         llm.preflight()
     return {name: run_stage(ctx, name, run_date) for name in names}

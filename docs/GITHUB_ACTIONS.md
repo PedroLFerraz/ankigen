@@ -94,6 +94,25 @@ finishes. Leave **quota** blank for that. Locally: `ankigen add-theme --deck "..
 the push puts the new pictures on the day's notes and leaves everything else
 alone.
 
+**A study guide for a day that has none.** *daily cards* with **stages** set
+to `guide,export,report` and that day's **run_date**. The guide is written
+again from that day's kept cards. Notes already in your collection keep what
+they have; only cards pushed for the first time get the `Guide … · §` line.
+
+## The study guide
+
+Each run also writes `guide_<day>.pdf`: a chapter per topic, opening with how
+the thing works, then a section per card with why its answer is what it is, an
+example, the usual mistakes and what to look at next. Every card says where
+its section is (`Guide 2026-10-03 · §2.3`, under the answer). It is in the
+run's **cards-<day>** artifact, next to the `.apkg`: open the run in the
+GitHub app, scroll to *Artifacts*, download, and open the PDF from the zip.
+Artifacts are kept for 90 days.
+
+The checker reads the guide too. A section it disagrees with stays in, marked
+with what it disputes; if the day's allowance runs out, the remaining chapters
+say so and the cards go out regardless.
+
 ## Pictures
 
 Most pictures are drawn from the card itself: when an answer is a comparison

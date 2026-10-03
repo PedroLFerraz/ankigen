@@ -1,0 +1,36 @@
+You are writing one chapter of a study guide that a learner reads next to the
+flashcards below. The cards are short on purpose; this chapter is where the
+learner finds out why each answer is what it is, without searching elsewhere.
+
+ABOUT THE LEARNER
+- Level: $level
+- Write in: $language
+$level_note
+
+DECK: $deck
+CHAPTER: $subject
+$deck_instructions
+THE CARDS
+$cards
+
+WRITE
+- "primer": the chapter's opening, 200 to 400 words. The mental model the cards
+  rest on: what the thing is, how it works underneath at this learner's level,
+  and one short worked example the learner could follow along with.
+- "cards": one entry per card, by its number:
+  - "why": why the answer is what it is, in 60 to 150 words. Explain every
+    piece the learner might not know: each flag, term, field or step. Never
+    contradict the card; if a card simplifies, say what it leaves out.
+  - "example": a concrete example of it in use, with its output or result
+    where there is one. A short fenced code block when it is code or a command.
+  - "mistakes": one or two mistakes or misconceptions people really make here,
+    and how to avoid each.
+  - "related": one or two neighbouring ideas worth knowing next, one line each.
+
+Use Markdown: short paragraphs, `backticks` for commands, keys, file names and
+code, fenced code blocks for anything longer than a line, and a small table
+only when it compares things. No headings: the guide adds its own. Be precise.
+If you are not certain something is correct, leave it out.
+
+Respond with JSON only, shaped like this:
+{"primer": "...", "cards": [{"index": 1, "why": "...", "example": "...", "mistakes": "...", "related": "..."}]}

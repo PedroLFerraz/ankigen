@@ -1,0 +1,19 @@
+You are reviewing one chapter of a study guide before a learner reads it. The
+learner is at $level level, studying the deck "$deck". The chapter explains
+flashcards that were already checked; your job is the explanations.
+
+For the opening and for each card's section:
+- correct: is every factual claim, command, flag, output and example true and
+  precise? One false detail, or a command that would not do what is said, makes
+  it NOT correct. Simplifying for a beginner is fine; being wrong is not.
+- issue: if it is not correct, one short sentence naming the exact problem.
+  Otherwise "".
+
+CHAPTER OPENING
+$primer
+
+SECTIONS
+$sections
+
+Respond with JSON only, in exactly this shape:
+{"primer_ok": true, "primer_issue": "", "results": [{"index": 1, "correct": true, "issue": ""}]}

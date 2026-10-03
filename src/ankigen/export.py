@@ -83,6 +83,29 @@ def with_picture(card_type: str, values: dict, picture: str) -> dict:
     return values
 
 
+# The field a card's guide reference goes in: the answer side, next to the
+# picture but never in the detailed type's Image field.
+GUIDE_FIELD = {"detailed": "Explanation", "command": "Note", "cloze": "Extra"}
+
+
+def guide_line(run_date, ref: str) -> str:
+    """Where the day's study guide explains this card. Styled inline, like the
+    command breakdown, so notes already in a collection need no new CSS."""
+    return ('<div class="ankigen-guide" style="margin-top:10px;font-size:13px;color:#8a93a6">'
+            f"Guide {run_date} · §{ref}</div>")
+
+
+def with_guide_ref(card_type: str, values: dict, run_date, ref: str | None) -> dict:
+    """Append the guide reference to the answer side. An edit to a field's
+    content, not a new field, so the note type stays as it is."""
+    if not ref:
+        return values
+    values = dict(values)
+    name = GUIDE_FIELD.get(card_type, "Answer")
+    values[name] = f"{values.get(name, '')}{guide_line(run_date, ref)}"
+    return values
+
+
 def build_package(run_date: date, cards: list[dict], profile=None,
                   media_dir: Path | None = None) -> genanki.Package | None:
     if not cards:
@@ -98,7 +121,10 @@ def build_package(run_date: date, cards: list[dict], profile=None,
         name = profile.deck_for(c["deck"]) if profile else c["deck"]
         deck = decks.setdefault(name, genanki.Deck(_deck_id(name), name))
         spec_fields = CARD_TYPES[c["card_type"]]["fields"]
-        values = json.loads(c["fields_json"])
+        # Before the picture, so a picture refreshed by push later still ends
+        # up last, where it always was.
+        values = with_guide_ref(c["card_type"], json.loads(c["fields_json"]), run_date,
+                                c.get("guide_ref"))
 
         filename = c.get("image_filename")
         if c.get("visual_html"):
@@ -255,6 +281,19 @@ def markdown_summary(wh, run_date: date) -> str:
             why = c["verify_reason"] if c["outcome"] == "dropped_verify" else c["dup_reason"]
             lines.append(f"- {_one_line(c['front'])} — *{_one_line(why or '')}*")
         lines.append("")
+
+    sections = wh.query(
+        "SELECT status, COUNT(*) AS n FROM guide_sections WHERE run_date = ? GROUP BY status",
+        [run_date])
+    if sections:
+        counts = {r["status"]: r["n"] for r in sections}
+        chapters = wh.scalar("SELECT COUNT(*) FROM guide_sections "
+                             "WHERE run_date = ? AND kind = 'primer'", [run_date])
+        flags = ", ".join(f"{counts[s]} {s}" for s in ("disputed", "unchecked", "missing")
+                          if counts.get(s))
+        lines += [f"**Study guide:** {chapters} chapter(s), {sum(counts.values())} section(s)"
+                  + (f" ({flags})" if flags else "")
+                  + f" — `guide_{run_date}.pdf`, in this run's `cards-{run_date}` artifact.", ""]
 
     models = sorted({c["model"] for c in cards if c["model"]})
     if models:

@@ -114,14 +114,16 @@ jobs:
           python-version: "3.12"
           cache: pip
 
-      # Draws the diagrams the model describes for a card (visuals.py). Without
-      # it those cards fall back to searching the web for a picture.
-      - run: sudo apt-get install -y --no-install-recommends graphviz
+      # Graphviz draws the diagrams the model describes for a card (visuals.py);
+      # without it those cards fall back to searching the web for a picture.
+      # Pango is what WeasyPrint lays the study guide's PDF out with.
+      - run: sudo apt-get install -y --no-install-recommends graphviz libpango-1.0-0 libpangoft2-1.0-0
 
       # [gemini] pulls google-genai, which is an extra because it is the one
       # provider that does not speak the OpenAI protocol. Without it the run
       # gets all the way to the first request before failing.
-      - run: pip install ".[gemini,push]"
+      # [guide] for the study guide's PDF.
+      - run: pip install ".[gemini,push,guide]"
 
       # Claude writes and checks the cards, on the Claude subscription behind
       # CLAUDE_CODE_OAUTH_TOKEN (`claude setup-token`). If this install fails,
@@ -266,6 +268,7 @@ jobs:
           name: cards-${{ env.RUN_DATE || 'unknown' }}
           path: |
             data/out/**/*.apkg
+            data/out/**/guide_*.pdf
             data/out/**/run_report.json
           if-no-files-found: warn
           retention-days: 90

@@ -19,7 +19,7 @@ except ImportError:                     # Airflow 2.x
     from airflow.decorators import dag, task
 
 # Order matters: each stage consumes what the previous one wrote.
-STAGES = ["ingest", "target", "generate", "verify", "dedup", "refill", "images", "export", "report"]
+STAGES = ["ingest", "target", "generate", "verify", "dedup", "refill", "images", "guide", "export", "report"]
 
 
 @dag(

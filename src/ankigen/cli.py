@@ -132,6 +132,11 @@ def run(
         typer.echo(f"\n{exp['kept']} card(s) kept for {d}.")
         typer.echo(f"  package: {exp['apkg'] or '(none: nothing kept)'}")
         typer.echo(f"  to Anki: ankigen push -d {d}")
+    if "guide" in results:
+        g = results["guide"]
+        typer.echo(f"  guide:   {g['pdf'] or g['html'] or '(none: nothing kept)'}"
+                   + (f"  ({g['disputed']} disputed, {g['missing']} not written)"
+                      if g["disputed"] or g["missing"] else ""))
     if "report" in results:
         typer.echo(f"  report:  {results['report']['report']}  (ankigen report -d {d})")
 
