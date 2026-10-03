@@ -163,3 +163,11 @@ def test_a_card_s_section_lists_its_command_parts():
             "visual_html": None}
     assert "human-readable sizes" in guide._card_box(card)
     assert "<code>ls -lh</code>" in guide._card_box(card)
+
+
+def test_a_build_card_s_context_stays_text_and_its_code_is_code():
+    card = {"front": "~/.bashrc: make `ll` run `ls -lh`\n[1] ll='ls -lh'", "back": "[1] alias",
+            "ref": "1.1", "fields_json": "{}", "visual_html": None}
+    box = guide._card_box(card)
+    assert "make <code>ll</code> run <code>ls -lh</code>" in box
+    assert "<pre><code>[1] ll='ls -lh'</code></pre>" in box

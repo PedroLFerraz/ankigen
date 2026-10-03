@@ -304,10 +304,13 @@ def _md(text: str) -> str:
 
 
 def _plain(text: str) -> str:
+    """A card's plain-text side as HTML. A build card's front is a line of
+    context and then its code, so the first line stays text."""
     text = str(text or "")
-    if "\n" in text:
-        return f"<pre><code>{html.escape(text)}</code></pre>"
-    return html_text(text)
+    if "\n" not in text:
+        return html_text(text)
+    first, code = text.split("\n", 1)
+    return f"{html_text(first)}<pre><code>{html.escape(code, quote=False)}</code></pre>"
 
 
 def _callout(status: str, issue: str) -> str:
