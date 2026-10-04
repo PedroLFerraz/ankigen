@@ -1,6 +1,6 @@
-# Running the daily pipeline without leaving a PC on
+# Running the pipelines without leaving a PC on
 
-GitHub Actions runs the pipeline on GitHub's machines: each run gets a clean
+GitHub Actions runs the pipelines on GitHub's machines: each run gets a clean
 Linux VM, does the work, and is destroyed. On a public repository the standard
 runners are free, with no minute limit and no card on file, which makes this the
 cheapest always-on option there is.
@@ -11,17 +11,64 @@ rebuilt on the spot:
 | it needs | where it comes from |
 |---|---|
 | the code | cloned from this repo |
-| your collection | synced down from AnkiWeb |
+| your collection | synced down from AnkiWeb (one for every pipeline) |
 | embeddings | `fastembed`, in-process — there is no Ollama on a runner |
-| past runs | the warehouse, restored from the Actions cache |
-| the cards | synced back to AnkiWeb, and kept as an artifact |
+| past runs | the pipeline's warehouse, restored from the Actions cache |
+| the cards | synced back to AnkiWeb, and kept as an artifact with the study guide |
+| what already ran | the `ankigen-status` branch |
 
 Nothing is imported by hand: the run adds the cards to your collection and syncs
 them up, and your phone and desktop pull them down like any other change.
 
+## Pipelines
+
+A pipeline is a folder under `pipelines/`:
+
+| file | what it is |
+|---|---|
+| `profile.yaml` | what to teach: the learner, the decks, the curriculum |
+| `pipeline.yaml` | how to run it: its schedule, outputs, models and budget |
+
+```yaml
+# pipelines/data-platform/pipeline.yaml
+name: Data Platform
+enabled: true
+schedule: {cron: "17 5 * * *", timezone: America/Sao_Paulo}   # one run = one curriculum day
+outputs:  {guide_pdf: true, push_to_ankiweb: true}
+models:   {writer: claude, checker: claude, fallback: gemini}  # and each one's model chain
+budget:   {max_llm_calls_per_run: 0}                           # 0: no cap
+```
+
+`ankigen pipelines list` shows them and when each runs next; `ankigen
+pipelines validate` checks them all, and runs on every push. Each pipeline
+needs decks of its own: two writing to one deck would move each other's
+curriculum along, and validation refuses it. Every note a pipeline makes is
+tagged `ankigen::pipeline::<id>`.
+
+**How the schedule works.** GitHub's own schedule is one cron per workflow
+file, so a workflow, **tick**, runs every hour at :23. It reads each pipeline's
+cron in the pipeline's time zone, checks `ankigen-status` for what already ran,
+and runs the due pipelines one after another (they share one AnkiWeb
+collection, so only one syncs at a time). A pipeline therefore runs within about
+an hour of its time. Times the tick missed collapse into one run: the
+curriculum is a queue, so a day is written late, never skipped. A failed run is
+tried again on the next two ticks, then waits for its next scheduled time.
+
+**What a run leaves behind.** On the `ankigen-status` branch, per pipeline:
+`latest.json` (what the last run made, or why it failed), `runs/` (one file per
+run), `scheduler.json` (the last scheduled time and how it went) and
+`curriculum.json` (every topic, and which are done or next). This is what the
+app reads.
+
+**Shared allowances.** Every pipeline uses the same Claude subscription and the
+same Gemini free tier. `budget.max_llm_calls_per_run` caps one run's share;
+when it is spent, each stage stops asking and keeps what it has, as it does
+when a quota runs out.
+
 ## Setup
 
-Secrets, under Settings → Secrets and variables → Actions.
+Secrets, under Settings → Secrets and variables → Actions. They are shared by
+every pipeline.
 
 **`CLAUDE_CODE_OAUTH_TOKEN`** — optional, and what writes the cards when set:
 Claude Opus writes them and Claude Sonnet checks them, on your Claude
@@ -30,9 +77,9 @@ subscription (Pro or Max), through the Claude Code CLI. Make one locally with
 (it prompts for the value). The code removes any Anthropic API key from the
 CLI's environment, so these calls can only ever run on the subscription.
 Whenever Claude cannot answer (the plan's usage limit reached, a missing or
-expired token), the rest of that run goes to Gemini instead. Keep *extra
-usage* off at claude.ai/settings/usage if a reached limit should mean Gemini
-rather than paid overage.
+expired token), the rest of that run goes to the pipeline's fallback, Gemini
+unless it says otherwise. Keep *extra usage* off at claude.ai/settings/usage if
+a reached limit should mean Gemini rather than paid overage.
 
 **`GOOGLE_API_KEY`** — your Gemini key: the fallback above, and what checks
 pictures found on the web.
@@ -48,30 +95,30 @@ It prints `ANKIWEB_KEY=...`. Add that as the secret, and put it in your local
 `.env` too so `pull` and `push` work from your machine. Changing your AnkiWeb
 password invalidates it.
 
-Optionally set *variables* (not secrets) to change models without editing the
-workflow, each a comma-separated preference order, best first:
-`CLAUDE_MODEL` and `CLAUDE_VERIFY_MODEL` for Claude's writer and checker,
-`GEMINI_MODEL` and `VERIFY_MODEL` for Gemini's. `LLM_PROVIDER=gemini` and
-`VERIFY_PROVIDER=gemini` put Gemini back in front.
+**`LLM_API_KEY`** — only for a pipeline whose writer is an OpenAI-compatible
+provider such as `groq` or `openrouter`.
 
-Then Actions → **daily cards** → Run workflow. After that it runs daily at
-08:17 UTC (05:17 in São Paulo), with a backup at 11:43 UTC that does nothing if
-the first one already succeeded.
+Models are set per pipeline, in `pipeline.yaml`'s `models:`, each chain a
+preference order, best first.
+
+Then Actions → **tick** → Run workflow with **dry run** ticked: its summary
+lists what is due. After that it runs every hour by itself.
 
 ## From your phone
 
 Everything below works from the GitHub app: Actions, pick the workflow, then
 **Run workflow**.
 
-**The next day of the curriculum, now.** *daily cards* with every field
-blank. Each run writes the day after the last one in your collection, so this
-adds tomorrow's cards today, and the scheduled run then writes the day after
-that: nothing is repeated, nothing skipped, and every later deck moves up a day.
-It is how to go faster than one day a day, as often as you can keep up with.
-The run's summary names the day it wrote, which is also the cards' tag
-(`tag:ankigen::run_<day>`); `added:1` in Anki finds everything added today.
+**The next day of a curriculum, now.** *run pipeline* with **pipeline** set
+and every other field blank. Each run writes the day after the last one the
+pipeline's decks have, so this adds tomorrow's cards today, and the scheduled
+run then writes the day after that: nothing is repeated, nothing skipped, and
+every later deck moves up a day. It is how to go faster than one day a day, as
+often as you can keep up with. The run's summary names the day it wrote, which
+is also the cards' tag (`tag:ankigen::run_<day>`); `added:1` in Anki finds
+everything added today.
 
-**More cards on one subject, now.** *daily cards* with **deck** set (and
+**More cards on one subject, now.** *run pipeline* with **deck** set (and
 optionally **topic**, **prompt**, **count**) writes for that deck instead of
 the day's plan. The cards reach your phone on its next sync. They are not a
 day of the curriculum and do not move it along. The same thing
@@ -81,33 +128,39 @@ locally:
 ankigen run --deck "Data Platform::Kubernetes" --topic "probes" --prompt "Contrast what happens to traffic when each one fails."
 ```
 
-**A new subject in the daily rotation.** *add a theme* with a **deck** name and
-a sentence **about** it. The model plans an ordered list of topics in the same
-shape as your other decks and proposes it as a change to the profile: open the
-run's summary for the link and the topics. Merge it to start the subject, or
-close it. When the profile is a curriculum (decks with `start:` dates), the new
-deck joins the end of it at the same pace, starting the day after the last one
-finishes. Leave **quota** blank for that. Locally: `ankigen add-theme --deck "..." --about "..."`.
+**A new subject.** *add a theme* with the **pipeline**, a **deck** name and a
+sentence **about** it. The model plans an ordered list of topics in the same
+shape as the pipeline's other decks and proposes it as a change to its profile:
+open the run's summary for the link and the topics. Merge it to start the
+subject, or close it. When the profile is a curriculum (decks with `start:`
+dates), the new deck joins the end of it at the same pace, starting the day
+after the last one finishes. Leave **quota** blank for that. Locally:
+`ankigen add-theme --deck "..." --about "..."`.
 
-**Redo a day's pictures.** *daily cards* with **stages** set to
+**A new pipeline.** Add a folder under `pipelines/` with a `pipeline.yaml` and
+a `profile.yaml` (copy another pipeline's and change it), and push. The next
+tick picks it up at its scheduled time.
+
+**Redo a day's pictures.** *run pipeline* with **stages** set to
 `images,export,report` and that day's **run_date**. No new cards are written;
 the push puts the new pictures on the day's notes and leaves everything else
 alone.
 
-**A study guide for a day that has none.** *daily cards* with **stages** set
+**A study guide for a day that has none.** *run pipeline* with **stages** set
 to `guide,export,report` and that day's **run_date**. The guide is written
 again from that day's kept cards. Notes already in your collection keep what
 they have; only cards pushed for the first time get the `Guide … · §` line.
 
 ## The study guide
 
-Each run also writes `guide_<day>.pdf`: a chapter per topic, opening with how
-the thing works, then a section per card with why its answer is what it is, an
-example, the usual mistakes and what to look at next. Every card says where
-its section is (`Guide 2026-10-03 · §2.3`, under the answer). It is in the
-run's **cards-<day>** artifact, next to the `.apkg`: open the run in the
-GitHub app, scroll to *Artifacts*, download, and open the PDF from the zip.
-Artifacts are kept for 90 days.
+Each run of a pipeline with `guide_pdf: true` also writes `guide_<day>.pdf`: a
+chapter per topic, opening with how the thing works, then a section per card
+with why its answer is what it is, an example, the usual mistakes and what to
+look at next. Every card says where its section is (`Guide 2026-10-03 · §2.3`,
+under the answer). It is in the run's **cards-<pipeline>-<day>** artifact, next
+to the `.apkg` and `cards.json`: open the run in the GitHub app, scroll to
+*Artifacts*, download, and open the PDF from the zip. Artifacts are kept for 90
+days.
 
 The checker reads the guide too. A section it disagrees with stays in, marked
 with what it disputes; if the day's allowance runs out, the remaining chapters
@@ -133,10 +186,11 @@ re-encoded small (640px JPEG) and stored as a `data:` URI. A push replaces a
 picture only with a newer one, and never takes a working picture off a note.
 
 **The model chain has backups.** Free tiers meter each model separately, so the
-run walks down `GEMINI_MODEL` (a repository variable here) as models run out or
-stay busy, then tries `gemini-3-flash-preview` and Gemma 4, which have daily
-allowances of their own. A busy model is tried once and skipped for ten
-minutes: on the free tier even a 503 seems to count against the day.
+run walks down the fallback's chain (`fallback_models` in `pipeline.yaml`) as
+models run out or stay busy, then tries `gemini-3-flash-preview` and Gemma 4,
+which have daily allowances of their own. A busy model is tried once and
+skipped for ten minutes: on the free tier even a 503 seems to count against the
+day.
 
 **The sync refuses to guess.** If AnkiWeb reports that the runner's copy and
 yours have diverged beyond a normal merge, the job stops. Resolving that means
@@ -144,22 +198,28 @@ declaring one side the winner, and choosing the runner's could discard review
 history. Sync from Anki on your own machine, then re-run; if it persists, clear
 the `anki-collection-` cache so the next run starts from a fresh download.
 
+**One run at a time.** Runs share a concurrency group, because they share the
+collection. GitHub keeps only one run waiting in a group and cancels an older
+waiting one for a newer, which is why the tick runs due pipelines one after
+another itself, and why starting several runs by hand at once leaves only the
+first and the last. A cancelled scheduled run is due again on the next tick.
+
 **GitHub's schedule is best-effort.** Runs start late under load and are
 sometimes dropped altogether, most often on the hour, which is how the first
-09:00 run never happened. That is why the schedule sits on an odd minute and has
-a backup.
+09:00 run never happened. That is why the tick sits on an odd minute; and since
+it runs hourly, a dropped tick only delays a pipeline to the next one.
 
-**Scheduled workflows stop after 60 days without a commit.** GitHub disables
-them on dormant repositories, and does not tell you.
+**Scheduled workflows stop after 60 days without repository activity.** GitHub
+disables them on dormant repositories, and does not tell you.
 
 **Caches can be evicted** after 7 days unused, which a daily schedule prevents.
-Losing the collection cache costs a fresh download; losing the warehouse cache
+Losing the collection cache costs a fresh download; losing a warehouse cache
 costs about ninety seconds of re-embedding and the memory of which cards were
 already made.
 
 **Gemini's free tier is 20 chat requests per day, per model**, which is why both
 model settings are chains. A run costs roughly ten calls plus one per image
-checked.
+checked, and two per chapter of the study guide.
 
 **Snapshots are kept for 14 days.** Each run stores a full snapshot of your
 notes, and only that day's is ever read, so ingest drops the ones older than

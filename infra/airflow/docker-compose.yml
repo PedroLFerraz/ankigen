@@ -38,7 +38,7 @@ services:
       # --- AnkiGen ---
       # The collection is mounted read-only; the pipeline only ever snapshots it.
       ANKI_COLLECTION_PATH: /opt/ankigen/anki/collection.anki2
-      ANKIGEN_PROFILE: /opt/ankigen/profiles/default.yaml
+      ANKIGEN_PIPELINES_DIR: /opt/ankigen/pipelines
       DATA_DIR: /opt/ankigen/data
       LLM_PROVIDER: ${LLM_PROVIDER:-openrouter}
       LLM_API_KEY: ${LLM_API_KEY:?set LLM_API_KEY in the repo .env}
@@ -47,7 +47,7 @@ services:
       - ./dags:/opt/airflow/dags
       - airflow-logs:/opt/airflow/logs
       - ../../data:/opt/ankigen/data
-      - ../../profiles:/opt/ankigen/profiles:ro
+      - ../../pipelines:/opt/ankigen/pipelines:ro
       # Whole Anki profile folder, so the -wal sidecar comes too.
       - ${ANKI_PROFILE_DIR:?set ANKI_PROFILE_DIR in the repo .env}:/opt/ankigen/anki:ro
     ports:

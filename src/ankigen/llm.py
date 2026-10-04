@@ -13,6 +13,7 @@ import re
 import shutil
 import subprocess
 import tempfile
+import threading
 import time
 from dataclasses import dataclass
 
@@ -63,6 +64,32 @@ FALLTHROUGH_ATTEMPTS = 1
 
 class QuotaExhausted(RuntimeError):
     """The provider's allowance for the day is gone. Nothing to wait for."""
+
+
+class BudgetExhausted(QuotaExhausted):
+    """This run's share of the allowance (MAX_LLM_CALLS) is spent. A quota
+    like any other to the stages: each stops asking and keeps what it has."""
+
+
+# Calls this process has made, against MAX_LLM_CALLS. Pipelines share one
+# subscription and the same free tiers, and a cap per run is how they share.
+# Locked: the images stage checks pictures on several threads at once.
+_calls = 0
+_calls_lock = threading.Lock()
+
+
+def calls_made() -> int:
+    return _calls
+
+
+def _spend() -> None:
+    global _calls
+    cap = settings.max_llm_calls
+    with _calls_lock:
+        if cap and _calls >= cap:
+            raise BudgetExhausted(f"this run's budget of {cap} model call(s) is spent "
+                                  "(MAX_LLM_CALLS, the pipeline's budget)")
+        _calls += 1
 
 
 class ProviderUnavailable(RuntimeError):
@@ -370,6 +397,7 @@ def call_json(prompt: str, max_retries: int = 5, cfg: dict | None = None) -> LLM
     subscription that has reached its usage limit stays there for hours, and
     the answer to that is the free tier, never a purchase.
     """
+    _spend()
     cfg = cfg or settings.resolve_llm()
     fallback = cfg.get("fallback")
     if fallback and cfg["provider"] in _down:
@@ -464,6 +492,7 @@ def check_image(image: bytes, card: str, query: str, cfg: dict | None = None) ->
     an SEO page whose title matched the query exactly. Only looking at the
     image catches that.
     """
+    _spend()
     cfg = cfg or settings.resolve_llm()
     if cfg["provider"] == "claude":
         # The CLI takes text on stdin; a picture would need its file tools,

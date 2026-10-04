@@ -107,6 +107,10 @@ FASTEMBED_THRESHOLD = 0.90
 # Used when a model has no measured threshold of its own.
 DEFAULT_SEMANTIC_THRESHOLD = 0.90
 
+# The pipeline a run without ANKIGEN_PIPELINE uses: the one there was before
+# there could be several.
+DEFAULT_PIPELINE = "data-platform"
+
 
 def provider_names() -> list[str]:
     return sorted(PROVIDERS) + sorted(NATIVE_PROVIDERS) + [CLAUDE]
@@ -221,8 +225,17 @@ class Settings(BaseSettings):
     # --- pipeline ---
     # Live Anki collection. The pipeline only ever reads a snapshot of it.
     anki_collection_path: str = _default_collection()
-    ankigen_profile: str = str(BASE_DIR / "profiles" / "default.yaml")
+    # Which of pipelines/<id>/ this run is. Empty: the default pipeline's
+    # profile, with everything in data/ itself, the layout from before there
+    # were several.
+    ankigen_pipeline: str = ""
+    ankigen_pipelines_dir: str = str(BASE_DIR / "pipelines")
+    # A profile to use instead of the pipeline's own.
+    ankigen_profile: str = ""
     data_dir: str = str(BASE_DIR / "data")
+    # Model calls one run may make; 0 is no cap. Every pipeline draws on the
+    # same subscription and free tiers, and this is how they share them.
+    max_llm_calls: int = 0
 
     model_config = SettingsConfigDict(
         env_file=str(BASE_DIR / ".env"),
@@ -233,6 +246,20 @@ class Settings(BaseSettings):
     @property
     def data_path(self) -> Path:
         return Path(self.data_dir)
+
+    @property
+    def work_path(self) -> Path:
+        """Where this pipeline keeps its warehouse, snapshots and output. The
+        AnkiWeb working copy stays in data/ itself: there is one collection."""
+        if self.ankigen_pipeline:
+            return self.data_path / "pipelines" / self.ankigen_pipeline
+        return self.data_path
+
+    def profile_path(self) -> Path:
+        if self.ankigen_profile:
+            return Path(self.ankigen_profile)
+        pipeline = self.ankigen_pipeline or DEFAULT_PIPELINE
+        return Path(self.ankigen_pipelines_dir) / pipeline / "profile.yaml"
 
     # ---------- resolution ----------
 

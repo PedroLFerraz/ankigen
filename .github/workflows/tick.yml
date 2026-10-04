@@ -1,0 +1,97 @@
+# The scheduler: every hour, run the pipelines whose cron has fired.
+#
+# GitHub's schedule lives in workflow files, one cron per entry, and cannot be
+# one per pipeline that the app can change. So this runs hourly, reads each
+# pipelines/<id>/pipeline.yaml and what already ran (the ankigen-status
+# branch), and runs the due ones one after another: they share one AnkiWeb
+# collection, so only one may sync at a time.
+#
+# Times the tick missed collapse into one run, and a failed one is tried again
+# on the next ticks, MAX_ATTEMPTS times in all (src/ankigen/pipelines.py).
+#
+# Free on public repositories. GitHub disables scheduled workflows after 60
+# days without repository activity, so a dormant repo stops running silently.
+name: tick
+
+on:
+  schedule:
+    # An odd minute: on the hour GitHub's scheduler is at its busiest and
+    # drops runs outright.
+    - cron: "23 * * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Only say what is due; run nothing."
+        type: boolean
+        default: false
+      now:
+        description: "With a dry run: pretend it is this UTC time, e.g. 2026-10-05T08:30:00Z."
+        required: false
+        type: string
+
+permissions:
+  contents: write           # run-pipeline records each run on ankigen-status
+
+# One tick at a time. A tick still running its pipelines when the next hour
+# comes keeps that one waiting, so nothing is started twice for one time.
+concurrency:
+  group: tick
+  cancel-in-progress: false
+
+jobs:
+  due:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      due: ${{ steps.due.outputs.due }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      # Deciding what is due needs only these, not the whole pipeline.
+      - run: pip install -q "pydantic>=2.5" "pydantic-settings>=2.2" "pyyaml>=6.0" "cronsim>=2.6"
+
+      - name: Read what already ran
+        run: |
+          if git ls-remote --exit-code --heads origin ankigen-status > /dev/null; then
+            git fetch -q origin ankigen-status
+            git worktree add --detach status FETCH_HEAD
+          else
+            mkdir status
+          fi
+
+      - name: Decide what is due
+        id: due
+        env:
+          PYTHONPATH: src
+          NOW: ${{ inputs.dry_run && inputs.now || '' }}
+        run: |
+          due=$(python -m ankigen.pipelines due --status-dir status --json ${NOW:+--now "$NOW"})
+          echo "due=$due" >> "$GITHUB_OUTPUT"
+          {
+            echo "### Due at this tick"
+            echo '```'
+            python -m ankigen.pipelines due --status-dir status ${NOW:+--now "$NOW"}
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  run:
+    needs: due
+    if: needs.due.outputs.due != '[]' && !inputs.dry_run
+    strategy:
+      matrix:
+        include: ${{ fromJSON(needs.due.outputs.due) }}
+      # One at a time, in the order `due` gave. They would wait for each other
+      # anyway (run-pipeline's concurrency group), but a waiting run can be
+      # cancelled by a newer one, and these must not be.
+      max-parallel: 1
+      fail-fast: false
+    uses: ./.github/workflows/run-pipeline.yml
+    with:
+      pipeline: ${{ matrix.pipeline }}
+      scheduled_for: ${{ matrix.scheduled_for }}
+      attempt: ${{ matrix.attempt }}
+    secrets: inherit

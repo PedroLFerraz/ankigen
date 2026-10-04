@@ -19,6 +19,7 @@ from contextlib import suppress
 from dataclasses import dataclass
 from datetime import date, timedelta
 from pathlib import Path
+from typing import Callable
 
 logger = logging.getLogger(__name__)
 
@@ -332,17 +333,27 @@ RUN_TAG = re.compile(r"(?<!\S)ankigen::run_(\d{4}-\d{2}-\d{2})(?!\S)", re.IGNORE
 AD_HOC_TAG = "ankigen::ad-hoc"
 
 
-def run_dates(collection: str | Path, raw_dir: str | Path) -> set[date]:
-    """The curriculum days the collection already has cards for."""
+def run_dates(collection: str | Path, raw_dir: str | Path,
+              within: Callable[[str], bool] | None = None) -> set[date]:
+    """The curriculum days the collection already has cards for.
+
+    With `within`, only cards in the decks it accepts count. Several pipelines
+    share one collection, and each one's curriculum is its own: counted across
+    the whole collection, a second pipeline's day would move the first's along.
+    """
     snap = snapshot(collection, Path(raw_dir) / "next" / "collection.anki2")
     con = sqlite3.connect(f"{snap.resolve().as_uri()}?mode=ro", uri=True)
     try:
-        rows = con.execute("SELECT tags FROM notes WHERE tags LIKE '%ankigen::run%'").fetchall()
+        rows = con.execute(
+            "SELECT id, tags FROM notes WHERE tags LIKE '%ankigen::run%'").fetchall()
+        homes = _home_decks(con, {nid for nid, _ in rows}) if within else {}
     finally:
         con.close()
     days = set()
-    for (tags,) in rows:
+    for nid, tags in rows:
         if AD_HOC_TAG in (tags or "").lower().split():
+            continue
+        if within and not within(homes.get(nid, "")):
             continue
         for match in RUN_TAG.finditer(tags or ""):
             with suppress(ValueError):
@@ -350,7 +361,20 @@ def run_dates(collection: str | Path, raw_dir: str | Path) -> set[date]:
     return days
 
 
-def next_run_date(collection: str | Path, raw_dir: str | Path, today: date) -> date:
+def _home_decks(con: sqlite3.Connection, note_ids: set[int]) -> dict[int, str]:
+    """Each note's deck: its first card's, or the one a filtered deck took it from."""
+    decks = _decks(con, _is_modern(con))
+    homes: dict[int, str] = {}
+    for nid, did in con.execute(
+            "SELECT nid, CASE WHEN odid != 0 THEN odid ELSE did END FROM cards ORDER BY nid, ord"):
+        if nid in note_ids and nid not in homes:
+            homes[nid] = decks.get(did, "")
+    return homes
+
+
+def next_run_date(collection: str | Path, raw_dir: str | Path, today: date,
+                  within: Callable[[str], bool] | None = None,
+                  also_done: set[date] = frozenset()) -> date:
     """The curriculum day a plan run writes: the one after the last day the
     collection has cards for, whenever the run happens.
 
@@ -358,8 +382,11 @@ def next_run_date(collection: str | Path, raw_dir: str | Path, today: date) -> d
     rather than redoing today's, so the scheduled run after it carries on from
     there instead of repeating it, and every deck after the current one moves
     up. A day the schedule missed is written by the next run, not skipped.
+
+    `also_done` adds days known from elsewhere: a pipeline that never pushes
+    has no cards in the collection to show which days it wrote.
     """
-    done = run_dates(collection, raw_dir)
+    done = run_dates(collection, raw_dir, within) | set(also_done)
     return max(done) + timedelta(days=1) if done else today
 
 

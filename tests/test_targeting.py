@@ -152,7 +152,7 @@ def test_overlapping_decks_past_the_daily_total_are_a_problem():
 
 
 def test_the_shipped_curriculum_runs_back_to_back():
-    p = load_profile("profiles/default.yaml")
+    p = load_profile("pipelines/data-platform/profile.yaml")
     phased = p.phased()
     assert len(phased) == 15 and p.schedule_problems() == []
     for a, b in zip(phased, phased[1:]):

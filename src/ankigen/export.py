@@ -106,8 +106,25 @@ def with_guide_ref(card_type: str, values: dict, run_date, ref: str | None) -> d
     return values
 
 
+def tags_for(card: dict, run_date, pipeline_id: str = "") -> list[str]:
+    """A note's tags: the batch it came in, why it was asked for, and which
+    pipeline made it, so a day or a whole pipeline can be found in Anki."""
+    tags = ["ankigen", f"ankigen::run_{run_date}", f"ankigen::{card['request_reason']}"]
+    if pipeline_id:
+        tags.append(f"ankigen::pipeline::{pipeline_id}")
+    if card.get("ad_hoc"):
+        tags.append(AD_HOC_TAG)
+    if (card.get("verify_reason") or "").startswith(UNVERIFIED):
+        tags.append("ankigen::unverified")
+    if (card.get("dup_reason") or "").startswith(NEAR_DUP):
+        # Close to something you already have, but not close enough to bin
+        # unseen. Search `tag:ankigen::near-dup` in Anki to judge them.
+        tags.append("ankigen::near-dup")
+    return [_tag(t) for t in tags]
+
+
 def build_package(run_date: date, cards: list[dict], profile=None,
-                  media_dir: Path | None = None) -> genanki.Package | None:
+                  media_dir: Path | None = None, pipeline_id: str = "") -> genanki.Package | None:
     if not cards:
         return None
     # genanki checks field HTML against a list of tags that predates inline
@@ -135,20 +152,11 @@ def build_package(run_date: date, cards: list[dict], profile=None,
         elif filename:
             logger.warning("Image %s is missing from %s; exporting without it", filename, media_dir)
 
-        tags = ["ankigen", f"ankigen::run_{run_date}", f"ankigen::{c['request_reason']}"]
-        if c.get("ad_hoc"):
-            tags.append(AD_HOC_TAG)
-        if (c.get("verify_reason") or "").startswith(UNVERIFIED):
-            tags.append("ankigen::unverified")
-        if (c.get("dup_reason") or "").startswith(NEAR_DUP):
-            # Close to something you already have, but not close enough to bin
-            # unseen. Search `tag:ankigen::near-dup` in Anki to judge them.
-            tags.append("ankigen::near-dup")
         deck.add_note(genanki.Note(
             model=models[c["card_type"]],
             fields=[str(values.get(f, "")) for f in spec_fields],
             guid=genanki.guid_for(c["card_uid"]),
-            tags=[_tag(t) for t in tags],
+            tags=tags_for(c, run_date, pipeline_id),
         ))
 
     package = genanki.Package(list(decks.values()))
@@ -157,7 +165,7 @@ def build_package(run_date: date, cards: list[dict], profile=None,
 
 
 def run(wh, run_date: date, out_root: str | Path, profile=None,
-        media_dir: Path | None = None) -> dict:
+        media_dir: Path | None = None, pipeline_id: str = "") -> dict:
     out_dir = Path(out_root) / str(run_date)
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -167,15 +175,33 @@ def run(wh, run_date: date, out_root: str | Path, profile=None,
     )
     apkg = out_dir / f"ankigen_{run_date}.apkg"
     apkg.unlink(missing_ok=True)  # a rerun that keeps nothing must not leave a stale package
-    package = build_package(run_date, kept, profile, media_dir)
+    package = build_package(run_date, kept, profile, media_dir, pipeline_id)
     if package:
         package.write_to_file(str(apkg))
+    write_cards(kept, out_dir / "cards.json", run_date, pipeline_id)
     return {
         "kept": len(kept),
         "apkg": str(apkg) if package else None,
         "images": len(package.media_files) if package else 0,
         "drawn": sum(1 for c in kept if c.get("visual_html")),
     }
+
+
+def write_cards(kept: list[dict], path: Path, run_date: date, pipeline_id: str = "") -> None:
+    """The day's cards as plain JSON, for the app's list of what a run made."""
+    path.write_text(json.dumps({
+        "pipeline": pipeline_id or None,
+        "run_date": str(run_date),
+        "cards": [{
+            "deck": c["deck"], "card_type": c["card_type"], "front": c["front"],
+            "back": c["back"], "topic": c.get("topic"), "guide_ref": c.get("guide_ref"),
+            "picture": "drawn" if c.get("visual_html") else
+                       "found" if c.get("image_filename") else None,
+            "refill": bool(c.get("refill")),
+            "near_dup": (c.get("dup_reason") or "").startswith(NEAR_DUP),
+            "unverified": (c.get("verify_reason") or "").startswith(UNVERIFIED),
+        } for c in kept],
+    }, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
 def write_report(wh, run_date: date, out_root: str | Path) -> dict:
@@ -237,7 +263,7 @@ def build_report(wh, run_date: date) -> dict:
     }
 
 
-def markdown_summary(wh, run_date: date) -> str:
+def markdown_summary(wh, run_date: date, artifact: str | None = None) -> str:
     """What a run did, for the page GitHub shows for it: read on a phone, so
     the counts first and the cards folded away underneath."""
     cards = wh.query(
@@ -293,7 +319,8 @@ def markdown_summary(wh, run_date: date) -> str:
                           if counts.get(s))
         lines += [f"**Study guide:** {chapters} chapter(s), {sum(counts.values())} section(s)"
                   + (f" ({flags})" if flags else "")
-                  + f" — `guide_{run_date}.pdf`, in this run's `cards-{run_date}` artifact.", ""]
+                  + f" — `guide_{run_date}.pdf`, in this run's "
+                  f"`{artifact or f'cards-{run_date}'}` artifact.", ""]
 
     models = sorted({c["model"] for c in cards if c["model"]})
     if models:

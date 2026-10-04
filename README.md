@@ -10,7 +10,7 @@
 
 <p align="center">
   <a href="https://github.com/PedroLFerraz/ankigen/actions/workflows/tests.yml"><img src="https://github.com/PedroLFerraz/ankigen/actions/workflows/tests.yml/badge.svg" alt="tests"></a>
-  <a href="https://github.com/PedroLFerraz/ankigen/actions/workflows/daily-cards.yml"><img src="https://github.com/PedroLFerraz/ankigen/actions/workflows/daily-cards.yml/badge.svg" alt="daily cards"></a>
+  <a href="https://github.com/PedroLFerraz/ankigen/actions/workflows/tick.yml"><img src="https://github.com/PedroLFerraz/ankigen/actions/workflows/tick.yml/badge.svg" alt="tick"></a>
   <img src="https://img.shields.io/badge/python-3.10%2B-3776AB" alt="Python 3.10+">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-lightgrey" alt="MIT license"></a>
 </p>
@@ -42,7 +42,7 @@ the [roadmap](#roadmap).
 pip install ".[guide]"             # installs the `ankigen` command (+ the PDF guide)
 cp .env.example .env               # set LLM_PROVIDER / LLM_API_KEY (Groq is free)
 ankigen decks                      # see your decks, to write the profile
-ankigen validate                   # check profiles/default.yaml against them
+ankigen validate                   # check the profile against them
 ankigen plan                       # what today's run would generate + the exact prompt
 ankigen run                        # do it
 ankigen report                     # what was kept, dropped, and why
@@ -87,7 +87,8 @@ ankigen run --date 2026-09-22 --stage dedup --stage export --stage report
 
 ## The profile
 
-`profiles/default.yaml` is where personalisation lives:
+A pipeline's `profile.yaml` (`pipelines/data-platform/profile.yaml` by
+default) is where personalisation lives:
 
 ```yaml
 learner:
@@ -197,12 +198,26 @@ seconds.
 > writes a `.pth` file in that encoding. pytest is configured with
 > `pythonpath = ["src"]`, and `python -m ankigen` works with `PYTHONPATH=src`.
 
-## Running it daily
+## Pipelines, and running them daily
 
-Without leaving a machine on: a [GitHub Actions workflow](.github/workflows/daily-cards.yml)
-runs the pipeline on GitHub's runners each morning. It syncs your collection
-down from AnkiWeb, writes the cards, and syncs them back, so they appear on your
-phone and desktop with nothing to import. Free on a public repo, two secrets to
+The repository can hold several **pipelines**, one folder each under
+`pipelines/`: a `profile.yaml` saying what to teach, and a `pipeline.yaml`
+saying when to run it (a cron in its own time zone), what to produce (the
+study guide PDF, a push to AnkiWeb), which models to use and how many calls a
+run may make. Each pipeline writes to decks of its own, keeps its own
+curriculum and warehouse, and tags its notes `ankigen::pipeline::<id>`.
+
+```bash
+ankigen pipelines list               # every pipeline, and when it runs next
+ankigen pipelines validate           # check them all
+ANKIGEN_PIPELINE=german ankigen run  # one run of one pipeline
+```
+
+Without leaving a machine on: an hourly [GitHub Actions workflow](.github/workflows/tick.yml)
+runs each pipeline at its time, on GitHub's runners, one after another. A run
+syncs your collection down from AnkiWeb, writes the cards, and syncs them back,
+so they appear on your phone and desktop with nothing to import; what it did is
+recorded on the `ankigen-status` branch. Free on a public repo, two secrets to
 set up — see [docs/GITHUB_ACTIONS.md](docs/GITHUB_ACTIONS.md).
 
 There is also an [Airflow stack](infra/airflow/) that runs the same stages
@@ -217,7 +232,8 @@ something to be on, so Actions is what actually fires daily.
 4. **Docker**: multi-stage image; the collection and profile mounted read-only.
 5. **AWS free tier**: S3 `raw/`, `curated/` and `gold/` layers via Terraform, and a least-privilege IAM role.
 6. **Kubernetes**: `CronJob` on `kind`, then `KubernetesPodOperator` per stage.
-7. Later: PDF ingestion as a second source, and an Android client.
+7. **Android client**: create, schedule and watch pipelines from a phone, with each run's study guide saved to a folder on it. The backend it drives (pipelines, the hourly tick, the status branch) is in place.
+8. Later: PDF ingestion as a second source.
 
 ## License
 

@@ -21,4 +21,7 @@ jobs:
       # diagram, sync and guide tests run rather than skip.
       - run: sudo apt-get install -y --no-install-recommends graphviz libpango-1.0-0 libpangoft2-1.0-0
       - run: pip install ".[dev,gemini,push,guide]"
+      # Every pipeline's files, including the ones the app commits: a bad
+      # schedule or two pipelines on one deck show up here, not at 05:17.
+      - run: python -m ankigen pipelines validate
       - run: python -m pytest -q

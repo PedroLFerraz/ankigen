@@ -4,15 +4,15 @@ from __future__ import annotations
 import json
 import logging
 import sys
+from contextlib import suppress
 from datetime import date
 from pathlib import Path
 from typing import Optional
 
 import typer
 
-from ankigen import ingest, pipeline
+from ankigen import pipeline
 from ankigen.config import NATIVE_PROVIDERS, PROVIDERS, settings
-from ankigen.ingest import AD_HOC_TAG
 from ankigen.profile import KINDS
 
 app = typer.Typer(
@@ -58,7 +58,7 @@ def _plan_date(value: Optional[str], ctx) -> date:
     """The day a plan run writes: the one given, else the curriculum's next."""
     if value:
         return _date(value)
-    return ingest.next_run_date(ctx.settings.anki_collection_path, ctx.raw_dir, date.today())
+    return pipeline.next_day(ctx, date.today())
 
 
 DateOpt = typer.Option(None, "--date", "-d", help="Run date, YYYY-MM-DD. Defaults to today.")
@@ -66,7 +66,9 @@ PlanDateOpt = typer.Option(
     None, "--date", "-d",
     help="Curriculum day, YYYY-MM-DD. Defaults to the day after the last one in the "
          "collection, so running again writes the next day rather than redoing this one.")
-ProfileOpt = typer.Option(None, "--profile", "-p", help="Profile YAML. Defaults to ANKIGEN_PROFILE.")
+ProfileOpt = typer.Option(
+    None, "--profile", "-p",
+    help="Profile YAML. Defaults to ANKIGEN_PROFILE, else the pipeline's (ANKIGEN_PIPELINE).")
 
 
 @app.command()
@@ -249,7 +251,7 @@ def validate(run_date: Optional[str] = DateOpt, profile: Optional[str] = Profile
 def report(run_date: Optional[str] = DateOpt):
     """Print a run's report."""
     d = _date(run_date)
-    path = settings.data_path / "out" / str(d) / "run_report.json"
+    path = settings.work_path / "out" / str(d) / "run_report.json"
     if not path.exists():
         typer.echo(f"No report for {d} at {path}.")
         raise typer.Exit(1)
@@ -273,10 +275,12 @@ def summary(run_date: Optional[str] = DateOpt):
     """A run's cards in Markdown: counts per deck, pictures, drops. The daily
     workflow puts it on the run's page, which is what a phone shows."""
     from ankigen.export import markdown_summary
+    from ankigen.pipelines import artifact_name
 
+    d = _date(run_date)
     ctx = pipeline.open_context()
     try:
-        typer.echo(markdown_summary(ctx.wh, _date(run_date)))
+        typer.echo(markdown_summary(ctx.wh, d, artifact_name(settings.ankigen_pipeline, d)))
     finally:
         ctx.wh.close()
 
@@ -344,12 +348,11 @@ def push(
         typer.echo(f"Nothing kept for {d}; nothing to push.")
         return
 
+    from ankigen.export import tags_for
+
     for card in cards:
-        card["tags"] = ["ankigen", f"ankigen::run_{d}", f"ankigen::{card['request_reason']}"]
-        if card.get("ad_hoc"):
-            card["tags"].append(AD_HOC_TAG)
-        if (card.get("dup_reason") or "").startswith("near-dup"):
-            card["tags"].append("ankigen::near-dup")
+        # The same tags the .apkg gives, so both routes file a day alike.
+        card["tags"] = tags_for(card, d, settings.ankigen_pipeline)
 
     if dry_run:
         typer.echo(f"\nWould push {len(cards)} card(s) from {d}:")
@@ -365,7 +368,7 @@ def push(
     try:
         state, auth = pusher.sync(col, auth)
         typer.echo(f"  down: {state}")
-        result = pusher.push_cards(col, cards, Path(settings.data_dir) / "media", deck_for)
+        result = pusher.push_cards(col, cards, settings.work_path / "media", deck_for)
         typer.echo(f"  push: {result}")
         state, auth = pusher.sync(col, auth)
         typer.echo(f"  up:   {state}")
@@ -392,7 +395,7 @@ def parts(
     from ankigen import push as pusher
     from ankigen.profile import load_profile
 
-    level = load_profile(settings.ankigen_profile).learner.level
+    level = load_profile(settings.profile_path()).learner.level
     auth = pusher._auth()
     col, auth = pusher.open_collection(auth)
     try:
@@ -437,7 +440,9 @@ def reset(
     """
     import shutil
 
-    data = Path(settings.data_dir)
+    # This pipeline's own files. The AnkiWeb working copy in data/anki is
+    # shared by every pipeline, and is left alone.
+    data = settings.work_path
     targets = [data / "warehouse.duckdb", data / "raw", data / "media",
                data / "out", data / "curated"]
     present = [t for t in targets if t.exists()]
@@ -508,7 +513,7 @@ def add_theme(
 
     if card_type and card_type not in themes.CARD_TYPES:
         raise typer.BadParameter(f"--card-type must be one of {', '.join(themes.CARD_TYPES)}.")
-    path = Path(profile or settings.ankigen_profile)
+    path = Path(profile or settings.profile_path())
     target = themes.plan(load_profile(path), deck, about=about, topics=topics, quota=quota,
                          card_type=card_type)
     if dry_run:
@@ -520,7 +525,11 @@ def add_theme(
     if proposal.global_quota:
         typer.echo(f"global_quota raised to {proposal.global_quota} so the new deck gets cards.")
     if summary_file:
-        Path(summary_file).write_text(themes.summary(proposal, about), encoding="utf-8")
+        shown = path.resolve()
+        with suppress(ValueError):
+            shown = shown.relative_to(Path.cwd())
+        Path(summary_file).write_text(themes.summary(proposal, about, shown.as_posix()),
+                                      encoding="utf-8")
 
 
 @app.command("audit-images")
@@ -543,7 +552,7 @@ def audit_images(
 
     collection = Path(settings.anki_collection_path)
     media = collection.parent / "collection.media"
-    snap = snapshot(collection, Path(settings.data_dir) / "raw" / "_audit" / "collection.anki2")
+    snap = snapshot(collection, settings.work_path / "raw" / "_audit" / "collection.anki2")
 
     con = sqlite3.connect(f"{snap.resolve().as_uri()}?mode=ro", uri=True)
     try:
@@ -582,6 +591,20 @@ def audit_images(
         typer.echo("\nPaste this into Anki's browser to select them:")
         typer.echo("  nid:" + ",".join(str(n) for n in bad))
         typer.echo("\nThen edit the notes to drop the image, or delete the cards outright.")
+
+
+@app.command(
+    "pipelines", add_help_option=False,
+    context_settings={"allow_extra_args": True, "ignore_unknown_options": True})
+def pipelines_cmd(ctx: typer.Context):
+    """The pipelines in pipelines/: list | validate | due | env | schema | record.
+
+    The same commands as `python -m ankigen.pipelines`, which the hourly tick
+    runs without installing the rest of the pipeline.
+    """
+    from ankigen import pipelines
+
+    raise typer.Exit(pipelines.main(ctx.args))
 
 
 @app.command()

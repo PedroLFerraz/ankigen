@@ -16,6 +16,8 @@ dependencies = [
     # lab/image-search branch has a workflow for it) before loosening this.
     "ddgs>=9.9.3,<9.10",
     "primp>=0.15,<0.16",
+    # Reads each pipeline's cron in its own time zone, for the hourly tick.
+    "cronsim>=2.6",
     "duckdb>=1.0",
     # Embeddings from an ONNX model in-process, so dedup needs no server and
     # no key. It is what lets the pipeline run on a throwaway CI machine.

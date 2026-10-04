@@ -16,8 +16,10 @@ from datetime import date
 from pathlib import Path
 from typing import Callable
 
-from ankigen import dedup, export, generate, guide, images, ingest, llm, refill, targeting, verify, visuals
+from ankigen import (dedup, export, generate, guide, images, ingest, llm, pipelines, refill,
+                     targeting, verify, visuals)
 from ankigen.config import Settings, settings
+from ankigen.pipelines import PipelineSpec
 from ankigen.profile import Profile, load_profile
 from ankigen.warehouse import Warehouse
 
@@ -40,21 +42,25 @@ class Context:
     profile: Profile
     wh: Warehouse
     ad_hoc: AdHoc | None = None
+    # The pipeline's own settings (pipelines/<id>/pipeline.yaml), when the run
+    # is one of them rather than a bare profile.
+    spec: PipelineSpec | None = None
 
     @property
     def raw_dir(self) -> Path:
-        return self.settings.data_path / "raw"
+        return self.settings.work_path / "raw"
 
     @property
     def out_dir(self) -> Path:
-        return self.settings.data_path / "out"
+        return self.settings.work_path / "out"
 
 
 def open_context(profile_path: str | None = None, cfg: Settings | None = None) -> Context:
     cfg = cfg or settings
-    profile = load_profile(profile_path or cfg.ankigen_profile)
-    wh = Warehouse(cfg.data_path / "warehouse.duckdb")
-    return Context(cfg, profile, wh)
+    profile = load_profile(profile_path or cfg.profile_path())
+    spec = pipelines.load(cfg.ankigen_pipeline, cfg).spec if cfg.ankigen_pipeline else None
+    wh = Warehouse(cfg.work_path / "warehouse.duckdb")
+    return Context(cfg, profile, wh, spec=spec)
 
 
 # --------------------------------------------------------------- stages
@@ -153,7 +159,7 @@ def stage_images(ctx: Context, run_date: date) -> dict:
         (lambda blob, card, query: llm.check_image(blob, card, query, cfg=checker))
         if ctx.profile.verify_images else None
     )
-    results = images.fetch_many(jobs, ctx.settings.data_path / "media", verifier=verifier)
+    results = images.fetch_many(jobs, ctx.settings.work_path / "media", verifier=verifier)
 
     ctx.wh.replace_partition(
         "card_images", run_date,
@@ -180,8 +186,9 @@ def stage_guide(ctx: Context, run_date: date) -> dict:
 
 def stage_export(ctx: Context, run_date: date) -> dict:
     result = export.run(ctx.wh, run_date, ctx.out_dir, ctx.profile,
-                        media_dir=ctx.settings.data_path / "media")
-    result["parquet_files"] = len(ctx.wh.export_parquet(run_date, ctx.settings.data_path / "curated"))
+                        media_dir=ctx.settings.work_path / "media",
+                        pipeline_id=ctx.settings.ankigen_pipeline)
+    result["parquet_files"] = len(ctx.wh.export_parquet(run_date, ctx.settings.work_path / "curated"))
     return result
 
 
@@ -207,19 +214,49 @@ DRY_RUN_STAGES = ("ingest", "target")
 
 def run_stage(ctx: Context, name: str, run_date: date) -> dict:
     ctx.wh.start_stage(run_date, name)
+    calls = llm.calls_made()
     try:
         detail = STAGES[name](ctx, run_date)
     except Exception as e:
-        ctx.wh.finish_stage(run_date, name, "failed", detail={"error": str(e)})
+        ctx.wh.finish_stage(run_date, name, "failed",
+                            detail={"error": str(e), "llm_calls": llm.calls_made() - calls})
         raise
+    # Counted per stage, so the report adds them up however the stages ran:
+    # in one process, or one Airflow task each.
+    detail["llm_calls"] = llm.calls_made() - calls
     rows = next((detail[k] for k in ("sections", "cards", "notes", "requests", "checked", "kept") if k in detail), 0)
     ctx.wh.finish_stage(run_date, name, "success", rows_out=rows if isinstance(rows, int) else 0, detail=detail)
     logger.info("stage %-8s ok  %s", name, detail)
     return detail
 
 
+def next_day(ctx: Context, today: date) -> date:
+    """The curriculum day the next plan run writes: the one after the last
+    day this pipeline's decks have cards for (see ingest.next_run_date)."""
+    decks = [t.deck for t in ctx.profile.decks]
+    done: set[date] = set()
+    if ctx.spec and not ctx.spec.outputs.push_to_ankiweb:
+        # Its cards never reach the collection, so the warehouse says which
+        # days it wrote. One that pushes trusts the collection instead: a day
+        # whose push failed is not done, and the next run writes it again.
+        done = {r["run_date"] for r in ctx.wh.query(
+            "SELECT DISTINCT run_date FROM card_outcomes WHERE outcome = 'kept' AND NOT ad_hoc")}
+    return ingest.next_run_date(
+        ctx.settings.anki_collection_path, ctx.raw_dir, today,
+        within=lambda deck: any(targeting.in_deck(deck, target) for target in decks),
+        also_done=done)
+
+
+def default_stages(ctx: Context) -> list[str]:
+    """Every stage, less the guide for a pipeline that asked for no PDF."""
+    names = list(STAGES)
+    if ctx.spec and not ctx.spec.outputs.guide_pdf:
+        names.remove("guide")
+    return names
+
+
 def run(ctx: Context, run_date: date, stages: list[str] | None = None, dry_run: bool = False) -> dict:
-    names = list(DRY_RUN_STAGES) if dry_run else (stages or list(STAGES))
+    names = list(DRY_RUN_STAGES) if dry_run else (stages or default_stages(ctx))
     unknown = [s for s in names if s not in STAGES]
     if unknown:
         raise ValueError(f"Unknown stage(s): {unknown}. Choose from {list(STAGES)}.")
