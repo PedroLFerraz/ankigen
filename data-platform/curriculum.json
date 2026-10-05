@@ -1,5 +1,5 @@
 {
-  "next_day": "2026-10-15",
+  "next_day": "2026-10-16",
   "decks": [
     {
       "deck": "Data Platform::01 Linux",
@@ -624,56 +624,56 @@
           "kind": "concept",
           "level": 1,
           "day": "2026-10-15",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "file formats: CSV, JSON, Parquet and Avro",
           "kind": "concept",
           "level": 1,
           "day": "2026-10-15",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "row versus columnar storage, and what columnar buys you",
           "kind": "concept",
           "level": 2,
           "day": "2026-10-15",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "compression and encoding in columnar files",
           "kind": "concept",
           "level": 2,
           "day": "2026-10-15",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "partitioning, file sizes and the small-file problem",
           "kind": "concept",
           "level": 2,
           "day": "2026-10-16",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "schema on read versus schema on write",
           "kind": "concept",
           "level": 2,
           "day": "2026-10-16",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "incremental versus full loads, and watermarks",
           "kind": "concept",
           "level": 2,
           "day": "2026-10-16",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "change data capture",
           "kind": "concept",
           "level": 2,
           "day": "2026-10-16",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "orchestration: dependencies, retries and state",
