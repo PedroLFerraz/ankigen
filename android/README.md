@@ -43,6 +43,11 @@ GitHub only dispatches workflows that exist on the default branch.
 
 ## Build
 
+On this machine, run `build-apk.bat` in the repository root: it builds the
+debug APK and drops `AnkiGen.apk` beside it, ready to copy to a phone.
+
+Elsewhere:
+
 ```bash
 ./gradlew testDebugUnitTest assembleDebug
 ```

@@ -43,6 +43,8 @@ android/app/build/
 android/.gradle/
 android/.kotlin/
 android/local.properties
+# build-apk.bat copies the built app here for sideloading; never committed.
+*.apk
 
 # Python build output
 /build/
