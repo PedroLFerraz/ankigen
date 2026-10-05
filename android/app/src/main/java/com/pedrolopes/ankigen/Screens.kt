@@ -4,6 +4,8 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -553,8 +555,9 @@ private fun SettingsScreen(model: AppModel) {
     var token by remember { mutableStateOf(model.token) }
     var branch by remember { mutableStateOf(model.statusBranch) }
     var code by remember { mutableStateOf(model.codeBranch) }
+    // Scrolls: on a short phone the study guides folder is below the fold.
     Column(
-        Modifier.fillMaxSize().padding(horizontal = Gutter, vertical = 20.dp),
+        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = Gutter, vertical = 20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Text("Settings", style = MaterialTheme.typography.headlineSmall)
