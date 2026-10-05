@@ -299,13 +299,16 @@ def test_a_run_is_recorded_for_the_tick_and_the_app(ctx, repo, tmp_path):
     run = {"run_id": "7", "trigger": "schedule", "scheduled_for": "2026-10-05T08:17:00Z",
            "attempt": 1, "conclusion": "success", "curriculum_date": "2026-10-02"}
     entry = pipelines.record("german", tmp_path / "status", run, report,
-                             next_day=date(2026, 10, 3), cfg=repo.cfg)
+                             next_day=date(2026, 10, 3), cfg=repo.cfg,
+                             cards_file=ctx.out_dir / str(RUN_DATE) / "cards.json")
     folder = tmp_path / "status" / "german"
     assert json.loads((folder / "latest.json").read_text()) == json.loads(
         json.dumps(entry, default=str))
     assert entry["cards"]["kept"] == report["outcomes"]["kept"] and entry["error"] is None
     assert entry["guide"]["chapters"] >= 1 and "llm_calls" in entry
     assert (folder / "runs" / "2026-10-02-7.json").exists()
+    cards = json.loads((folder / "cards" / "2026-10-02.json").read_text(encoding="utf-8"))
+    assert len(cards["cards"]) == entry["cards"]["kept"]
     assert json.loads((folder / "scheduler.json").read_text())["scheduled_for"] == \
         "2026-10-05T08:17:00Z"
     topics = json.loads((folder / "curriculum.json").read_text())["decks"][0]["topics"]

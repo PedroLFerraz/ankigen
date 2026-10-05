@@ -370,7 +370,7 @@ memory and what the Android app reads:
 ```
 tick (hourly) ──▶ pipelines due? ──▶ run-pipeline (one at a time) ──▶ AnkiWeb
       ▲                                     │
-      └──────── ankigen-status branch ◀─────┘   latest.json, runs/, curriculum.json
+      └──────── ankigen-status branch ◀─────┘   latest.json, runs/, cards/, curriculum.json
 ```
 
 `pipelines.py` imports nothing heavy, so the tick decides what is due after

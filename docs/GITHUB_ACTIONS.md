@@ -56,9 +56,9 @@ tried again on the next two ticks, then waits for its next scheduled time.
 
 **What a run leaves behind.** On the `ankigen-status` branch, per pipeline:
 `latest.json` (what the last run made, or why it failed), `runs/` (one file per
-run), `scheduler.json` (the last scheduled time and how it went) and
-`curriculum.json` (every topic, and which are done or next). This is what the
-app reads.
+run), `cards/` (each day's cards), `scheduler.json` (the last scheduled time
+and how it went) and `curriculum.json` (every topic, and which are done or
+next). This is what the app reads.
 
 **Shared allowances.** Every pipeline uses the same Claude subscription and the
 same Gemini free tier. `budget.max_llm_calls_per_run` caps one run's share;

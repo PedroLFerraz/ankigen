@@ -25,6 +25,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import shutil
 import sys
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta, timezone
@@ -408,11 +409,13 @@ def summarize(report: dict | None) -> dict:
 
 
 def record(pipeline_id: str, status_dir: Path, run: dict, report: dict | None = None,
-           next_day: date | None = None, cfg=None) -> dict:
+           next_day: date | None = None, cfg=None, cards_file: Path | None = None) -> dict:
     """Write what a run did into a checkout of the status branch.
 
     `run` is what the workflow knows: run_id, run_url, trigger, scheduled_for,
     attempt, conclusion, started_at, finished_at, curriculum_date, artifact.
+    `cards_file` is the run's cards.json, kept as cards/<day>.json so the app
+    can show the cards without unzipping an artifact.
     Written even for a pipeline whose files no longer load: an unrecorded
     scheduled run would be tried again every hour.
     """
@@ -436,6 +439,9 @@ def record(pipeline_id: str, status_dir: Path, run: dict, report: dict | None = 
     if run.get("trigger") == "schedule":
         write("scheduler.json", {k: run.get(k) for k in
                                  ("scheduled_for", "attempt", "conclusion", "run_id")})
+    if cards_file and Path(cards_file).exists() and run.get("curriculum_date"):
+        (folder / "cards").mkdir(exist_ok=True)
+        shutil.copyfile(cards_file, folder / "cards" / f"{run['curriculum_date']}.json")
     try:
         if p:
             write("curriculum.json", curriculum(p.profile(), next_day))
@@ -484,7 +490,8 @@ def _record(args) -> int:
         "started_at": args.started_at or None, "finished_at": _iso(datetime.now(timezone.utc)),
         "artifact": artifact_name(args.pipeline, args.date) if args.date else None,
     }
-    entry = record(args.pipeline, Path(args.status_dir), run, report, next_day, cfg)
+    cards_file = cfg.work_path / "out" / args.date / "cards.json" if args.date else None
+    entry = record(args.pipeline, Path(args.status_dir), run, report, next_day, cfg, cards_file)
     print(f"{args.pipeline}: {entry['conclusion']}, "
           f"{(entry['cards'] or {}).get('kept', 0)} card(s) kept, next day {next_day}")
     return 0
