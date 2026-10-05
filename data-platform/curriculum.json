@@ -1,5 +1,5 @@
 {
-  "next_day": "2026-10-14",
+  "next_day": "2026-10-15",
   "decks": [
     {
       "deck": "Data Platform::01 Linux",
@@ -596,56 +596,56 @@
           "kind": "concept",
           "level": 1,
           "day": "2026-10-14",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "OLTP versus OLAP",
           "kind": "concept",
           "level": 1,
           "day": "2026-10-14",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "batch versus streaming",
           "kind": "concept",
           "level": 1,
           "day": "2026-10-14",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "ETL versus ELT",
           "kind": "concept",
           "level": 1,
           "day": "2026-10-14",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "data lake versus data warehouse versus lakehouse",
           "kind": "concept",
           "level": 1,
           "day": "2026-10-15",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "file formats: CSV, JSON, Parquet and Avro",
           "kind": "concept",
           "level": 1,
           "day": "2026-10-15",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "row versus columnar storage, and what columnar buys you",
           "kind": "concept",
           "level": 2,
           "day": "2026-10-15",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "compression and encoding in columnar files",
           "kind": "concept",
           "level": 2,
           "day": "2026-10-15",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "partitioning, file sizes and the small-file problem",
