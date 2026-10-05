@@ -71,12 +71,10 @@ jobs:
         run: |
           due=$(python -m ankigen.pipelines due --status-dir status --json ${NOW:+--now "$NOW"})
           echo "due=$due" >> "$GITHUB_OUTPUT"
-          {
-            echo "### Due at this tick"
-            echo '```'
-            python -m ankigen.pipelines due --status-dir status ${NOW:+--now "$NOW"}
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+          # In the log as well as the summary: the summary needs a sign-in to see.
+          list=$(python -m ankigen.pipelines due --status-dir status ${NOW:+--now "$NOW"})
+          echo "$list"
+          printf '### Due at this tick\n```\n%s\n```\n' "$list" >> "$GITHUB_STEP_SUMMARY"
 
   run:
     needs: due
