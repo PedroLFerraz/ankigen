@@ -173,9 +173,29 @@ class FakeLLM:
         self.bad_words = bad_words
         self.fail_verify = fail_verify
         self.distinct = distinct
+        self.fail_guide: Exception | None = None
+        self.fail_guide_check = False
 
     def __call__(self, prompt: str, max_retries: int = 5, cfg: dict | None = None) -> llm.LLMResult:
         self.calls.append(prompt)
+        if "reviewing one chapter of a study guide" in prompt:
+            if self.fail_guide_check:
+                raise RuntimeError("429 rate limit")
+            sections = re.findall(r"^(\d+)\. Card: (.*)$", prompt, flags=re.M)
+            return llm.LLMResult({"primer_ok": True, "primer_issue": "", "results": [
+                {"index": int(i), "correct": not any(w in s for w in self.bad_words),
+                 "issue": "" if not any(w in s for w in self.bad_words) else "wrong flag"}
+                for i, s in sections
+            ]}, "fake-checker")
+        if "writing one chapter of a study guide" in prompt:
+            if self.fail_guide:
+                raise self.fail_guide
+            cards = re.findall(r"^(\d+)\. Q: (.*)$", prompt, flags=re.M)
+            return llm.LLMResult({"primer": "How it works, with `code`.", "cards": [
+                {"index": int(i), "why": f"Because of {q}.", "example": "```\nls -l\n```",
+                 "mistakes": "Forgetting the flag.", "related": "- `ls -a`"}
+                for i, q in cards
+            ]}, "fake", prompt_tokens=200, completion_tokens=400)
         if "fact-checker" in prompt:
             if self.fail_verify:
                 raise RuntimeError("429 rate limit")

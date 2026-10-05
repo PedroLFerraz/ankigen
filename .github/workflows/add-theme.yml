@@ -10,6 +10,11 @@ name: add a theme
 on:
   workflow_dispatch:
     inputs:
+      pipeline:
+        description: "The pipeline to add it to, the folder name under pipelines/."
+        required: true
+        type: string
+        default: data-platform
       deck:
         description: 'The new deck, e.g. "Data Platform::Spark"'
         required: true
@@ -49,29 +54,37 @@ jobs:
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
           LLM_PROVIDER: gemini
           GEMINI_MODEL: ${{ vars.GEMINI_MODEL || 'gemini-3.8-flash,gemini-3.7-flash,gemini-3.6-flash,gemini-3.5-flash' }}
-          ANKIGEN_PROFILE: profiles/default.yaml
+          ANKIGEN_PIPELINE: ${{ inputs.pipeline }}
           DECK: ${{ inputs.deck }}
           ABOUT: ${{ inputs.about }}
           QUOTA: ${{ inputs.quota }}
         run: |
+          if [ ! -f "pipelines/$ANKIGEN_PIPELINE/profile.yaml" ]; then
+            echo "::error::No pipeline '$ANKIGEN_PIPELINE': pipelines/$ANKIGEN_PIPELINE/profile.yaml does not exist."
+            exit 1
+          fi
           python -m ankigen add-theme --deck "$DECK" --about "$ABOUT" \
             ${QUOTA:+--quota "$QUOTA"} --summary proposal.md
+          # Two pipelines writing to one deck would move each other's
+          # curriculum along; this says so before anything is proposed.
+          python -m ankigen pipelines validate
 
       - name: Propose it
         env:
           GH_TOKEN: ${{ github.token }}
           DECK: ${{ inputs.deck }}
+          PIPELINE: ${{ inputs.pipeline }}
         run: |
           slug=$(printf '%s' "$DECK" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-|-$//g')
-          branch="theme/${slug}-${GITHUB_RUN_ID}"
+          branch="theme/${PIPELINE}/${slug}-${GITHUB_RUN_ID}"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git switch -c "$branch"
-          git commit -am "feat: add $DECK to the daily cards"
+          git commit -am "feat: add $DECK to the $PIPELINE pipeline"
           git push -u origin "$branch"
 
           if gh pr create --base master --head "$branch" \
-               --title "Add $DECK to the daily cards" --body-file proposal.md; then
+               --title "Add $DECK to the $PIPELINE pipeline" --body-file proposal.md; then
             echo "Opened a pull request. Review the topics, then merge it." >> "$GITHUB_STEP_SUMMARY"
           else
             url="https://github.com/${GITHUB_REPOSITORY}/compare/master...${branch}?expand=1"

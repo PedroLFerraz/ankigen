@@ -230,7 +230,8 @@ def push_cards(col, cards: list[dict], media_dir: Path, deck_for=None) -> PushRe
         note = col.new_note(notetype)
         note.guid = guid
 
-        values = json.loads(card["fields_json"])
+        values = with_guide_ref(card["card_type"], json.loads(card["fields_json"]),
+                                card.get("run_date"), card.get("guide_ref"))
         if picture:
             values = with_picture(card["card_type"], values, picture)
             pictures += 1
@@ -301,6 +302,13 @@ def _refresh_picture(col, nid, card_type: str, picture: str) -> bool:
     note[field] = want
     col.update_note(note)
     return True
+
+
+def with_guide_ref(card_type: str, values: dict, run_date, ref: str | None) -> dict:
+    """Same reference line the .apkg export adds."""
+    from ankigen.export import with_guide_ref as place
+
+    return place(card_type, values, run_date, ref)
 
 
 def with_picture(card_type: str, values: dict, picture: str) -> dict:

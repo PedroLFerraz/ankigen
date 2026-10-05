@@ -10,7 +10,7 @@
 
 <p align="center">
   <a href="https://github.com/PedroLFerraz/ankigen/actions/workflows/tests.yml"><img src="https://github.com/PedroLFerraz/ankigen/actions/workflows/tests.yml/badge.svg" alt="tests"></a>
-  <a href="https://github.com/PedroLFerraz/ankigen/actions/workflows/daily-cards.yml"><img src="https://github.com/PedroLFerraz/ankigen/actions/workflows/daily-cards.yml/badge.svg" alt="daily cards"></a>
+  <a href="https://github.com/PedroLFerraz/ankigen/actions/workflows/tick.yml"><img src="https://github.com/PedroLFerraz/ankigen/actions/workflows/tick.yml/badge.svg" alt="tick"></a>
   <img src="https://img.shields.io/badge/python-3.10%2B-3776AB" alt="Python 3.10+">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-lightgrey" alt="MIT license"></a>
 </p>
@@ -39,16 +39,18 @@ the [roadmap](#roadmap).
 ## Quick start
 
 ```bash
-pip install .                      # installs the `ankigen` command
+pip install ".[guide]"             # installs the `ankigen` command (+ the PDF guide)
 cp .env.example .env               # set LLM_PROVIDER / LLM_API_KEY (Groq is free)
 ankigen decks                      # see your decks, to write the profile
-ankigen validate                   # check profiles/default.yaml against them
+ankigen validate                   # check the profile against them
 ankigen plan                       # what today's run would generate + the exact prompt
 ankigen run                        # do it
 ankigen report                     # what was kept, dropped, and why
 ```
 
-Import `data/out/<date>/ankigen_<date>.apkg` into Anki with File > Import.
+Import `data/out/<date>/ankigen_<date>.apkg` into Anki with File > Import, and
+read `data/out/<date>/guide_<date>.pdf` alongside it: it explains each card in
+depth, and each card names its section.
 Cards land **straight in their deck**, tagged `ankigen::run_<date>` so a batch
 can be found or deleted later. Anything close to a card you already have is
 tagged `ankigen::near-dup` with what it resembles, so search that tag first and
@@ -71,6 +73,7 @@ get a lock.
 | **refill** | requests left short by verify and dedup | more `generated_cards` (flagged `refill`), with their `verified_cards` and `dedup_results` | One more request per short batch, for exactly the cards it lost, showing the model each rejected card and why. The new cards go through the same check and dedup; one round only, so a stubborn topic cannot spend the day's free-tier requests. |
 | **dedup** | the above + `raw_notes` + previous runs | `dedup_results` | Compared against your **whole collection**, not just the target deck — a fact you already have in `DS::SQL` is not new because a run asked for it under Data Platform. Embedding similarity catches rephrasings; fuzzy matching runs over the nearest twenty by meaning. Cards just below the duplicate threshold are kept and tagged `ankigen::near-dup` rather than dropped unseen. |
 | **images** | kept cards wanting one | `card_visuals`, `card_images` | Only for cards whose answer is easier to hold as a picture. Mostly **drawn from the card itself**: the model that writes a card can describe a comparison as a table or a flow as a Graphviz diagram in the same request, so the picture shows exactly what the card says, and the fact-checker checks it along with the card. Cards that need a real picture — a screenshot, a photograph — are searched for on the web, then **shown to the model with the card** and kept only if it actually illustrates it: search engines match the words around a picture, never the picture, so a card about S3's flat namespace once arrived with a stock photo of a basketball player. Everything travels inside the note (inline SVG, HTML tables, small inline JPEGs), so no media sync is needed. |
+| **guide** | kept cards | `guide_sections`, `guide_<date>.pdf` | A **study guide** for the day: a chapter per topic that opens with how the thing works, then a section per card with why the answer is what it is, an example, the usual mistakes, and what is related. Written by the writer's model and read by the checker's; a section it disputes stays in, marked with the dispute. Each card carries its section number under the answer (`Guide 2026-10-03 · §2.3`). Needs the `[guide]` extra for the PDF; without it the guide is HTML. |
 | **export** | `card_outcomes` view | `.apkg`, Parquet | Stable note GUIDs and stable deck and note-type IDs. |
 | **report** | `pipeline_runs` + all of the above | `run_report.json` | Per-stage timings, drops with reasons, and token usage. |
 
@@ -84,7 +87,8 @@ ankigen run --date 2026-09-22 --stage dedup --stage export --stage report
 
 ## The profile
 
-`profiles/default.yaml` is where personalisation lives:
+A pipeline's `profile.yaml` (`pipelines/data-platform/profile.yaml` by
+default) is where personalisation lives:
 
 ```yaml
 learner:
@@ -194,12 +198,26 @@ seconds.
 > writes a `.pth` file in that encoding. pytest is configured with
 > `pythonpath = ["src"]`, and `python -m ankigen` works with `PYTHONPATH=src`.
 
-## Running it daily
+## Pipelines, and running them daily
 
-Without leaving a machine on: a [GitHub Actions workflow](.github/workflows/daily-cards.yml)
-runs the pipeline on GitHub's runners each morning. It syncs your collection
-down from AnkiWeb, writes the cards, and syncs them back, so they appear on your
-phone and desktop with nothing to import. Free on a public repo, two secrets to
+The repository can hold several **pipelines**, one folder each under
+`pipelines/`: a `profile.yaml` saying what to teach, and a `pipeline.yaml`
+saying when to run it (a cron in its own time zone), what to produce (the
+study guide PDF, a push to AnkiWeb), which models to use and how many calls a
+run may make. Each pipeline writes to decks of its own, keeps its own
+curriculum and warehouse, and tags its notes `ankigen::pipeline::<id>`.
+
+```bash
+ankigen pipelines list               # every pipeline, and when it runs next
+ankigen pipelines validate           # check them all
+ANKIGEN_PIPELINE=german ankigen run  # one run of one pipeline
+```
+
+Without leaving a machine on: an hourly [GitHub Actions workflow](.github/workflows/tick.yml)
+runs each pipeline at its time, on GitHub's runners, one after another. A run
+syncs your collection down from AnkiWeb, writes the cards, and syncs them back,
+so they appear on your phone and desktop with nothing to import; what it did is
+recorded on the `ankigen-status` branch. Free on a public repo, two secrets to
 set up — see [docs/GITHUB_ACTIONS.md](docs/GITHUB_ACTIONS.md).
 
 There is also an [Airflow stack](infra/airflow/) that runs the same stages
@@ -214,7 +232,8 @@ something to be on, so Actions is what actually fires daily.
 4. **Docker**: multi-stage image; the collection and profile mounted read-only.
 5. **AWS free tier**: S3 `raw/`, `curated/` and `gold/` layers via Terraform, and a least-privilege IAM role.
 6. **Kubernetes**: `CronJob` on `kind`, then `KubernetesPodOperator` per stage.
-7. Later: PDF ingestion as a second source, and an Android client.
+7. **Android client**: create, schedule and watch pipelines from a phone, with each run's study guide saved to a folder on it. The backend it drives (pipelines, the hourly tick, the status branch) is in place.
+8. Later: PDF ingestion as a second source.
 
 ## License
 

@@ -300,3 +300,13 @@ def test_a_working_picture_survives_a_warehouse_that_knows_of_none(tmp_path):
     result = push.push_cards(col, [_detailed("u1"), _detailed("u2")], tmp_path)
     assert result.updated == 0 and col.updated == []
     assert col.notes[1].fields["Image"] == inline and col.notes[2].fields["Image"] == drawn
+
+
+def test_a_new_card_points_to_its_guide_section(tmp_path, monkeypatch):
+    monkeypatch.setattr(push, "_notetype", lambda col, ct: {"name": "AnkiGen Detailed"})
+    col = _Col()
+    card = {**_detailed(), "run_date": "2026-10-03", "guide_ref": "2.3"}
+    push.push_cards(col, [card], tmp_path)
+    [note] = col.added
+    assert note.fields["Explanation"].startswith("E")
+    assert "Guide 2026-10-03 · §2.3" in note.fields["Explanation"]

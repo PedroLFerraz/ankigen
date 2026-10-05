@@ -144,7 +144,8 @@ def add_to_profile(path: Path, target: DeckTarget, today: date | None = None) ->
     return Proposal(target, block, raised)
 
 
-def summary(proposal: Proposal, about: str = "") -> str:
+def summary(proposal: Proposal, about: str = "",
+            profile_path: str = "pipelines/data-platform/profile.yaml") -> str:
     """Markdown describing the change, for the pull request."""
     t = proposal.target
     if t.start:
@@ -164,6 +165,6 @@ def summary(proposal: Proposal, about: str = "") -> str:
         lines += [f"`global_quota` goes up to **{proposal.global_quota}** so the new deck "
                   "gets cards; lower another deck's `daily_quota` instead if you would "
                   "rather keep the daily total.", ""]
-    lines += ["Edit `profiles/default.yaml` on this branch to reorder, drop or add "
+    lines += [f"Edit `{profile_path}` on this branch to reorder, drop or add "
               "topics before merging. Nothing changes until this is merged."]
     return "\n".join(lines)

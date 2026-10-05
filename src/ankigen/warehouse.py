@@ -121,6 +121,21 @@ CREATE TABLE IF NOT EXISTS card_visuals (
     detail    VARCHAR
 );
 
+-- The day's study guide (guide.py): a chapter opening per request, a section
+-- per kept card. `ref` is what the card carries: "2" for a chapter, "2.3" for
+-- its third card.
+CREATE TABLE IF NOT EXISTS guide_sections (
+    run_date   DATE    NOT NULL,
+    card_uid   VARCHAR,
+    request_id VARCHAR NOT NULL,
+    ref        VARCHAR NOT NULL,
+    kind       VARCHAR NOT NULL,
+    markdown   VARCHAR,
+    status     VARCHAR NOT NULL,
+    issue      VARCHAR,
+    model      VARCHAR
+);
+
 CREATE TABLE IF NOT EXISTS embedding_cache (
     content_hash VARCHAR NOT NULL,
     model        VARCHAR NOT NULL,
@@ -148,6 +163,7 @@ SELECT
     cv.kind AS visual_kind, cv.html AS visual_html,
     d.is_dup, d.reason AS dup_reason,
     i.filename AS image_filename, i.source AS image_source,
+    gs.guide_ref,
     CASE
         WHEN v.passed IS FALSE THEN 'dropped_verify'
         WHEN d.is_dup IS TRUE  THEN 'dropped_duplicate'
@@ -159,7 +175,9 @@ JOIN requests r USING (run_date, request_id)
 LEFT JOIN verified_cards v USING (run_date, card_uid)
 LEFT JOIN dedup_results d USING (run_date, card_uid)
 LEFT JOIN card_images   i USING (run_date, card_uid)
-LEFT JOIN card_visuals  cv USING (run_date, card_uid);
+LEFT JOIN card_visuals  cv USING (run_date, card_uid)
+LEFT JOIN (SELECT run_date, card_uid, ref AS guide_ref FROM guide_sections
+           WHERE kind = 'card') gs USING (run_date, card_uid);
 """
 
 

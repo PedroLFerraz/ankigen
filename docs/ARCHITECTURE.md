@@ -123,7 +123,7 @@ Two more pieces of hardware have direct equivalents:
 
 | | |
 |---|---|
-| **Input** | `raw_notes`, `profiles/default.yaml` |
+| **Input** | `raw_notes`, the pipeline's `profile.yaml` |
 | **Output** | `requests`: one row per request, including the complete prompt |
 | **Tools** | `pydantic` + `PyYAML` (profile), `random` seeded by the date, `string.Template` + `importlib.resources` (prompt files) |
 
@@ -212,6 +212,26 @@ Only decks the profile targets are embedded, so a 5,000-card German deck costs
 nothing. If embeddings are unavailable, only the fuzzy check runs, and the
 report says so.
 
+#### guide: the explanations
+
+| | |
+|---|---|
+| **Input** | `card_outcomes` view, filtered to `outcome = 'kept'`, with `requests` |
+| **Output** | `guide_sections`; `data/out/<date>/guide_<date>.html` and `.pdf` |
+| **Tools** | the writer's LLM (`prompts/guide.txt`), the checker's (`prompts/guide_check.txt`), `markdown`, WeasyPrint |
+
+1. Number the chapters (one per request, decks in the profile's order, topics
+   in the curriculum's) and the cards under them, **before** any model call,
+   so each card's reference (`§2.3`) holds even if its chapter is not written.
+2. Per chapter, one call writes an opening and a section per card, and one
+   checker call reads it. A disputed section is kept and marked; one never
+   checked is marked unchecked.
+3. Render HTML, and a PDF when WeasyPrint is installed.
+
+Runs after images so drawn tables and diagrams appear in it, and before export
+so the notes carry their reference. Like verify, it never fails the run: a
+spent allowance leaves the rest of the guide "not written today".
+
 #### ⑥ export: write back
 
 | | |
@@ -256,6 +276,7 @@ One DuckDB file, `data/warehouse.duckdb`, split into layers:
 | stage | `dedup_results` | dedup | replaces that date's rows |
 | mart | `card_outcomes` *(view)* | derived | joins the above: `kept` / `dropped_verify` / `dropped_duplicate` |
 | cache | `embedding_cache` | dedup | keyed by (content hash, model) |
+| stage | `guide_sections` | guide | replaces that date's rows |
 | ops | `pipeline_runs` | orchestrator | one row per (date, stage): status, rows, timing, detail |
 
 **The idempotency guarantee.** In one transaction, a stage deletes that date's
@@ -312,12 +333,50 @@ data/
 | NumPy | vectorised similarity | dedup |
 | `difflib` | fuzzy wording match | dedup |
 | genanki | writes `.apkg` packages | export |
+| cronsim | reads each pipeline's cron in its own time zone | the tick |
+| `markdown` + WeasyPrint | the study guide, as HTML and PDF | guide |
 | Typer | CLI | interface |
 | pytest | 73 offline tests, using fake LLM and embeddings | — |
 
 ---
 
-## 7. What the future phases swap out
+## 7. Several pipelines
+
+Everything above is one **pipeline**: one profile, one warehouse, one
+curriculum. A repository holds several, one folder each under `pipelines/`,
+and a run is one of them, chosen with `ANKIGEN_PIPELINE`:
+
+| | per pipeline | shared |
+|---|---|---|
+| what to teach | `pipelines/<id>/profile.yaml` | |
+| how to run it | `pipelines/<id>/pipeline.yaml`: cron and time zone, outputs, models, budget | |
+| storage | `data/pipelines/<id>/` (warehouse, snapshots, output) | `data/anki/`, the AnkiWeb working copy |
+| curriculum | the days its own decks have cards for | |
+| credentials | | the repository's secrets |
+
+**The curriculum queue is per pipeline.** The next curriculum day is the day
+after the last one the collection has cards for, and the collection is
+shared, so only notes in the pipeline's own decks count; two pipelines may not
+share a deck. A pipeline that never pushes counts the days in its warehouse
+instead, since its cards never reach the collection.
+
+**The scheduler is a tick.** GitHub's schedule is one cron per workflow file,
+so `tick.yml` runs hourly, asks `ankigen pipelines due` which crons have fired
+since each pipeline last ran, and runs those through `run-pipeline.yml`, one
+after another: one AnkiWeb collection means one sync at a time. Each run
+records its outcome on the `ankigen-status` branch, which is both the tick's
+memory and what the Android app reads:
+
+```
+tick (hourly) ──▶ pipelines due? ──▶ run-pipeline (one at a time) ──▶ AnkiWeb
+      ▲                                     │
+      └──────── ankigen-status branch ◀─────┘   latest.json, runs/, cards/, curriculum.json
+```
+
+`pipelines.py` imports nothing heavy, so the tick decides what is due after
+installing only pydantic and cronsim.
+
+## 8. What the future phases swap out
 
 Levels L0 to L3 stay the same. Later phases only replace orchestration (L4) and
 where the data lives (L0):
