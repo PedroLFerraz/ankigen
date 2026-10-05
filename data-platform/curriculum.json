@@ -1,0 +1,2400 @@
+{
+  "next_day": "2026-10-14",
+  "decks": [
+    {
+      "deck": "Data Platform::01 Linux",
+      "start": "2026-09-27",
+      "last_day": "2026-10-04",
+      "daily_quota": 20,
+      "topics": [
+        {
+          "topic": "what the terminal, the shell and a command are",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-09-27",
+          "status": "done"
+        },
+        {
+          "topic": "moving around: pwd, cd, ls, and the home directory",
+          "kind": "command",
+          "level": 1,
+          "day": "2026-09-27",
+          "status": "done"
+        },
+        {
+          "topic": "absolute versus relative paths, and what ., .. and ~ mean",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-09-27",
+          "status": "done"
+        },
+        {
+          "topic": "terminal shortcuts: Tab completion, Ctrl+C, Ctrl+L and the arrow keys",
+          "kind": "shortcut",
+          "level": 1,
+          "day": "2026-09-27",
+          "status": "done"
+        },
+        {
+          "topic": "command history: Ctrl+R, !!, history, and re-running a command",
+          "kind": "shortcut",
+          "level": 1,
+          "day": "2026-09-27",
+          "status": "done"
+        },
+        {
+          "topic": "editing the command line: Ctrl+A, Ctrl+E, Ctrl+U and Ctrl+W",
+          "kind": "shortcut",
+          "level": 1,
+          "day": "2026-09-27",
+          "status": "done"
+        },
+        {
+          "topic": "listing files: ls -l, ls -a, ls -lh, and reading the output",
+          "kind": "command",
+          "level": 1,
+          "day": "2026-09-27",
+          "status": "done"
+        },
+        {
+          "topic": "creating and removing: mkdir, touch, rm, rm -r and rmdir",
+          "kind": "command",
+          "level": 1,
+          "day": "2026-09-27",
+          "status": "done"
+        },
+        {
+          "topic": "copying, moving and renaming: cp, cp -r and mv",
+          "kind": "command",
+          "level": 1,
+          "day": "2026-09-27",
+          "status": "done"
+        },
+        {
+          "topic": "reading files: cat, less, head and tail",
+          "kind": "command",
+          "level": 1,
+          "day": "2026-09-27",
+          "status": "done"
+        },
+        {
+          "topic": "moving around inside less: space, b, /search, n and q",
+          "kind": "shortcut",
+          "level": 1,
+          "day": "2026-09-27",
+          "status": "done"
+        },
+        {
+          "topic": "getting help: man, --help, and reading a man page",
+          "kind": "command",
+          "level": 1,
+          "day": "2026-09-27",
+          "status": "done"
+        },
+        {
+          "topic": "wildcards: *, ? and braces, and what the shell expands",
+          "kind": "command",
+          "level": 1,
+          "day": "2026-09-27",
+          "status": "done"
+        },
+        {
+          "topic": "editing a file with nano: open, save and exit",
+          "kind": "command",
+          "level": 1,
+          "day": "2026-09-27",
+          "status": "done"
+        },
+        {
+          "topic": "surviving vim: i, Esc, :w, :q, :wq and :q!",
+          "kind": "shortcut",
+          "level": 1,
+          "day": "2026-09-27",
+          "status": "done"
+        },
+        {
+          "topic": "users, the root user, and sudo",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-09-27",
+          "status": "done"
+        },
+        {
+          "topic": "file permissions: reading rwx in ls -l, chmod and chown",
+          "kind": "command",
+          "level": 1,
+          "day": "2026-09-27",
+          "status": "done"
+        },
+        {
+          "topic": "pipes and redirection: |, >, >>, 2> and <",
+          "kind": "command",
+          "level": 1,
+          "day": "2026-09-27",
+          "status": "done"
+        },
+        {
+          "topic": "searching text: grep, grep -i, grep -r and grep -v",
+          "kind": "command",
+          "level": 1,
+          "day": "2026-09-27",
+          "status": "done"
+        },
+        {
+          "topic": "finding files: find by name, type and modification time",
+          "kind": "command",
+          "level": 1,
+          "day": "2026-09-27",
+          "status": "done"
+        },
+        {
+          "topic": "counting and sorting: wc, sort, uniq and cut",
+          "kind": "command",
+          "level": 2,
+          "day": "2026-09-28",
+          "status": "done"
+        },
+        {
+          "topic": "processes, PIDs, and what happens when you run a command",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-09-28",
+          "status": "done"
+        },
+        {
+          "topic": "watching processes: ps aux, top and htop",
+          "kind": "command",
+          "level": 2,
+          "day": "2026-09-28",
+          "status": "done"
+        },
+        {
+          "topic": "stopping processes: Ctrl+C, kill, kill -9 and pkill",
+          "kind": "command",
+          "level": 2,
+          "day": "2026-09-28",
+          "status": "done"
+        },
+        {
+          "topic": "jobs: &, Ctrl+Z, bg, fg, jobs and nohup",
+          "kind": "command",
+          "level": 2,
+          "day": "2026-09-29",
+          "status": "done"
+        },
+        {
+          "topic": "environment variables, PATH, and export",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-09-29",
+          "status": "done"
+        },
+        {
+          "topic": "shell configuration in .bashrc: aliases and exported variables",
+          "kind": "build",
+          "level": 2,
+          "day": "2026-09-29",
+          "status": "done"
+        },
+        {
+          "topic": "installing software: apt update, apt install and apt remove",
+          "kind": "command",
+          "level": 2,
+          "day": "2026-09-29",
+          "status": "done"
+        },
+        {
+          "topic": "disk space: df -h, du -sh, and finding what is big",
+          "kind": "command",
+          "level": 2,
+          "day": "2026-09-30",
+          "status": "done"
+        },
+        {
+          "topic": "archives: tar czf, tar xzf, zip and unzip",
+          "kind": "command",
+          "level": 2,
+          "day": "2026-09-30",
+          "status": "done"
+        },
+        {
+          "topic": "calling URLs and downloading: curl and wget",
+          "kind": "command",
+          "level": 2,
+          "day": "2026-09-30",
+          "status": "done"
+        },
+        {
+          "topic": "a first bash script: shebang, variables, arguments and chmod +x",
+          "kind": "build",
+          "level": 2,
+          "day": "2026-09-30",
+          "status": "done"
+        },
+        {
+          "topic": "exit codes, and how && and || use them",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-10-01",
+          "status": "done"
+        },
+        {
+          "topic": "a bash script that stops on errors: set -euo pipefail and checking $?",
+          "kind": "build",
+          "level": 2,
+          "day": "2026-10-01",
+          "status": "done"
+        },
+        {
+          "topic": "connecting to a server: ssh, ssh-keygen and ~/.ssh/config",
+          "kind": "command",
+          "level": 3,
+          "day": "2026-10-01",
+          "status": "done"
+        },
+        {
+          "topic": "copying files between machines: scp and rsync",
+          "kind": "command",
+          "level": 3,
+          "day": "2026-10-01",
+          "status": "done"
+        },
+        {
+          "topic": "services with systemd: systemctl start, stop, status and enable",
+          "kind": "command",
+          "level": 3,
+          "day": "2026-10-02",
+          "status": "done"
+        },
+        {
+          "topic": "reading logs: journalctl -u, journalctl -f, and /var/log",
+          "kind": "command",
+          "level": 3,
+          "day": "2026-10-02",
+          "status": "done"
+        },
+        {
+          "topic": "signals: SIGTERM, SIGKILL, SIGHUP, and graceful shutdown",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-10-02",
+          "status": "done"
+        },
+        {
+          "topic": "scheduling a job with cron: crontab -e and the five time fields",
+          "kind": "build",
+          "level": 3,
+          "day": "2026-10-02",
+          "status": "done"
+        },
+        {
+          "topic": "inodes, hard links and symbolic links",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-10-03",
+          "status": "done"
+        },
+        {
+          "topic": "file descriptors, stdin, stdout and stderr",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-10-03",
+          "status": "done"
+        },
+        {
+          "topic": "a full disk: deleted files still held open, inodes, and log rotation",
+          "kind": "scenario",
+          "level": 4,
+          "day": "2026-10-03",
+          "status": "done"
+        },
+        {
+          "topic": "a process killed by the out-of-memory killer, and exit code 137",
+          "kind": "scenario",
+          "level": 4,
+          "day": "2026-10-03",
+          "status": "done"
+        },
+        {
+          "topic": "a script that works in your shell but not from cron",
+          "kind": "scenario",
+          "level": 4,
+          "day": "2026-10-04",
+          "status": "done"
+        },
+        {
+          "topic": "permission denied: ownership, execute bits, and directories",
+          "kind": "scenario",
+          "level": 4,
+          "day": "2026-10-04",
+          "status": "done"
+        }
+      ]
+    },
+    {
+      "deck": "Data Platform::02 Networking",
+      "start": "2026-10-05",
+      "last_day": "2026-10-09",
+      "daily_quota": 20,
+      "topics": [
+        {
+          "topic": "what an IP address and a port are",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-05",
+          "status": "done"
+        },
+        {
+          "topic": "what DNS does: turning a name into an address",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-05",
+          "status": "done"
+        },
+        {
+          "topic": "clients, servers, requests and responses",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-05",
+          "status": "done"
+        },
+        {
+          "topic": "HTTP: methods, status codes and headers",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-05",
+          "status": "done"
+        },
+        {
+          "topic": "checking connectivity: ping, curl -I and curl -v",
+          "kind": "command",
+          "level": 1,
+          "day": "2026-10-06",
+          "status": "done"
+        },
+        {
+          "topic": "looking up names: dig, nslookup and /etc/hosts",
+          "kind": "command",
+          "level": 1,
+          "day": "2026-10-06",
+          "status": "done"
+        },
+        {
+          "topic": "private versus public IP addresses, and NAT",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-10-06",
+          "status": "done"
+        },
+        {
+          "topic": "CIDR notation: reading 10.0.0.0/16 and /24",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-10-06",
+          "status": "done"
+        },
+        {
+          "topic": "TCP versus UDP",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-10-07",
+          "status": "done"
+        },
+        {
+          "topic": "TLS and HTTPS: certificates and what they protect",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-10-07",
+          "status": "done"
+        },
+        {
+          "topic": "which ports are listening: ss -tlnp and lsof -i",
+          "kind": "command",
+          "level": 2,
+          "day": "2026-10-07",
+          "status": "done"
+        },
+        {
+          "topic": "localhost, 0.0.0.0, and binding a service to an interface",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-10-07",
+          "status": "done"
+        },
+        {
+          "topic": "firewalls and security groups: allowing a port",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-10-08",
+          "status": "done"
+        },
+        {
+          "topic": "load balancers and reverse proxies",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-10-08",
+          "status": "done"
+        },
+        {
+          "topic": "SSH tunnels: ssh -L, ssh -J and port forwarding",
+          "kind": "command",
+          "level": 3,
+          "day": "2026-10-08",
+          "status": "done"
+        },
+        {
+          "topic": "connection refused versus a timeout: what each tells you",
+          "kind": "scenario",
+          "level": 3,
+          "day": "2026-10-08",
+          "status": "done"
+        },
+        {
+          "topic": "a service that works on the server but not from your laptop",
+          "kind": "scenario",
+          "level": 4,
+          "day": "2026-10-09",
+          "status": "done"
+        },
+        {
+          "topic": "a DNS record that changed but clients still use the old address",
+          "kind": "scenario",
+          "level": 4,
+          "day": "2026-10-09",
+          "status": "done"
+        }
+      ]
+    },
+    {
+      "deck": "Data Platform::03 Git",
+      "start": "2026-10-10",
+      "last_day": "2026-10-13",
+      "daily_quota": 20,
+      "topics": [
+        {
+          "topic": "what version control and Git are for",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-10",
+          "status": "done"
+        },
+        {
+          "topic": "starting: git init, git clone and git status",
+          "kind": "command",
+          "level": 1,
+          "day": "2026-10-10",
+          "status": "done"
+        },
+        {
+          "topic": "saving work: git add, git commit and git log",
+          "kind": "command",
+          "level": 1,
+          "day": "2026-10-10",
+          "status": "done"
+        },
+        {
+          "topic": "the working directory, the staging area and commits",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-10",
+          "status": "done"
+        },
+        {
+          "topic": "branches: git branch, git switch and git merge",
+          "kind": "command",
+          "level": 1,
+          "day": "2026-10-11",
+          "status": "done"
+        },
+        {
+          "topic": "working with GitHub: git remote, git push and git pull",
+          "kind": "command",
+          "level": 1,
+          "day": "2026-10-11",
+          "status": "done"
+        },
+        {
+          "topic": "a .gitignore for a Python data project",
+          "kind": "build",
+          "level": 1,
+          "day": "2026-10-11",
+          "status": "done"
+        },
+        {
+          "topic": "seeing changes: git diff, git diff --staged and git show",
+          "kind": "command",
+          "level": 2,
+          "day": "2026-10-11",
+          "status": "done"
+        },
+        {
+          "topic": "undoing: git restore, git reset and git revert",
+          "kind": "command",
+          "level": 2,
+          "day": "2026-10-12",
+          "status": "done"
+        },
+        {
+          "topic": "pull requests and code review",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-10-12",
+          "status": "done"
+        },
+        {
+          "topic": "merge conflicts: why they happen and how to resolve them",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-10-12",
+          "status": "done"
+        },
+        {
+          "topic": "setting work aside: git stash, git stash pop and git stash list",
+          "kind": "command",
+          "level": 2,
+          "day": "2026-10-12",
+          "status": "done"
+        },
+        {
+          "topic": "rebase versus merge",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-10-13",
+          "status": "done"
+        },
+        {
+          "topic": "a secret committed to Git, and why it must be rotated",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-10-13",
+          "status": "done"
+        },
+        {
+          "topic": "a GitHub Actions workflow that runs tests on every push",
+          "kind": "build",
+          "level": 3,
+          "day": "2026-10-13",
+          "status": "done"
+        },
+        {
+          "topic": "recovering a commit you lost with git reflog",
+          "kind": "scenario",
+          "level": 4,
+          "day": "2026-10-13",
+          "status": "done"
+        }
+      ]
+    },
+    {
+      "deck": "Data Platform::04 Data Fundamentals",
+      "start": "2026-10-14",
+      "last_day": "2026-10-18",
+      "daily_quota": 20,
+      "topics": [
+        {
+          "topic": "what a data platform does: ingestion, storage, transformation and serving",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-14",
+          "status": "next"
+        },
+        {
+          "topic": "OLTP versus OLAP",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-14",
+          "status": "next"
+        },
+        {
+          "topic": "batch versus streaming",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-14",
+          "status": "next"
+        },
+        {
+          "topic": "ETL versus ELT",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-14",
+          "status": "next"
+        },
+        {
+          "topic": "data lake versus data warehouse versus lakehouse",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-15",
+          "status": "upcoming"
+        },
+        {
+          "topic": "file formats: CSV, JSON, Parquet and Avro",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-15",
+          "status": "upcoming"
+        },
+        {
+          "topic": "row versus columnar storage, and what columnar buys you",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-10-15",
+          "status": "upcoming"
+        },
+        {
+          "topic": "compression and encoding in columnar files",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-10-15",
+          "status": "upcoming"
+        },
+        {
+          "topic": "partitioning, file sizes and the small-file problem",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-10-16",
+          "status": "upcoming"
+        },
+        {
+          "topic": "schema on read versus schema on write",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-10-16",
+          "status": "upcoming"
+        },
+        {
+          "topic": "incremental versus full loads, and watermarks",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-10-16",
+          "status": "upcoming"
+        },
+        {
+          "topic": "change data capture",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-10-16",
+          "status": "upcoming"
+        },
+        {
+          "topic": "orchestration: dependencies, retries and state",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-10-17",
+          "status": "upcoming"
+        },
+        {
+          "topic": "idempotency: why reruns must be safe",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-10-17",
+          "status": "upcoming"
+        },
+        {
+          "topic": "backfills, and what makes them cheap or expensive",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-10-17",
+          "status": "upcoming"
+        },
+        {
+          "topic": "data quality checks: freshness, completeness and uniqueness",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-10-17",
+          "status": "upcoming"
+        },
+        {
+          "topic": "lineage and data catalogues",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-10-18",
+          "status": "upcoming"
+        },
+        {
+          "topic": "late-arriving data",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-10-18",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a daily job that ran twice and doubled a table",
+          "kind": "scenario",
+          "level": 4,
+          "day": "2026-10-18",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a query on object storage that costs far more than expected",
+          "kind": "scenario",
+          "level": 4,
+          "day": "2026-10-18",
+          "status": "upcoming"
+        }
+      ]
+    },
+    {
+      "deck": "Data Platform::05 Modelling & SQL",
+      "start": "2026-10-19",
+      "last_day": "2026-10-23",
+      "daily_quota": 20,
+      "topics": [
+        {
+          "topic": "normalisation, and why analytics denormalises",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-19",
+          "status": "upcoming"
+        },
+        {
+          "topic": "facts and dimensions: the star schema",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-19",
+          "status": "upcoming"
+        },
+        {
+          "topic": "grain: what one row of a table means",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-19",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a CREATE TABLE for a fact table and a dimension table",
+          "kind": "build",
+          "level": 1,
+          "day": "2026-10-19",
+          "status": "upcoming"
+        },
+        {
+          "topic": "surrogate keys versus natural keys",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-10-20",
+          "status": "upcoming"
+        },
+        {
+          "topic": "slowly changing dimensions: type 1 versus type 2",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-10-20",
+          "status": "upcoming"
+        },
+        {
+          "topic": "deduplicating rows with ROW_NUMBER over a partition",
+          "kind": "build",
+          "level": 2,
+          "day": "2026-10-20",
+          "status": "upcoming"
+        },
+        {
+          "topic": "an upsert with MERGE",
+          "kind": "build",
+          "level": 2,
+          "day": "2026-10-20",
+          "status": "upcoming"
+        },
+        {
+          "topic": "fact table types: transaction, periodic snapshot and accumulating snapshot",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-10-21",
+          "status": "upcoming"
+        },
+        {
+          "topic": "the medallion layers: bronze, silver and gold",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-10-21",
+          "status": "upcoming"
+        },
+        {
+          "topic": "dbt: models, ref and the DAG they build",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-10-21",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a dbt model and its tests in schema.yml",
+          "kind": "build",
+          "level": 3,
+          "day": "2026-10-21",
+          "status": "upcoming"
+        },
+        {
+          "topic": "incremental models in dbt",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-10-22",
+          "status": "upcoming"
+        },
+        {
+          "topic": "reading a query plan to find the expensive step",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-10-22",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a join that multiplies rows because the grain was wrong",
+          "kind": "scenario",
+          "level": 4,
+          "day": "2026-10-22",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a type 2 dimension joined without its validity dates",
+          "kind": "scenario",
+          "level": 4,
+          "day": "2026-10-22",
+          "status": "upcoming"
+        },
+        {
+          "topic": "data contracts with the teams that produce the data",
+          "kind": "concept",
+          "level": 4,
+          "day": "2026-10-23",
+          "status": "upcoming"
+        }
+      ]
+    },
+    {
+      "deck": "Data Platform::06 Docker",
+      "start": "2026-10-24",
+      "last_day": "2026-10-30",
+      "daily_quota": 20,
+      "topics": [
+        {
+          "topic": "what problem Docker solves",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-24",
+          "status": "upcoming"
+        },
+        {
+          "topic": "images versus containers",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-24",
+          "status": "upcoming"
+        },
+        {
+          "topic": "containers versus virtual machines",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-24",
+          "status": "upcoming"
+        },
+        {
+          "topic": "running a container: docker run, -d, --name and --rm",
+          "kind": "command",
+          "level": 1,
+          "day": "2026-10-24",
+          "status": "upcoming"
+        },
+        {
+          "topic": "ports and environment variables: docker run -p and -e",
+          "kind": "command",
+          "level": 1,
+          "day": "2026-10-25",
+          "status": "upcoming"
+        },
+        {
+          "topic": "seeing what runs: docker ps, docker ps -a and docker logs",
+          "kind": "command",
+          "level": 1,
+          "day": "2026-10-25",
+          "status": "upcoming"
+        },
+        {
+          "topic": "getting inside and stopping: docker exec -it, docker stop and docker rm",
+          "kind": "command",
+          "level": 1,
+          "day": "2026-10-25",
+          "status": "upcoming"
+        },
+        {
+          "topic": "images: docker pull, docker images and docker rmi",
+          "kind": "command",
+          "level": 1,
+          "day": "2026-10-25",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a first Dockerfile for a Python script: FROM, COPY and CMD",
+          "kind": "build",
+          "level": 1,
+          "day": "2026-10-26",
+          "status": "upcoming"
+        },
+        {
+          "topic": "installing dependencies: WORKDIR, COPY requirements.txt and RUN pip install",
+          "kind": "build",
+          "level": 1,
+          "day": "2026-10-26",
+          "status": "upcoming"
+        },
+        {
+          "topic": "building and tagging an image: docker build -t and the build context",
+          "kind": "command",
+          "level": 1,
+          "day": "2026-10-26",
+          "status": "upcoming"
+        },
+        {
+          "topic": "layers and the build cache, and ordering a Dockerfile for it",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-10-26",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a .dockerignore that keeps the build context small",
+          "kind": "build",
+          "level": 2,
+          "day": "2026-10-27",
+          "status": "upcoming"
+        },
+        {
+          "topic": "ENTRYPOINT versus CMD",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-10-27",
+          "status": "upcoming"
+        },
+        {
+          "topic": "volumes and bind mounts: docker run -v",
+          "kind": "command",
+          "level": 2,
+          "day": "2026-10-27",
+          "status": "upcoming"
+        },
+        {
+          "topic": "why files written inside a container disappear",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-10-27",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a docker-compose.yml with an app and a Postgres database",
+          "kind": "build",
+          "level": 2,
+          "day": "2026-10-28",
+          "status": "upcoming"
+        },
+        {
+          "topic": "Compose commands: up, up -d, down, logs and ps",
+          "kind": "command",
+          "level": 2,
+          "day": "2026-10-28",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a multi-stage build for a smaller image",
+          "kind": "build",
+          "level": 3,
+          "day": "2026-10-28",
+          "status": "upcoming"
+        },
+        {
+          "topic": "running as a non-root user with USER",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-10-28",
+          "status": "upcoming"
+        },
+        {
+          "topic": "configuration and secrets: what never to bake into an image",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-10-29",
+          "status": "upcoming"
+        },
+        {
+          "topic": "container networking and service names in Compose",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-10-29",
+          "status": "upcoming"
+        },
+        {
+          "topic": "registries: docker tag, docker push, and logging in to Amazon ECR",
+          "kind": "command",
+          "level": 3,
+          "day": "2026-10-29",
+          "status": "upcoming"
+        },
+        {
+          "topic": "debugging: docker inspect, docker exec, and reading exit codes",
+          "kind": "command",
+          "level": 3,
+          "day": "2026-10-29",
+          "status": "upcoming"
+        },
+        {
+          "topic": "an image that is 2 GB, and how to shrink it",
+          "kind": "scenario",
+          "level": 4,
+          "day": "2026-10-30",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a container that takes 10 seconds to stop",
+          "kind": "scenario",
+          "level": 4,
+          "day": "2026-10-30",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a build that reinstalls every dependency on each code change",
+          "kind": "scenario",
+          "level": 4,
+          "day": "2026-10-30",
+          "status": "upcoming"
+        }
+      ]
+    },
+    {
+      "deck": "Data Platform::07 AWS Core",
+      "start": "2026-10-31",
+      "last_day": "2026-11-07",
+      "daily_quota": 20,
+      "topics": [
+        {
+          "topic": "what the cloud is: renting computers, storage and services",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-31",
+          "status": "upcoming"
+        },
+        {
+          "topic": "regions and availability zones",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-31",
+          "status": "upcoming"
+        },
+        {
+          "topic": "the AWS console, the CLI and the SDKs",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-31",
+          "status": "upcoming"
+        },
+        {
+          "topic": "setting up the AWS CLI: aws configure, profiles and aws sts get-caller-identity",
+          "kind": "command",
+          "level": 1,
+          "day": "2026-10-31",
+          "status": "upcoming"
+        },
+        {
+          "topic": "IAM: users, groups, roles and policies",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-01",
+          "status": "upcoming"
+        },
+        {
+          "topic": "reading an IAM policy: Effect, Action and Resource",
+          "kind": "build",
+          "level": 1,
+          "day": "2026-11-01",
+          "status": "upcoming"
+        },
+        {
+          "topic": "S3: buckets, objects and keys",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-01",
+          "status": "upcoming"
+        },
+        {
+          "topic": "S3 from the CLI: aws s3 ls, cp, sync and rm",
+          "kind": "command",
+          "level": 1,
+          "day": "2026-11-01",
+          "status": "upcoming"
+        },
+        {
+          "topic": "EC2: instances, AMIs and instance types",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-02",
+          "status": "upcoming"
+        },
+        {
+          "topic": "the free tier, budgets, and what quietly costs money",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-02",
+          "status": "upcoming"
+        },
+        {
+          "topic": "roles and temporary credentials: STS and assuming a role",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-11-02",
+          "status": "upcoming"
+        },
+        {
+          "topic": "least privilege, and why not to use the root account",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-11-02",
+          "status": "upcoming"
+        },
+        {
+          "topic": "identity policies versus resource policies",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-11-03",
+          "status": "upcoming"
+        },
+        {
+          "topic": "S3 storage classes, lifecycle rules and versioning",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-11-03",
+          "status": "upcoming"
+        },
+        {
+          "topic": "VPC: subnets, route tables and internet gateways",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-11-03",
+          "status": "upcoming"
+        },
+        {
+          "topic": "public versus private subnets, and NAT gateways",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-11-03",
+          "status": "upcoming"
+        },
+        {
+          "topic": "security groups versus network ACLs",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-11-04",
+          "status": "upcoming"
+        },
+        {
+          "topic": "EC2 from the CLI: describe-instances, start-instances and stop-instances",
+          "kind": "command",
+          "level": 2,
+          "day": "2026-11-04",
+          "status": "upcoming"
+        },
+        {
+          "topic": "KMS and encryption at rest",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-11-04",
+          "status": "upcoming"
+        },
+        {
+          "topic": "S3 bucket policies and Block Public Access",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-11-04",
+          "status": "upcoming"
+        },
+        {
+          "topic": "VPC endpoints: reaching S3 without the internet",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-11-05",
+          "status": "upcoming"
+        },
+        {
+          "topic": "CloudWatch: metrics, logs and alarms",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-11-05",
+          "status": "upcoming"
+        },
+        {
+          "topic": "CloudTrail: who did what",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-11-05",
+          "status": "upcoming"
+        },
+        {
+          "topic": "instance profiles: credentials for code running on EC2",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-11-05",
+          "status": "upcoming"
+        },
+        {
+          "topic": "Lambda: running code without a server",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-11-06",
+          "status": "upcoming"
+        },
+        {
+          "topic": "Secrets Manager versus Parameter Store",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-11-06",
+          "status": "upcoming"
+        },
+        {
+          "topic": "an AccessDenied error, and how to find the missing permission",
+          "kind": "scenario",
+          "level": 4,
+          "day": "2026-11-06",
+          "status": "upcoming"
+        },
+        {
+          "topic": "an S3 bucket that became public",
+          "kind": "scenario",
+          "level": 4,
+          "day": "2026-11-06",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a surprise bill: NAT gateways, data transfer and idle resources",
+          "kind": "scenario",
+          "level": 4,
+          "day": "2026-11-07",
+          "status": "upcoming"
+        },
+        {
+          "topic": "an instance in a private subnet that cannot reach the internet",
+          "kind": "scenario",
+          "level": 4,
+          "day": "2026-11-07",
+          "status": "upcoming"
+        }
+      ]
+    },
+    {
+      "deck": "Data Platform::08 Terraform",
+      "start": "2026-11-08",
+      "last_day": "2026-11-13",
+      "daily_quota": 20,
+      "topics": [
+        {
+          "topic": "infrastructure as code, and why not click in the console",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-08",
+          "status": "upcoming"
+        },
+        {
+          "topic": "providers, resources and data sources",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-08",
+          "status": "upcoming"
+        },
+        {
+          "topic": "the workflow: terraform init, plan, apply and destroy",
+          "kind": "command",
+          "level": 1,
+          "day": "2026-11-08",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a first main.tf: the AWS provider and an S3 bucket",
+          "kind": "build",
+          "level": 1,
+          "day": "2026-11-08",
+          "status": "upcoming"
+        },
+        {
+          "topic": "reading a plan: create, update, replace and destroy",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-09",
+          "status": "upcoming"
+        },
+        {
+          "topic": "variables, outputs and locals",
+          "kind": "build",
+          "level": 1,
+          "day": "2026-11-09",
+          "status": "upcoming"
+        },
+        {
+          "topic": "state: what it records and why it matters",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-11-09",
+          "status": "upcoming"
+        },
+        {
+          "topic": "remote state in S3 with locking",
+          "kind": "build",
+          "level": 2,
+          "day": "2026-11-09",
+          "status": "upcoming"
+        },
+        {
+          "topic": "implicit dependencies versus depends_on",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-11-10",
+          "status": "upcoming"
+        },
+        {
+          "topic": "count versus for_each",
+          "kind": "build",
+          "level": 2,
+          "day": "2026-11-10",
+          "status": "upcoming"
+        },
+        {
+          "topic": "modules, and when one is worth writing",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-11-10",
+          "status": "upcoming"
+        },
+        {
+          "topic": "housekeeping: terraform fmt, terraform validate and terraform state list",
+          "kind": "command",
+          "level": 2,
+          "day": "2026-11-10",
+          "status": "upcoming"
+        },
+        {
+          "topic": "drift: changes made outside Terraform",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-11-11",
+          "status": "upcoming"
+        },
+        {
+          "topic": "bringing existing resources in: terraform import and import blocks",
+          "kind": "command",
+          "level": 3,
+          "day": "2026-11-11",
+          "status": "upcoming"
+        },
+        {
+          "topic": "lifecycle rules: prevent_destroy and create_before_destroy",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-11-11",
+          "status": "upcoming"
+        },
+        {
+          "topic": "environments: workspaces versus separate state",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-11-11",
+          "status": "upcoming"
+        },
+        {
+          "topic": "keeping secrets out of state and code",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-11-12",
+          "status": "upcoming"
+        },
+        {
+          "topic": "running Terraform from CI with a plan to review",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-11-12",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a plan that wants to replace a database",
+          "kind": "scenario",
+          "level": 4,
+          "day": "2026-11-12",
+          "status": "upcoming"
+        },
+        {
+          "topic": "two people applying at the same time",
+          "kind": "scenario",
+          "level": 4,
+          "day": "2026-11-12",
+          "status": "upcoming"
+        },
+        {
+          "topic": "Terraform versus CloudFormation versus CDK",
+          "kind": "concept",
+          "level": 4,
+          "day": "2026-11-13",
+          "status": "upcoming"
+        }
+      ]
+    },
+    {
+      "deck": "Data Platform::09 AWS Data Lake",
+      "start": "2026-11-14",
+      "last_day": "2026-11-18",
+      "daily_quota": 20,
+      "topics": [
+        {
+          "topic": "what a data lake on S3 is",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-14",
+          "status": "upcoming"
+        },
+        {
+          "topic": "lake layout: raw, curated and gold zones",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-14",
+          "status": "upcoming"
+        },
+        {
+          "topic": "partitioning by date in S3 keys",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-14",
+          "status": "upcoming"
+        },
+        {
+          "topic": "the Glue Data Catalog: databases, tables and partitions",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-14",
+          "status": "upcoming"
+        },
+        {
+          "topic": "Athena: SQL on files in S3",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-15",
+          "status": "upcoming"
+        },
+        {
+          "topic": "an Athena CREATE EXTERNAL TABLE over Parquet files",
+          "kind": "build",
+          "level": 1,
+          "day": "2026-11-15",
+          "status": "upcoming"
+        },
+        {
+          "topic": "what an Athena query scans, and what it costs",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-11-15",
+          "status": "upcoming"
+        },
+        {
+          "topic": "Glue crawlers, and when to define tables yourself",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-11-15",
+          "status": "upcoming"
+        },
+        {
+          "topic": "partition projection versus registered partitions",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-11-16",
+          "status": "upcoming"
+        },
+        {
+          "topic": "converting CSV to partitioned Parquet with an Athena CTAS",
+          "kind": "build",
+          "level": 2,
+          "day": "2026-11-16",
+          "status": "upcoming"
+        },
+        {
+          "topic": "table formats: why Iceberg, Delta and Hudi exist",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-11-16",
+          "status": "upcoming"
+        },
+        {
+          "topic": "Iceberg: snapshots, time travel and schema evolution",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-11-16",
+          "status": "upcoming"
+        },
+        {
+          "topic": "updates and deletes in a lake",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-11-17",
+          "status": "upcoming"
+        },
+        {
+          "topic": "Lake Formation permissions versus IAM on S3",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-11-17",
+          "status": "upcoming"
+        },
+        {
+          "topic": "S3 events: starting work when a file lands",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-11-17",
+          "status": "upcoming"
+        },
+        {
+          "topic": "getting data in: DMS, Firehose and plain uploads",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-11-17",
+          "status": "upcoming"
+        },
+        {
+          "topic": "an Athena query that scans the whole bucket",
+          "kind": "scenario",
+          "level": 4,
+          "day": "2026-11-18",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a lake full of tiny files",
+          "kind": "scenario",
+          "level": 4,
+          "day": "2026-11-18",
+          "status": "upcoming"
+        },
+        {
+          "topic": "Iceberg compaction and hidden partitioning",
+          "kind": "concept",
+          "level": 4,
+          "day": "2026-11-18",
+          "status": "upcoming"
+        }
+      ]
+    },
+    {
+      "deck": "Data Platform::10 Spark",
+      "start": "2026-11-19",
+      "last_day": "2026-11-24",
+      "daily_quota": 20,
+      "topics": [
+        {
+          "topic": "what Spark is for, and when pandas is enough",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-19",
+          "status": "upcoming"
+        },
+        {
+          "topic": "the driver, the executors and the cluster",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-19",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a first PySpark job: read Parquet, filter and write",
+          "kind": "build",
+          "level": 1,
+          "day": "2026-11-19",
+          "status": "upcoming"
+        },
+        {
+          "topic": "DataFrame basics: select, filter, withColumn, groupBy and agg",
+          "kind": "command",
+          "level": 1,
+          "day": "2026-11-19",
+          "status": "upcoming"
+        },
+        {
+          "topic": "lazy evaluation: transformations versus actions",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-20",
+          "status": "upcoming"
+        },
+        {
+          "topic": "partitions, and how Spark splits the work",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-11-20",
+          "status": "upcoming"
+        },
+        {
+          "topic": "narrow versus wide transformations, and shuffles",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-11-20",
+          "status": "upcoming"
+        },
+        {
+          "topic": "joins in PySpark, and broadcasting the small side",
+          "kind": "build",
+          "level": 2,
+          "day": "2026-11-20",
+          "status": "upcoming"
+        },
+        {
+          "topic": "the Spark UI: jobs, stages and tasks",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-11-21",
+          "status": "upcoming"
+        },
+        {
+          "topic": "the Catalyst optimizer and explain()",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-11-21",
+          "status": "upcoming"
+        },
+        {
+          "topic": "predicate pushdown and column pruning on Parquet",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-11-21",
+          "status": "upcoming"
+        },
+        {
+          "topic": "repartition versus coalesce, and output file sizes",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-11-21",
+          "status": "upcoming"
+        },
+        {
+          "topic": "writing partitioned output with partitionBy",
+          "kind": "build",
+          "level": 3,
+          "day": "2026-11-22",
+          "status": "upcoming"
+        },
+        {
+          "topic": "data skew, and how to spot it",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-11-22",
+          "status": "upcoming"
+        },
+        {
+          "topic": "memory, spills and out-of-memory errors",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-11-22",
+          "status": "upcoming"
+        },
+        {
+          "topic": "caching, and when it helps",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-11-22",
+          "status": "upcoming"
+        },
+        {
+          "topic": "EMR, EMR Serverless and Glue ETL jobs",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-11-23",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a job where one task runs for an hour and the rest for a minute",
+          "kind": "scenario",
+          "level": 4,
+          "day": "2026-11-23",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a job that fails with executors out of memory",
+          "kind": "scenario",
+          "level": 4,
+          "day": "2026-11-23",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a job on spot instances that lost an executor",
+          "kind": "scenario",
+          "level": 4,
+          "day": "2026-11-23",
+          "status": "upcoming"
+        },
+        {
+          "topic": "adaptive query execution",
+          "kind": "concept",
+          "level": 4,
+          "day": "2026-11-24",
+          "status": "upcoming"
+        }
+      ]
+    },
+    {
+      "deck": "Data Platform::11 Orchestration",
+      "start": "2026-11-25",
+      "last_day": "2026-11-29",
+      "daily_quota": 20,
+      "topics": [
+        {
+          "topic": "what an orchestrator is for, and why not cron",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-25",
+          "status": "upcoming"
+        },
+        {
+          "topic": "DAGs, tasks and operators",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-25",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a first Airflow DAG with two tasks and a dependency",
+          "kind": "build",
+          "level": 1,
+          "day": "2026-11-25",
+          "status": "upcoming"
+        },
+        {
+          "topic": "schedules and the logical date",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-25",
+          "status": "upcoming"
+        },
+        {
+          "topic": "the Airflow CLI: dags list, dags trigger, tasks test and tasks clear",
+          "kind": "command",
+          "level": 1,
+          "day": "2026-11-26",
+          "status": "upcoming"
+        },
+        {
+          "topic": "catchup and backfills",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-11-26",
+          "status": "upcoming"
+        },
+        {
+          "topic": "retries, timeouts and trigger rules",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-11-26",
+          "status": "upcoming"
+        },
+        {
+          "topic": "the TaskFlow API with @dag and @task",
+          "kind": "build",
+          "level": 2,
+          "day": "2026-11-26",
+          "status": "upcoming"
+        },
+        {
+          "topic": "XCom, and why not to pass data through it",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-11-27",
+          "status": "upcoming"
+        },
+        {
+          "topic": "sensors and deferrable operators",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-11-27",
+          "status": "upcoming"
+        },
+        {
+          "topic": "connections and variables",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-11-27",
+          "status": "upcoming"
+        },
+        {
+          "topic": "idempotent tasks",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-11-27",
+          "status": "upcoming"
+        },
+        {
+          "topic": "pools and concurrency limits",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-11-28",
+          "status": "upcoming"
+        },
+        {
+          "topic": "executors, the scheduler and the metadata database",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-11-28",
+          "status": "upcoming"
+        },
+        {
+          "topic": "MWAA: managed Airflow on AWS",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-11-28",
+          "status": "upcoming"
+        },
+        {
+          "topic": "Step Functions: state machines, retries and error handling",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-11-28",
+          "status": "upcoming"
+        },
+        {
+          "topic": "testing DAGs locally",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-11-29",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a DAG that loaded yesterday's data twice after a rerun",
+          "kind": "scenario",
+          "level": 4,
+          "day": "2026-11-29",
+          "status": "upcoming"
+        },
+        {
+          "topic": "heavy code at the top of a DAG file slowing the scheduler",
+          "kind": "scenario",
+          "level": 4,
+          "day": "2026-11-29",
+          "status": "upcoming"
+        },
+        {
+          "topic": "Airflow versus Step Functions versus EventBridge schedules",
+          "kind": "concept",
+          "level": 4,
+          "day": "2026-11-29",
+          "status": "upcoming"
+        }
+      ]
+    },
+    {
+      "deck": "Data Platform::12 Streaming",
+      "start": "2026-11-30",
+      "last_day": "2026-12-03",
+      "daily_quota": 20,
+      "topics": [
+        {
+          "topic": "events and streams, versus batch files",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-30",
+          "status": "upcoming"
+        },
+        {
+          "topic": "Kafka: topics, partitions and offsets",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-30",
+          "status": "upcoming"
+        },
+        {
+          "topic": "producers, consumers and consumer groups",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-30",
+          "status": "upcoming"
+        },
+        {
+          "topic": "Kinesis Data Streams and shards",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-30",
+          "status": "upcoming"
+        },
+        {
+          "topic": "ordering, and what a partition key decides",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-12-01",
+          "status": "upcoming"
+        },
+        {
+          "topic": "at-most-once, at-least-once and exactly-once delivery",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-12-01",
+          "status": "upcoming"
+        },
+        {
+          "topic": "Firehose: delivering a stream to S3",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-12-01",
+          "status": "upcoming"
+        },
+        {
+          "topic": "Lambda as a stream consumer",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-12-01",
+          "status": "upcoming"
+        },
+        {
+          "topic": "event time versus processing time",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-12-02",
+          "status": "upcoming"
+        },
+        {
+          "topic": "windows and aggregations on a stream",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-12-02",
+          "status": "upcoming"
+        },
+        {
+          "topic": "schemas on a stream, and a schema registry",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-12-02",
+          "status": "upcoming"
+        },
+        {
+          "topic": "consumer lag, and alerting on it",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-12-02",
+          "status": "upcoming"
+        },
+        {
+          "topic": "Kinesis versus MSK",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-12-03",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a poison message that blocks a consumer",
+          "kind": "scenario",
+          "level": 4,
+          "day": "2026-12-03",
+          "status": "upcoming"
+        },
+        {
+          "topic": "duplicate events after a consumer restart",
+          "kind": "scenario",
+          "level": 4,
+          "day": "2026-12-03",
+          "status": "upcoming"
+        },
+        {
+          "topic": "late events arriving after their window closed",
+          "kind": "scenario",
+          "level": 4,
+          "day": "2026-12-03",
+          "status": "upcoming"
+        }
+      ]
+    },
+    {
+      "deck": "Data Platform::13 Warehouse",
+      "start": "2026-12-04",
+      "last_day": "2026-12-07",
+      "daily_quota": 20,
+      "topics": [
+        {
+          "topic": "what a warehouse adds over a lake",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-12-04",
+          "status": "upcoming"
+        },
+        {
+          "topic": "Redshift: the leader node, compute nodes and slices",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-12-04",
+          "status": "upcoming"
+        },
+        {
+          "topic": "provisioned Redshift versus Redshift Serverless",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-12-04",
+          "status": "upcoming"
+        },
+        {
+          "topic": "loading data with COPY from S3",
+          "kind": "build",
+          "level": 1,
+          "day": "2026-12-04",
+          "status": "upcoming"
+        },
+        {
+          "topic": "distribution styles",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-12-05",
+          "status": "upcoming"
+        },
+        {
+          "topic": "sort keys and zone maps",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-12-05",
+          "status": "upcoming"
+        },
+        {
+          "topic": "vacuum and analyze",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-12-05",
+          "status": "upcoming"
+        },
+        {
+          "topic": "Redshift Spectrum: querying the lake",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-12-05",
+          "status": "upcoming"
+        },
+        {
+          "topic": "materialized views",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-12-06",
+          "status": "upcoming"
+        },
+        {
+          "topic": "workload management and concurrency scaling",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-12-06",
+          "status": "upcoming"
+        },
+        {
+          "topic": "dbt on a warehouse: environments and CI",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-12-06",
+          "status": "upcoming"
+        },
+        {
+          "topic": "semantic layers and metric definitions",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-12-06",
+          "status": "upcoming"
+        },
+        {
+          "topic": "serving BI tools, and reverse ETL",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-12-07",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a slow join between two large tables",
+          "kind": "scenario",
+          "level": 4,
+          "day": "2026-12-07",
+          "status": "upcoming"
+        },
+        {
+          "topic": "Redshift versus Athena versus Snowflake",
+          "kind": "concept",
+          "level": 4,
+          "day": "2026-12-07",
+          "status": "upcoming"
+        },
+        {
+          "topic": "keeping warehouse costs predictable",
+          "kind": "concept",
+          "level": 4,
+          "day": "2026-12-07",
+          "status": "upcoming"
+        }
+      ]
+    },
+    {
+      "deck": "Data Platform::14 Kubernetes & EKS",
+      "start": "2026-12-08",
+      "last_day": "2026-12-13",
+      "daily_quota": 20,
+      "topics": [
+        {
+          "topic": "what Kubernetes adds over running containers yourself",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-12-08",
+          "status": "upcoming"
+        },
+        {
+          "topic": "pods, nodes and the cluster",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-12-08",
+          "status": "upcoming"
+        },
+        {
+          "topic": "kubectl basics: get, describe and logs",
+          "kind": "command",
+          "level": 1,
+          "day": "2026-12-08",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a first Deployment manifest",
+          "kind": "build",
+          "level": 1,
+          "day": "2026-12-08",
+          "status": "upcoming"
+        },
+        {
+          "topic": "deployments and replicas",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-12-09",
+          "status": "upcoming"
+        },
+        {
+          "topic": "services: a stable address for a set of pods",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-12-09",
+          "status": "upcoming"
+        },
+        {
+          "topic": "kubectl apply, delete, exec and port-forward",
+          "kind": "command",
+          "level": 2,
+          "day": "2026-12-09",
+          "status": "upcoming"
+        },
+        {
+          "topic": "configmaps and secrets",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-12-09",
+          "status": "upcoming"
+        },
+        {
+          "topic": "namespaces, labels and selectors",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-12-10",
+          "status": "upcoming"
+        },
+        {
+          "topic": "jobs and cronjobs for batch work",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-12-10",
+          "status": "upcoming"
+        },
+        {
+          "topic": "resource requests and limits",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-12-10",
+          "status": "upcoming"
+        },
+        {
+          "topic": "liveness, readiness and startup probes",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-12-10",
+          "status": "upcoming"
+        },
+        {
+          "topic": "the control plane and the node components",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-12-11",
+          "status": "upcoming"
+        },
+        {
+          "topic": "rolling updates and rollbacks",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-12-11",
+          "status": "upcoming"
+        },
+        {
+          "topic": "persistent volumes and claims",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-12-11",
+          "status": "upcoming"
+        },
+        {
+          "topic": "EKS: managed node groups versus Fargate",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-12-11",
+          "status": "upcoming"
+        },
+        {
+          "topic": "IAM roles for service accounts",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-12-12",
+          "status": "upcoming"
+        },
+        {
+          "topic": "Helm charts",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-12-12",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a pod in CrashLoopBackOff",
+          "kind": "scenario",
+          "level": 4,
+          "day": "2026-12-12",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a pod stuck in Pending",
+          "kind": "scenario",
+          "level": 4,
+          "day": "2026-12-12",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a container killed with OOMKilled",
+          "kind": "scenario",
+          "level": 4,
+          "day": "2026-12-13",
+          "status": "upcoming"
+        },
+        {
+          "topic": "running Spark and Airflow on Kubernetes",
+          "kind": "concept",
+          "level": 4,
+          "day": "2026-12-13",
+          "status": "upcoming"
+        }
+      ]
+    },
+    {
+      "deck": "Data Platform::15 Platform Operations",
+      "start": "2026-12-14",
+      "last_day": "2026-12-17",
+      "daily_quota": 20,
+      "topics": [
+        {
+          "topic": "observability: logs, metrics and traces",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-12-14",
+          "status": "upcoming"
+        },
+        {
+          "topic": "alerts that page on symptoms, not causes",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-12-14",
+          "status": "upcoming"
+        },
+        {
+          "topic": "environments: development, staging and production",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-12-14",
+          "status": "upcoming"
+        },
+        {
+          "topic": "CI/CD for data: testing transformations before they ship",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-12-14",
+          "status": "upcoming"
+        },
+        {
+          "topic": "data quality tests inside the pipeline",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-12-15",
+          "status": "upcoming"
+        },
+        {
+          "topic": "data observability: freshness, volume and schema drift",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-12-15",
+          "status": "upcoming"
+        },
+        {
+          "topic": "PII, masking and column-level access",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-12-15",
+          "status": "upcoming"
+        },
+        {
+          "topic": "cost attribution with tags",
+          "kind": "concept",
+          "level": 2,
+          "day": "2026-12-15",
+          "status": "upcoming"
+        },
+        {
+          "topic": "incident response and postmortems",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-12-16",
+          "status": "upcoming"
+        },
+        {
+          "topic": "backups, RPO and RTO for data",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-12-16",
+          "status": "upcoming"
+        },
+        {
+          "topic": "multi-account AWS setups",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-12-16",
+          "status": "upcoming"
+        },
+        {
+          "topic": "governance and ownership of datasets",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-12-16",
+          "status": "upcoming"
+        },
+        {
+          "topic": "system design: an ingestion pipeline from an API to a dashboard",
+          "kind": "scenario",
+          "level": 4,
+          "day": "2026-12-17",
+          "status": "upcoming"
+        },
+        {
+          "topic": "system design: a lakehouse for a mid-size company",
+          "kind": "scenario",
+          "level": 4,
+          "day": "2026-12-17",
+          "status": "upcoming"
+        },
+        {
+          "topic": "system design: near-real-time events into a warehouse",
+          "kind": "scenario",
+          "level": 4,
+          "day": "2026-12-17",
+          "status": "upcoming"
+        },
+        {
+          "topic": "explaining a platform you built, the way an interviewer wants to hear it",
+          "kind": "scenario",
+          "level": 4,
+          "day": "2026-12-17",
+          "status": "upcoming"
+        }
+      ]
+    }
+  ]
+}

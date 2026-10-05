@@ -1,0 +1,74 @@
+{
+  "pipeline": "data-platform",
+  "name": "Data Platform",
+  "run_id": "37208024681",
+  "run_url": "https://github.com/PedroLFerraz/ankigen/actions/runs/37208024681",
+  "trigger": "schedule",
+  "scheduled_for": "2026-10-04T08:17:00Z",
+  "attempt": 1,
+  "conclusion": "success",
+  "curriculum_date": "2026-10-13",
+  "started_at": "2026-10-04T14:06:14Z",
+  "finished_at": "2026-10-04T14:09:35Z",
+  "artifact": "cards-2026-10-13",
+  "cards": {
+    "kept": 16,
+    "dropped": 1,
+    "by_deck": [
+      {
+        "deck": "Data Platform::03 Git",
+        "kept": 16,
+        "generated": 17
+      }
+    ]
+  },
+  "guide": null,
+  "llm_calls": 0,
+  "tokens": {
+    "prompt": 6929,
+    "completion": 5516
+  },
+  "stages": [
+    {
+      "stage": "ingest",
+      "status": "success",
+      "seconds": 0.385
+    },
+    {
+      "stage": "target",
+      "status": "success",
+      "seconds": 0.16
+    },
+    {
+      "stage": "generate",
+      "status": "success",
+      "seconds": 62.211
+    },
+    {
+      "stage": "verify",
+      "status": "success",
+      "seconds": 57.338
+    },
+    {
+      "stage": "dedup",
+      "status": "success",
+      "seconds": 3.337
+    },
+    {
+      "stage": "refill",
+      "status": "success",
+      "seconds": 30.493
+    },
+    {
+      "stage": "images",
+      "status": "success",
+      "seconds": 0.14
+    },
+    {
+      "stage": "export",
+      "status": "success",
+      "seconds": 0.024
+    }
+  ],
+  "error": null
+}

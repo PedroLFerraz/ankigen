@@ -1,0 +1,114 @@
+{
+  "pipeline": "data-platform",
+  "run_date": "2026-10-09",
+  "cards": [
+    {
+      "deck": "Data Platform::02 Networking",
+      "card_type": "detailed",
+      "front": "After a DNS change, `dig` shows the new IP, but your long-running Python service still sends requests to the old server. Why?",
+      "back": "It reuses open TCP connections, for example from a connection pool or keep-alive, that were made to the old IP.",
+      "topic": null,
+      "guide_ref": null,
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "Data Platform::02 Networking",
+      "card_type": "detailed",
+      "front": "Postgres on `db-host` listens only on `127.0.0.1:5432`. Reach it from your laptop without opening any new port on the server.",
+      "back": "`ssh -L 5432:localhost:5432 user@db-host`, then connect to `localhost:5432` on your laptop.",
+      "topic": null,
+      "guide_ref": null,
+      "picture": "drawn",
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    },
+    {
+      "deck": "Data Platform::02 Networking",
+      "card_type": "detailed",
+      "front": "You change an A record's IP and lower its TTL from 86400 to 60 in the same edit. Some clients keep using the old IP for hours. Why?",
+      "back": "Resolvers had cached the old record with the old 86400-second TTL. Lower the TTL first, wait out the old TTL, then change the IP.",
+      "topic": null,
+      "guide_ref": null,
+      "picture": "drawn",
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "Data Platform::02 Networking",
+      "card_type": "detailed",
+      "front": "Your AWS security group allows port 8080 from `192.168.1.20/32`, your laptop's IP at home. Your laptop still times out. Why?",
+      "back": "Allow your home's public IP instead. The server never sees `192.168.1.20`.",
+      "topic": null,
+      "guide_ref": null,
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "Data Platform::02 Networking",
+      "card_type": "detailed",
+      "front": "Inside a container, the app listens on `127.0.0.1:8000`. You ran `docker run -p 8000:8000`, yet `curl localhost:8000` on the host fails. Why?",
+      "back": "Bind the app to `0.0.0.0` inside the container.",
+      "topic": null,
+      "guide_ref": null,
+      "picture": null,
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    },
+    {
+      "deck": "Data Platform::02 Networking",
+      "card_type": "detailed",
+      "front": "`dig example.com` returns the new IP, but `getent hosts example.com` on the same machine returns the old one. What is the usual cause?",
+      "back": "An old entry for example.com in `/etc/hosts`.",
+      "topic": null,
+      "guide_ref": null,
+      "picture": null,
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    },
+    {
+      "deck": "Data Platform::02 Networking",
+      "card_type": "detailed",
+      "front": "A subnet's network ACL allows inbound TCP 8080 and outbound TCP 8080 only. Clients connecting to port 8080 time out. Why?",
+      "back": "Replies go to the client's random high source port, which the outbound rule blocks. Allow outbound traffic to ports 1024-65535.",
+      "topic": null,
+      "guide_ref": null,
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "Data Platform::02 Networking",
+      "card_type": "detailed",
+      "front": "You looked up api.example.com before you created its record, and got NXDOMAIN. Now the record exists, but lookups still fail for a while. Why?",
+      "back": "Resolvers cached the NXDOMAIN answer. They keep returning it until the negative-cache TTL from the zone's SOA record expires.",
+      "topic": null,
+      "guide_ref": null,
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "Data Platform::02 Networking",
+      "card_type": "detailed",
+      "front": "You moved a record to a new server and waited longer than the old TTL. Is it now safe to shut down the old server?",
+      "back": "Not yet. First check its logs or traffic and wait until requests actually stop.",
+      "topic": null,
+      "guide_ref": null,
+      "picture": null,
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    }
+  ]
+}

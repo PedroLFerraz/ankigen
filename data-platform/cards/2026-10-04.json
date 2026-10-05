@@ -1,0 +1,126 @@
+{
+  "pipeline": "data-platform",
+  "run_date": "2026-10-04",
+  "cards": [
+    {
+      "deck": "Data Platform::01 Linux",
+      "card_type": "detailed",
+      "front": "You own `data.csv` with mode `070` and you are in its group. `cat data.csv` gives Permission denied. Why?",
+      "back": "Only the owner bits (`---`) apply to you. The group's `rwx` is ignored.",
+      "topic": null,
+      "guide_ref": null,
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "Data Platform::01 Linux",
+      "card_type": "detailed",
+      "front": "Your crontab runs `backup.sh`, which calls `aws s3 cp`. It works in your terminal, but cron logs `aws: command not found`. Why?",
+      "back": "Cron's `PATH` is minimal, usually `/usr/bin:/bin`. `aws` lives elsewhere, such as `/usr/local/bin`. Use the full path, or set `PATH=` at the top of the crontab.",
+      "topic": null,
+      "guide_ref": null,
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "Data Platform::01 Linux",
+      "card_type": "detailed",
+      "front": "A directory `reports` has mode `r` but no `x` for you. You run `ls reports`, then `cat reports/q1.csv`. What happens?",
+      "back": "`ls` shows the names, with errors or `?` for details. `cat` fails with Permission denied, and so does `cd reports`.",
+      "topic": null,
+      "guide_ref": null,
+      "picture": "drawn",
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    },
+    {
+      "deck": "Data Platform::01 Linux",
+      "card_type": "detailed",
+      "front": "On Ubuntu, this crontab line fails with `source: not found`: `* * * * * source ~/venv/bin/activate && python job.py`. Why?",
+      "back": "Cron runs the line with `/bin/sh`, which is `dash` on Ubuntu and has no `source`. Set `SHELL=/bin/bash` in the crontab, or use `.`.",
+      "topic": null,
+      "guide_ref": null,
+      "picture": null,
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    },
+    {
+      "deck": "Data Platform::01 Linux",
+      "card_type": "detailed",
+      "front": "Your crontab has `job.sh 2>&1 >> /var/log/job.log`, but the error messages never appear in `job.log`. Why?",
+      "back": "Redirections apply left to right. `2>&1` copies stdout before stdout moves to the file, so errors still go to cron. Write `>> /var/log/job.log 2>&1`.",
+      "topic": null,
+      "guide_ref": null,
+      "picture": null,
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    },
+    {
+      "deck": "Data Platform::01 Linux",
+      "card_type": "detailed",
+      "front": "`old.log` is owned by root with mode `644`. It sits in your own directory, where you have `rwx`. Can you `rm old.log`?",
+      "back": "Yes. `rm` asks \"remove write-protected regular file?\", and answering `y` deletes it.",
+      "topic": null,
+      "guide_ref": null,
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "Data Platform::01 Linux",
+      "card_type": "detailed",
+      "front": "This crontab line never creates the file it should: `0 2 * * * tar czf /backup/db-$(date +%F).tgz /data`. Why?",
+      "back": "In a crontab line, `%` means newline. The command is cut at the first `%`. Escape it as `\\%F`.",
+      "topic": null,
+      "guide_ref": null,
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "Data Platform::01 Linux",
+      "card_type": "detailed",
+      "front": "Your Python job does `open('orders.csv')`, and `orders.csv` sits next to the script. It works when run from that folder, but fails from cron. Why?",
+      "back": "Cron runs the job with your home directory as the working directory, so the relative path points to `~/orders.csv`. Use absolute paths or `cd` first.",
+      "topic": null,
+      "guide_ref": null,
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "Data Platform::01 Linux",
+      "card_type": "detailed",
+      "front": "`deploy.sh` is a bash script owned by alice with mode `711`. When bob runs `./deploy.sh`, what happens?",
+      "back": "It fails with Permission denied. Bob needs `r` as well as `x` to run a script.",
+      "topic": null,
+      "guide_ref": null,
+      "picture": null,
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    },
+    {
+      "deck": "Data Platform::01 Linux",
+      "card_type": "detailed",
+      "front": "`/data/app/config.yml` has mode `644`, but alice still gets Permission denied reading it. Which command shows the directory that blocks her?",
+      "back": "`namei -l /data/app/config.yml`",
+      "topic": null,
+      "guide_ref": null,
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    }
+  ]
+}
