@@ -2,6 +2,8 @@ package com.pedrolopes.ankigen
 
 import android.app.Application
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
@@ -67,6 +69,9 @@ class AppModel(app: Application) : AndroidViewModel(app) {
     /** Where pipelines/ is read and saved; blank is the repository's default branch. */
     var codeBranch by mutableStateOf(prefs.getString("code_branch", null).orEmpty())
         private set
+    /** Where study guides are saved: a folder picked in Settings. */
+    var guideFolder by mutableStateOf(prefs.getString("guide_folder", null)?.let(Uri::parse))
+        private set
 
     val stack = mutableStateListOf<Screen>(Screen.Home)
     val screen get() = stack.last()
@@ -119,6 +124,49 @@ class AppModel(app: Application) : AndroidViewModel(app) {
         refreshHome()
     }
 
+    fun chooseGuideFolder(uri: Uri) {
+        // Kept across restarts; without this the grant ends with the process.
+        getApplication<Application>().contentResolver.takePersistableUriPermission(
+            uri, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
+        )
+        guideFolder = uri
+        prefs.edit { putString("guide_folder", uri.toString()) }
+        refreshHome()
+    }
+
+    fun folder(): GuideFolder? = guideFolder?.let { GuideFolder(getApplication(), it) }
+
+    fun saveGuide(pipeline: String, run: Run) = task { saveGuideNow(pipeline, run, auto = false) }
+
+    /**
+     * Downloads a run's study guide from its artifact into the guide folder.
+     * [auto] is the quiet pass over each pipeline's latest run: it says
+     * nothing when there is nothing to do.
+     */
+    private suspend fun saveGuideNow(pipeline: String, r: Run, auto: Boolean) {
+        val folder = folder()
+        val day = r.day
+        when {
+            folder == null -> if (!auto) message = "Choose a folder for study guides in Settings first."
+            token.isBlank() -> if (!auto) message = "Downloading a study guide needs the GitHub token in Settings."
+            !r.hasPdf || day == null -> if (!auto) message = "That run has no study guide PDF."
+            else -> {
+                val file = GuideFolder.fileName(pipeline, day)
+                if (io { folder.has(file) }) {
+                    if (!auto) message = "$file is already in ${folder.label}."
+                    return
+                }
+                val pdf = io { gh.artifactFile(r.runId!!, r.artifact!!, ".pdf") }
+                if (pdf == null) {
+                    if (!auto) message = "That run's files are gone: GitHub keeps them for 90 days."
+                    return
+                }
+                io { folder.write(file, pdf) }
+                message = "Saved $file to ${folder.label}."
+            }
+        }
+    }
+
     /** Runs [work] off the main thread, with the spinner on and any failure shown. */
     private fun task(work: suspend () -> Unit) {
         viewModelScope.launch {
@@ -156,6 +204,10 @@ class AppModel(app: Application) : AndroidViewModel(app) {
                 val (spec, error) = specOf(id, branch)
                 Pipeline(id, spec, error, latestOf(id))
             }
+        }
+        // Each pipeline's newest guide lands in the folder without asking.
+        pipelines.orEmpty().forEach { p ->
+            p.latest?.let { saveGuideNow(p.spec?.name ?: p.id, it, auto = true) }
         }
     }
 

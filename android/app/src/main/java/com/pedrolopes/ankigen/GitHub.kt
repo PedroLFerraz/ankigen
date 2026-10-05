@@ -5,6 +5,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
+import java.util.zip.ZipInputStream
 
 /**
  * The repository is the backend: pipelines/ on the default branch says what
@@ -100,6 +101,39 @@ class GitHub(private val repo: String, private val token: String) {
         call("POST", "/actions/workflows/$workflow/dispatches", JSONObject()
             .put("ref", branch)
             .put("inputs", JSONObject(inputs)))
+    }
+
+    /**
+     * The first file in a run's artifact whose name ends with [suffix], or null
+     * when the artifact or the file is gone (artifacts last 90 days). Needs a
+     * token even on a public repository.
+     */
+    fun artifactFile(runId: String, artifact: String, suffix: String): ByteArray? {
+        val list = JSONObject(call("GET", "/actions/runs/$runId/artifacts?name=$artifact")).getJSONArray("artifacts")
+        if (list.length() == 0) return null
+        val id = list.getJSONObject(0).getLong("id")
+        // GitHub answers with a redirect to storage that refuses our
+        // Authorization header, so follow it by hand, without the header.
+        val api = URL("https://api.github.com/repos/$repo/actions/artifacts/$id/zip").openConnection() as HttpURLConnection
+        val location = try {
+            api.instanceFollowRedirects = false
+            api.setRequestProperty("Authorization", "Bearer ${token.trim()}")
+            if (api.responseCode !in 300..399) throw Failure(api.responseCode, explain(api.responseCode, "could not download $artifact"))
+            api.getHeaderField("Location")
+        } finally {
+            api.disconnect()
+        }
+        val blob = URL(location).openConnection() as HttpURLConnection
+        try {
+            ZipInputStream(blob.inputStream).use { zip ->
+                generateSequence { zip.nextEntry }.forEach { entry ->
+                    if (entry.name.endsWith(suffix)) return zip.readBytes()
+                }
+            }
+        } finally {
+            blob.disconnect()
+        }
+        return null
     }
 
     /** The workflow's latest runs, newest first. */

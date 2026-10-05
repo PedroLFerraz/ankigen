@@ -4,7 +4,9 @@ import org.json.JSONArray
 import org.json.JSONObject
 import org.snakeyaml.engine.v2.api.Load
 import org.snakeyaml.engine.v2.api.LoadSettings
+import java.time.LocalDate
 import java.time.ZoneId
+import java.time.temporal.ChronoUnit
 
 /**
  * pipelines/<id>/pipeline.yaml. Its fields are fixed (the schema forbids any
@@ -94,6 +96,8 @@ class Run(val json: JSONObject) {
     val attempt = json.optInt("attempt", 1)
     val finishedAt = json.str("finished_at")
     val url = json.str("run_url")
+    val runId = json.str("run_id")
+    val artifact = json.str("artifact")
     val error = json.str("error")
     val llmCalls = json.optInt("llm_calls")
     private val cards = json.obj("cards")
@@ -101,6 +105,7 @@ class Run(val json: JSONObject) {
     val dropped = cards?.optInt("dropped") ?: 0
     val byDeck = cards?.objects("by_deck").orEmpty()
     val guide = json.obj("guide")
+    val hasPdf get() = guide?.optBoolean("pdf") == true && runId != null && artifact != null
     val stages = json.objects("stages")
 }
 
@@ -113,13 +118,36 @@ class Topic(json: JSONObject) {
 
 class DeckPlan(json: JSONObject) {
     val deck = json.optString("deck")
+    val start = json.str("start")?.let(LocalDate::parse)
+    val lastDay = json.str("last_day")?.let(LocalDate::parse)
     val quota = json.optInt("daily_quota")
     val topics = json.objects("topics").map(::Topic)
 }
 
+/**
+ * The curriculum is a queue, not a calendar: each run writes the day after
+ * the last one written, so a run by hand moves the whole plan forward and
+ * its dates stop being the days they are written on. Days are numbered from
+ * the first deck's start instead.
+ */
 class Curriculum(json: JSONObject) {
-    val nextDay = json.str("next_day")
+    val nextDay = json.str("next_day")?.let(LocalDate::parse)
     val decks = json.objects("decks").map(::DeckPlan)
+    private val first = decks.mapNotNull { it.start }.minOrNull()
+    val totalDays = decks.mapNotNull { it.lastDay }.maxOrNull()?.let(::number)
+
+    /** Day 1 is the first deck's start; null without dates, or for a day before the plan began. */
+    fun number(day: LocalDate?): Int? =
+        if (day == null || first == null) null
+        else (ChronoUnit.DAYS.between(first, day).toInt() + 1).takeIf { it >= 1 }
+
+    fun number(day: String?): Int? = number(day?.let { runCatching { LocalDate.parse(it) }.getOrNull() })
+
+    /** How many runs from now [day] is written: 0 for the next run. */
+    fun runsUntil(day: LocalDate): Long? = nextDay?.let { ChronoUnit.DAYS.between(it, day) }
+
+    fun topicsOn(day: LocalDate?): List<Topic> =
+        decks.flatMap { d -> d.topics.filter { it.day == day?.toString() } }
 }
 
 class Card(json: JSONObject) {

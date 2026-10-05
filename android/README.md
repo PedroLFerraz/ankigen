@@ -9,6 +9,18 @@ backend.
 | Latest run, past runs, each day's cards, the curriculum | the `ankigen-status` branch, written by every run |
 | Setup: name, on/off, cron, time zone, guide, push, call budget | commits `pipeline.yaml` (CI validates it) |
 | Run the next day now | dispatches `run-pipeline.yml` |
+| Study guide PDFs, saved to a folder you pick | each run's artifact (needs the token) |
+
+**Where the curriculum is.** Each run writes the day after the last one
+written, whenever it runs, so a run by hand pulls the whole plan forward and
+the dates in `profile.yaml` stop matching the days they are written on. The
+app numbers the days instead: "next run writes day 15 of 82 · 9 days ahead of
+the plan", and beside each day still to come, when the schedule will write it.
+
+**Study guides.** In Settings, choose a folder (on the phone, or in a cloud
+app such as Drive). Each pipeline's newest guide is saved there as
+`<pipeline> <curriculum day>.pdf` whenever the app reloads; an older run's
+guide is saved from its page. GitHub keeps a run's files for 90 days.
 
 ## Install
 

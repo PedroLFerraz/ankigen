@@ -138,3 +138,8 @@ fun local(iso: String?): String = iso?.let {
 } ?: "—"
 
 fun local(time: ZonedDateTime): String = When.format(time.withZoneSameInstant(ZoneId.systemDefault()))
+
+private val Day = DateTimeFormatter.ofPattern("EEE d MMM")
+
+/** The phone's date for a moment, e.g. "Tue 6 Oct". */
+fun localDay(time: ZonedDateTime): String = Day.format(time.withZoneSameInstant(ZoneId.systemDefault()))

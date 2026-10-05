@@ -1,6 +1,8 @@
 package com.pedrolopes.ankigen
 
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -42,7 +44,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import java.time.LocalDate
 import java.time.ZoneId
+import java.time.temporal.ChronoUnit
 import java.time.ZonedDateTime
 
 private val Gutter = 16.dp
@@ -66,7 +70,7 @@ fun AppScreen(model: AppModel = viewModel()) {
                 Screen.Home -> HomeScreen(model)
                 Screen.Settings -> SettingsScreen(model)
                 is Screen.Pipeline -> PipelineScreen(model, screen.id)
-                is Screen.RunFile -> RunFileScreen(model, screen.file)
+                is Screen.RunFile -> RunFileScreen(model, screen.id, screen.file)
             }
         }
         SnackbarHost(snackbar) { data ->
@@ -136,7 +140,10 @@ private fun HomeScreen(model: AppModel) {
         title("Pipelines", kicker = model.repo)
         when {
             pipelines == null -> if (!model.busy) note("Could not read the repository. Check Settings, then Reload.")
-            pipelines.isEmpty() -> note("No pipelines/ folder on the default branch yet.")
+            pipelines.isEmpty() -> note(
+                "No pipelines/ folder on ${model.codeBranch.ifBlank { "the default branch" }}. " +
+                    "If Settings names a code branch, check it still exists.",
+            )
         }
         items(pipelines.orEmpty(), key = { it.id }) { p ->
             PipelineRow(p) { model.open(Screen.Pipeline(p.id)) }
@@ -183,6 +190,7 @@ private fun PipelineRow(p: Pipeline, onClick: () -> Unit) {
 private fun PipelineScreen(model: AppModel, id: String) {
     val d = model.detail?.takeIf { it.id == id }
     var tab by rememberSaveable(id) { mutableIntStateOf(0) }
+    var showWritten by rememberSaveable(id) { mutableStateOf(false) }
     val uri = LocalUriHandler.current
 
     LazyColumn(
@@ -199,6 +207,7 @@ private fun PipelineScreen(model: AppModel, id: String) {
                 d.spec?.let { spec ->
                     Fact("Schedule", if (spec.enabled) "${spec.cron} · ${spec.timezone}" else "off")
                     if (spec.enabled) Fact("Next run", nextRun(spec))
+                    d.curriculum?.let { c -> where(c)?.let { Fact("Curriculum", it, Cyan) } }
                     Fact("Makes", listOfNotNull(
                         "cards",
                         "study guide".takeIf { spec.guidePdf },
@@ -222,8 +231,8 @@ private fun PipelineScreen(model: AppModel, id: String) {
         }
         item { Tabs(listOf("Latest", "Curriculum", "Runs", "Setup"), tab, { tab = it }) }
         when (tab) {
-            0 -> latest(d)
-            1 -> curriculum(d.curriculum)
+            0 -> latest(d) { model.saveGuide(d.spec?.name ?: id, it) }
+            1 -> curriculum(d.curriculum, d.spec, showWritten) { showWritten = it }
             2 -> runs(d.runFiles) { model.open(Screen.RunFile(id, it)) }
             else -> item {
                 if (d.spec != null) SpecEditor(d.spec) { model.saveSpec(id, it) }
@@ -233,13 +242,13 @@ private fun PipelineScreen(model: AppModel, id: String) {
     }
 }
 
-private fun LazyListScope.latest(d: Detail) {
+private fun LazyListScope.latest(d: Detail, onSaveGuide: (Run) -> Unit) {
     val run = d.latest
     if (run == null) {
         note("No run recorded yet. Runs are recorded on the status branch from the first tick after the pipelines change is merged.")
         return
     }
-    item { RunSummary(run) }
+    item { RunSummary(run, d.curriculum) { onSaveGuide(run) } }
     cards(run, d.latestCards)
 }
 
@@ -253,7 +262,7 @@ private fun LazyListScope.cards(run: Run, cards: List<Card>) {
 }
 
 @Composable
-private fun RunSummary(run: Run) {
+private fun RunSummary(run: Run, curriculum: Curriculum?, onSaveGuide: () -> Unit) {
     val uri = LocalUriHandler.current
     Slip(rule = if (run.ok) Cyan else Magenta) {
         Kicker(
@@ -261,7 +270,13 @@ private fun RunSummary(run: Run) {
                 if (run.attempt > 1) " · attempt ${run.attempt}" else "",
             color = if (run.ok) Cyan else Magenta,
         )
-        Text(run.day?.let { "Curriculum day $it" } ?: "No curriculum day", style = MaterialTheme.typography.titleMedium)
+        Text(
+            when (val n = curriculum?.number(run.day)) {
+                null -> run.day?.let { "Curriculum day $it" } ?: "No curriculum day"
+                else -> "Day $n · ${run.day}"
+            },
+            style = MaterialTheme.typography.titleMedium,
+        )
         Fact("Finished", local(run.finishedAt))
         Fact("Cards", "${run.kept} kept, ${run.dropped} dropped")
         run.byDeck.forEach { deck ->
@@ -280,6 +295,9 @@ private fun RunSummary(run: Run) {
             })
         }
         run.error?.let { Text(it, color = Magenta, style = MaterialTheme.typography.bodyMedium) }
+        if (run.hasPdf) {
+            SecondaryButton("Save the study guide PDF", onSaveGuide, Modifier.fillMaxWidth().padding(top = 4.dp))
+        }
         run.url?.let { url ->
             Text("Open the run on GitHub ›", Modifier.clickable { uri.openUri(url) }, Cyan,
                 style = MaterialTheme.typography.labelLarge)
@@ -302,18 +320,89 @@ private fun CardSlip(card: Card) {
     }
 }
 
-private fun LazyListScope.curriculum(c: Curriculum?) {
+/** "next run writes day 9 of 46 · 8 days ahead of the plan", or null without dates. */
+private fun where(c: Curriculum): String? {
+    val next = c.nextDay ?: return null
+    val n = c.number(next) ?: return null
+    val total = c.totalDays
+    if (total != null && n > total) return "every day is written"
+    val ahead = ChronoUnit.DAYS.between(LocalDate.now(), next)
+    return "next run writes day $n of $total" + when {
+        ahead == 1L -> " · 1 day ahead of the plan"
+        ahead > 1 -> " · $ahead days ahead of the plan"
+        ahead == -1L -> " · 1 day behind the plan"
+        ahead < -1 -> " · ${-ahead} days behind the plan"
+        else -> ""
+    }
+}
+
+/** When the next [count] runs happen, if the schedule writes one day each. */
+private fun runTimes(spec: Spec?, count: Int): List<ZonedDateTime> {
+    if (spec == null || !spec.enabled || count <= 0) return emptyList()
+    val cron = runCatching { Cron(spec.cron) }.getOrNull() ?: return emptyList()
+    val zone = ZoneId.of(spec.timezone)
+    val times = mutableListOf<ZonedDateTime>()
+    var t = ZonedDateTime.now()
+    repeat(count) {
+        t = cron.next(t, zone) ?: return times
+        times += t
+    }
+    return times
+}
+
+private fun LazyListScope.curriculum(
+    c: Curriculum?,
+    spec: Spec?,
+    showWritten: Boolean,
+    onShowWritten: (Boolean) -> Unit,
+) {
     if (c == null) {
         note("The curriculum shows after the first recorded run.")
         return
     }
-    c.nextDay?.let { item { Fact("Next day", it, Cyan) } }
+    val next = c.nextDay
+    val lastDay = c.decks.mapNotNull { it.lastDay }.maxOrNull()
+    val runs = if (lastDay != null) (c.runsUntil(lastDay) ?: 0).toInt() + 1 else 0
+    val times = runTimes(spec, runs)
+    fun whenWritten(day: LocalDate): String? {
+        val k = c.runsUntil(day)?.toInt() ?: return null
+        val time = times.getOrNull(k) ?: return if (spec?.enabled == false) "schedule off" else null
+        return (if (k == 0) "next run, " else "") + localDay(time)
+    }
+
+    item {
+        Slip(rule = Cyan) {
+            Kicker("Where it is", color = Cyan)
+            Text(
+                where(c)?.replaceFirstChar(Char::uppercase) ?: "No dated days.",
+                style = MaterialTheme.typography.titleSmall,
+            )
+            if (next != null) {
+                whenWritten(next)?.let { Text("Written $it:", style = MaterialTheme.typography.bodyMedium) }
+                c.topicsOn(next).forEach {
+                    Text("· ${it.topic}", style = MaterialTheme.typography.bodyMedium, color = ink(0.7f))
+                }
+            }
+            Text(
+                "Each run writes the next day whenever it runs, so a run by hand pulls the plan forward. " +
+                    "Days are numbered; the plan's dates only say where it started.",
+                style = MaterialTheme.typography.bodySmall, color = ink(0.55f),
+            )
+        }
+    }
+    item {
+        Text(
+            if (showWritten) "Hide written days" else "Show written days",
+            Modifier.clickable { onShowWritten(!showWritten) }.padding(vertical = 4.dp),
+            Cyan, style = MaterialTheme.typography.labelLarge,
+        )
+    }
     c.decks.forEach { deck ->
+        val done = deck.topics.count { it.status == "done" }
         item(key = "deck-${deck.deck}") {
-            val done = deck.topics.count { it.status == "done" }
             Column(Modifier.padding(top = 14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(deck.deck.substringAfter("::"), style = MaterialTheme.typography.titleMedium)
-                Kicker("$done of ${deck.topics.size} topics · ${deck.quota} cards a day")
+                Kicker("$done of ${deck.topics.size} topics written · ${deck.quota} cards a day")
                 LinearProgressIndicator(
                     progress = { if (deck.topics.isEmpty()) 0f else done.toFloat() / deck.topics.size },
                     modifier = Modifier.fillMaxWidth(), color = Cyan, trackColor = Divider,
@@ -322,9 +411,25 @@ private fun LazyListScope.curriculum(c: Curriculum?) {
             }
         }
         deck.topics.groupBy { it.day }.forEach { (day, topics) ->
+            val written = topics.all { it.status == "done" }
+            if (written && !showWritten) return@forEach
             item(key = "${deck.deck}-$day") {
+                val date = day?.let(LocalDate::parse)
                 Row(Modifier.fillMaxWidth().padding(top = 4.dp)) {
-                    Kicker(day ?: "rotating", Modifier.width(84.dp).padding(top = 3.dp))
+                    Column(Modifier.width(96.dp).padding(top = 2.dp)) {
+                        Kicker(
+                            c.number(date)?.let { "Day $it" } ?: "rotating",
+                            color = if (topics.any { it.status == "next" }) Cyan else ink(0.5f),
+                        )
+                        Text(
+                            when {
+                                date == null -> ""
+                                written -> "written"
+                                else -> whenWritten(date).orEmpty()
+                            },
+                            style = MaterialTheme.typography.bodySmall, color = ink(0.5f),
+                        )
+                    }
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                         topics.forEach { t ->
                             Text(
@@ -422,7 +527,7 @@ private fun Toggle(label: String, checked: Boolean, onChange: (Boolean) -> Unit)
 // ------------------------------------------------------------ one past run
 
 @Composable
-private fun RunFileScreen(model: AppModel, file: String) {
+private fun RunFileScreen(model: AppModel, id: String, file: String) {
     val view = model.runView
     LazyColumn(
         contentPadding = PaddingValues(horizontal = Gutter, vertical = 4.dp),
@@ -434,7 +539,8 @@ private fun RunFileScreen(model: AppModel, file: String) {
             if (!model.busy) note("Could not load this run.")
             return@LazyColumn
         }
-        item { RunSummary(run) }
+        val known = model.detail?.takeIf { it.id == id }
+        item { RunSummary(run, known?.curriculum) { model.saveGuide(known?.spec?.name ?: id, run) } }
         cards(run, view.second)
     }
 }
@@ -468,5 +574,21 @@ private fun SettingsScreen(model: AppModel) {
             label = { Text("Code branch") },
             supportingText = { Text("Where pipelines/ is read and saved. Blank: the default branch.") })
         PrimaryButton("Save", { model.saveSettings(repo, token, branch, code) }, Modifier.fillMaxWidth())
+
+        Rule(Modifier.padding(top = 12.dp))
+        val pick = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+            uri?.let(model::chooseGuideFolder)
+        }
+        Text("Study guides", style = MaterialTheme.typography.titleMedium)
+        Text(
+            model.folder()?.let {
+                "Saved to ${it.label}. Each pipeline's newest guide is saved when the app reloads; older ones from a run's page."
+            } ?: "Choose a folder, on the phone or in a cloud app like Drive, and each run's PDF is saved there. Needs the token.",
+            style = MaterialTheme.typography.bodyMedium, color = ink(0.62f),
+        )
+        SecondaryButton(
+            if (model.guideFolder == null) "Choose a folder" else "Change the folder",
+            { pick.launch(null) }, Modifier.fillMaxWidth(),
+        )
     }
 }
