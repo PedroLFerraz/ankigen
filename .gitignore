@@ -41,6 +41,7 @@ web/dist/
 android/build/
 android/app/build/
 android/.gradle/
+android/.kotlin/
 android/local.properties
 
 # Python build output
