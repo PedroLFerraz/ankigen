@@ -1,5 +1,5 @@
 {
-  "next_day": "2026-10-16",
+  "next_day": "2026-10-17",
   "decks": [
     {
       "deck": "Data Platform::01 Linux",
@@ -652,56 +652,56 @@
           "kind": "concept",
           "level": 2,
           "day": "2026-10-16",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "schema on read versus schema on write",
           "kind": "concept",
           "level": 2,
           "day": "2026-10-16",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "incremental versus full loads, and watermarks",
           "kind": "concept",
           "level": 2,
           "day": "2026-10-16",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "change data capture",
           "kind": "concept",
           "level": 2,
           "day": "2026-10-16",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "orchestration: dependencies, retries and state",
           "kind": "concept",
           "level": 2,
           "day": "2026-10-17",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "idempotency: why reruns must be safe",
           "kind": "concept",
           "level": 3,
           "day": "2026-10-17",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "backfills, and what makes them cheap or expensive",
           "kind": "concept",
           "level": 3,
           "day": "2026-10-17",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "data quality checks: freshness, completeness and uniqueness",
           "kind": "concept",
           "level": 3,
           "day": "2026-10-17",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "lineage and data catalogues",
