@@ -16,33 +16,56 @@ import kotlin.concurrent.thread
 /**
  * The folder picked in Settings for study guides, reached through the
  * Storage Access Framework: any folder on the phone, or one a cloud app
- * offers (Drive, Dropbox), with no storage permission.
+ * offers (Drive, Dropbox), with no storage permission. Each pipeline's
+ * guides go in a folder of its own inside it ([folder]).
  */
-class GuideFolder(private val context: Context, private val tree: Uri) {
-    private val treeId = DocumentsContract.getTreeDocumentId(tree)
-
+class GuideFolder(
+    private val context: Context,
+    private val tree: Uri,
+    private val docId: String = DocumentsContract.getTreeDocumentId(tree),
     /** "primary:Documents/AnkiGen" reads as "Documents/AnkiGen". */
-    val label: String = treeId.substringAfter(':').ifBlank { treeId }
+    val label: String = docId.substringAfter(':').ifBlank { docId },
+) {
+    private val uri get() = DocumentsContract.buildDocumentUriUsingTree(tree, docId)
 
-    /** The files in the folder, by name. */
-    fun files(): Map<String, Uri> {
-        val children = DocumentsContract.buildChildDocumentsUriUsingTree(tree, treeId)
-        val found = mutableMapOf<String, Uri>()
+    private class Child(val name: String, val id: String, val isFolder: Boolean)
+
+    private fun children(): List<Child> {
+        val found = mutableListOf<Child>()
         context.contentResolver.query(
-            children,
-            arrayOf(DocumentsContract.Document.COLUMN_DISPLAY_NAME, DocumentsContract.Document.COLUMN_DOCUMENT_ID),
+            DocumentsContract.buildChildDocumentsUriUsingTree(tree, docId),
+            arrayOf(
+                DocumentsContract.Document.COLUMN_DISPLAY_NAME,
+                DocumentsContract.Document.COLUMN_DOCUMENT_ID,
+                DocumentsContract.Document.COLUMN_MIME_TYPE,
+            ),
             null, null, null,
         )?.use { rows ->
             while (rows.moveToNext()) {
-                found[rows.getString(0)] = DocumentsContract.buildDocumentUriUsingTree(tree, rows.getString(1))
+                found += Child(rows.getString(0), rows.getString(1),
+                    rows.getString(2) == DocumentsContract.Document.MIME_TYPE_DIR)
             }
         }
         return found
     }
 
+    /** The files in the folder, by name. */
+    fun files(): Map<String, Uri> = children().filterNot { it.isFolder }
+        .associate { it.name to DocumentsContract.buildDocumentUriUsingTree(tree, it.id) }
+
+    /** The folder [name] inside this one; made when [create], else null when it is not there. */
+    fun folder(name: String, create: Boolean): GuideFolder? {
+        val clean = name.replace('/', '-').trim().ifBlank { "pipeline" }
+        val id = children().firstOrNull { it.isFolder && it.name == clean }?.id
+            ?: if (!create) return null
+            else DocumentsContract.createDocument(
+                context.contentResolver, uri, DocumentsContract.Document.MIME_TYPE_DIR, clean,
+            )?.let(DocumentsContract::getDocumentId) ?: error("Could not create $clean in $label.")
+        return GuideFolder(context, tree, id, "$label/$clean")
+    }
+
     fun write(name: String, bytes: ByteArray): Uri {
-        val parent = DocumentsContract.buildDocumentUriUsingTree(tree, treeId)
-        val doc = DocumentsContract.createDocument(context.contentResolver, parent, "application/pdf", name)
+        val doc = DocumentsContract.createDocument(context.contentResolver, uri, "application/pdf", name)
             ?: error("Could not create $name in $label.")
         context.contentResolver.openOutputStream(doc)?.use { it.write(bytes) }
             ?: error("Could not write $name in $label.")
@@ -60,7 +83,8 @@ class GuideFolder(private val context: Context, private val tree: Uri) {
  * [GuideJob] in the background. Reads the settings AppModel saves.
  */
 object Guides {
-    private const val SEEN = "guides_seen"
+    // _2: guides moved into a folder per pipeline, so every one is saved again there.
+    private const val SEEN = "guides_seen_2"
 
     fun prefs(context: Context) = context.getSharedPreferences("ankigen", Context.MODE_PRIVATE)
 
@@ -90,8 +114,9 @@ object Guides {
         val branch = statusBranch(context)
         val seen = prefs.getStringSet(SEEN, null).orEmpty().toMutableSet()
         val saved = mutableListOf<String>()
+        // Each pipeline's folder, and the guides already in it.
+        val inside = mutableMapOf<String, Pair<GuideFolder?, Set<String>>>()
         try {
-            val present = folder.files().keys
             for (id in gh.list("", branch, dirs = true)) {
                 for (file in gh.list("$id/runs", branch, dirs = false)) {
                     val key = "$id/$file"
@@ -99,12 +124,18 @@ object Guides {
                     val run = gh.text("$id/runs/$file", branch)?.let { Run(JSONObject(it)) }
                     val day = run?.day
                     if (run != null && run.hasPdf && day != null) {
-                        val name = GuideFolder.fileName(run.name ?: id, day)
+                        val pipeline = run.name ?: id
+                        val name = GuideFolder.fileName(pipeline, day)
+                        val (sub, present) = inside.getOrPut(pipeline) {
+                            folder.folder(pipeline, create = false).let { it to it?.files()?.keys.orEmpty() }
+                        }
                         if (name !in present) {
                             // Null when GitHub no longer has the run's files.
                             gh.artifactFile(run.runId!!, run.artifact!!, ".pdf")?.let {
-                                folder.write(name, it)
-                                saved += name
+                                val target = sub ?: folder.folder(pipeline, create = true)!!
+                                inside[pipeline] = target to present
+                                target.write(name, it)
+                                saved += "$pipeline/$name"
                             }
                         }
                     }
@@ -121,10 +152,11 @@ object Guides {
     @Synchronized
     fun fetch(context: Context, pipeline: String, run: Run): Uri? {
         val folder = folder(context) ?: return null
-        val name = GuideFolder.fileName(run.name ?: pipeline, run.day ?: return null)
-        folder.files()[name]?.let { return it }
+        val name = run.name ?: pipeline
+        val file = GuideFolder.fileName(name, run.day ?: return null)
+        folder.folder(name, create = false)?.files()?.get(file)?.let { return it }
         val pdf = github(context).artifactFile(run.runId ?: return null, run.artifact ?: return null, ".pdf")
-        return pdf?.let { folder.write(name, it) }
+        return pdf?.let { folder.folder(name, create = true)!!.write(file, it) }
     }
 }
 

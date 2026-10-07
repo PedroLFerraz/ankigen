@@ -159,7 +159,9 @@ class AppModel(app: Application) : AndroidViewModel(app) {
     /** Saves the guides the folder is missing; quiet when there are none. */
     private suspend fun syncGuides() {
         val saved = io { Guides.sync(getApplication()) }
-        if (saved.isNotEmpty()) message = "Saved ${saved.joinToString()} to ${folder()?.label}."
+        if (saved.isNotEmpty()) {
+            message = "Saved ${saved.singleOrNull() ?: "${saved.size} study guides"} to ${folder()?.label}."
+        }
     }
 
     /** Opens a run's study guide, saving it to the folder first when it is not there. */

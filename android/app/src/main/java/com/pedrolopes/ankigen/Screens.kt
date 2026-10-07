@@ -631,8 +631,8 @@ private fun SettingsScreen(model: AppModel) {
         Text("Study guides", style = MaterialTheme.typography.titleMedium)
         Text(
             model.folder()?.let {
-                "Saved to ${it.label}: every guide, a few times a day in the background and whenever the app reloads. Open any day's from the Runs tab."
-            } ?: "Choose a folder, on the phone or in a cloud app like Drive, and every run's PDF is saved there, in the background too. Needs the token.",
+                "Saved to ${it.label}, in a folder per pipeline: every guide, a few times a day in the background and whenever the app reloads. Open any day's from the Runs tab."
+            } ?: "Choose a folder, on the phone or in a cloud app like Drive, and every run's PDF is saved there, in a folder per pipeline, in the background too. Needs the token.",
             style = MaterialTheme.typography.bodyMedium, color = ink(0.62f),
         )
         SecondaryButton(

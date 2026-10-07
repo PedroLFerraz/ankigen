@@ -26,9 +26,10 @@ the home screen works the same way: describe the subject and Claude plans
 every deck. Uses the Claude subscription, about a minute a round.
 
 **Study guides.** In Settings, choose a folder (on the phone, or in a cloud
-app such as Drive). Every guide is saved there as `<pipeline> <curriculum
-day>.pdf`: every 6 hours in the background, and whenever the app reloads. A
-guide deleted from the folder is not saved again. Any day's guide opens from
+app such as Drive). Every guide is saved there, in a folder per pipeline, as
+`<pipeline>/<pipeline> <curriculum day>.pdf`: every 6 hours in the
+background, and whenever the app reloads. A guide deleted from its folder is
+not saved again. Any day's guide opens from
 the Runs tab, and is saved again then if it is missing. GitHub keeps a
 run's files for 90 days.
 
