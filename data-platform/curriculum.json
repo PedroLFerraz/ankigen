@@ -1,5 +1,5 @@
 {
-  "next_day": "2026-10-17",
+  "next_day": "2026-10-18",
   "decks": [
     {
       "deck": "Data Platform::01 Linux",
@@ -680,56 +680,56 @@
           "kind": "concept",
           "level": 2,
           "day": "2026-10-17",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "idempotency: why reruns must be safe",
           "kind": "concept",
           "level": 3,
           "day": "2026-10-17",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "backfills, and what makes them cheap or expensive",
           "kind": "concept",
           "level": 3,
           "day": "2026-10-17",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "data quality checks: freshness, completeness and uniqueness",
           "kind": "concept",
           "level": 3,
           "day": "2026-10-17",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "lineage and data catalogues",
           "kind": "concept",
           "level": 3,
           "day": "2026-10-18",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "late-arriving data",
           "kind": "concept",
           "level": 3,
           "day": "2026-10-18",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "a daily job that ran twice and doubled a table",
           "kind": "scenario",
           "level": 4,
           "day": "2026-10-18",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "a query on object storage that costs far more than expected",
           "kind": "scenario",
           "level": 4,
           "day": "2026-10-18",
-          "status": "upcoming"
+          "status": "next"
         }
       ]
     },
