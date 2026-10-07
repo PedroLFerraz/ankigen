@@ -13,8 +13,8 @@ import java.util.zip.ZipInputStream
  * call blocks, so callers run it off the main thread.
  *
  * A public repository reads without a token (60 requests an hour); saving a
- * pipeline and "Run now" need a fine-grained token with Contents and Actions
- * set to read and write.
+ * pipeline, "Run now" and asking Claude for a plan change need a fine-grained
+ * token with Contents and Actions set to read and write.
  */
 class GitHub(private val repo: String, private val token: String) {
 
@@ -95,6 +95,23 @@ class GitHub(private val repo: String, private val token: String) {
             .put("content", Base64.encodeToString(text.toByteArray(), Base64.NO_WRAP))
             .put("sha", sha)
             .put("branch", branch))
+    }
+
+    /** The branches whose names start with [prefix], e.g. "plan/". */
+    fun branches(prefix: String): List<String> {
+        val refs = JSONArray(call("GET", "/git/matching-refs/heads/$prefix"))
+        return (0 until refs.length()).map { refs.getJSONObject(it).getString("ref").removePrefix("refs/heads/") }
+    }
+
+    /** What [head] has that [base] does not: its commits and changed files. */
+    fun compare(base: String, head: String): JSONObject = JSONObject(call("GET", "/compare/$base...$head"))
+
+    fun merge(base: String, head: String, message: String) {
+        call("POST", "/merges", JSONObject().put("base", base).put("head", head).put("commit_message", message))
+    }
+
+    fun deleteBranch(name: String) {
+        call("DELETE", "/git/refs/heads/$name")
     }
 
     fun dispatch(workflow: String, branch: String, inputs: Map<String, String>) {

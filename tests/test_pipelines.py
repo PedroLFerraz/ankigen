@@ -316,6 +316,27 @@ def test_a_run_is_recorded_for_the_tick_and_the_app(ctx, repo, tmp_path):
         [("sein", "done"), ("haben", "done"), ("werden", "next")]
 
 
+def test_a_changed_plan_shows_before_the_next_run(repo, tmp_path):
+    """The app's plan edits merge to master; the curriculum it shows follows
+    at once, keeping the next day the last run recorded."""
+    plan = {"decks": [{"deck": "German::Verbs", "new_deck": True, "start": "2026-10-01",
+                       "daily_quota": 5, "topics": ["sein", "haben", "werden"]}]}
+    repo("german", profile=plan)
+    repo("french", spec={**SPEC, "name": "French"}, profile={
+        "decks": [{"deck": "French::Verbs", "new_deck": True, "start": "2026-11-01",
+                   "daily_quota": 5, "topics": ["être"]}]})
+    status = tmp_path / "status"
+    (status / "german").mkdir(parents=True)
+    (status / "german" / "curriculum.json").write_text('{"next_day": "2026-10-02"}')
+
+    assert pipelines.refresh_curricula(status, repo.cfg) == ["french", "german"]
+    german = json.loads((status / "german" / "curriculum.json").read_text())
+    assert german["next_day"] == "2026-10-02"
+    assert [t["status"] for t in german["decks"][0]["topics"]] == ["done", "next", "upcoming"]
+    french = json.loads((status / "french" / "curriculum.json").read_text(encoding="utf-8"))
+    assert french["next_day"] == "2026-11-01"       # not run yet: its first day
+
+
 def test_a_run_by_hand_does_not_count_as_the_schedule(repo, tmp_path):
     repo("german")
     pipelines.record("german", tmp_path, {"run_id": "8", "trigger": "manual",

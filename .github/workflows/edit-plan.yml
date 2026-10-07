@@ -1,0 +1,169 @@
+# Change a pipeline's plan, or start a new pipeline, by asking Claude in words.
+#
+# The app sends the request. Claude Code edits pipelines/<id>/ on a draft
+# branch (plan/<id>/<when>), checks it with `ankigen pipelines validate`, and
+# each round is one commit: the request, and Claude's reply. Asking again on
+# the same branch carries on from there. Nothing reaches a run until the app's
+# Apply merges the branch; Discard deletes it.
+#
+# Claude runs on the subscription, behind CLAUDE_CODE_OAUTH_TOKEN, like the
+# daily run's writer. The prompts are in .github/edit-plan/.
+name: edit plan
+run-name: "plan · ${{ inputs.pipeline }} · ${{ inputs.branch }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      pipeline:
+        description: "The pipeline, the folder name under pipelines/."
+        required: true
+        type: string
+      request:
+        description: "What to change, in words."
+        required: true
+        type: string
+      branch:
+        description: "The draft branch, plan/<pipeline>/<anything>. Made if it does not exist."
+        required: true
+        type: string
+      new:
+        description: "Create the pipeline rather than change it (the first round of its draft)."
+        type: boolean
+        default: false
+
+permissions:
+  contents: write           # the draft branch
+
+# Rounds on one draft one after another; drafts apart run side by side.
+concurrency:
+  group: plan-${{ inputs.branch }}
+  cancel-in-progress: false
+
+jobs:
+  edit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PIPELINE: ${{ inputs.pipeline }}
+      BRANCH: ${{ inputs.branch }}
+      NEW: ${{ inputs.new }}
+      PYTHONPATH: src
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Open the draft
+        run: |
+          if ! [[ "$PIPELINE" =~ ^[a-z0-9][a-z0-9-]{0,39}$ ]]; then
+            echo "::error::'$PIPELINE' is not a pipeline id: lowercase letters, digits and dashes."
+            exit 1
+          fi
+          if [[ "$BRANCH" != "plan/$PIPELINE/"* ]]; then
+            echo "::error::The draft branch has to be plan/$PIPELINE/<something>."
+            exit 1
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git ls-remote --exit-code --heads origin "$BRANCH" > /dev/null; then
+            git fetch -q origin "$BRANCH"
+            git switch -q -c "$BRANCH" FETCH_HEAD
+          else
+            if [ "$NEW" = "true" ] && [ -e "pipelines/$PIPELINE" ]; then
+              echo "::error::There is already a pipeline '$PIPELINE'."
+              exit 1
+            fi
+            git switch -q -c "$BRANCH"
+            # Pushed before Claude starts, so the app finds the draft at once.
+            git push -q origin "HEAD:refs/heads/$BRANCH"
+          fi
+          if [ "$NEW" != "true" ] && [ ! -f "pipelines/$PIPELINE/profile.yaml" ]; then
+            echo "::error::No pipeline '$PIPELINE': pipelines/$PIPELINE/profile.yaml does not exist."
+            exit 1
+          fi
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      # Checking a pipeline needs only these, not the whole pipeline.
+      - run: pip install -q "pydantic>=2.5" "pydantic-settings>=2.2" "pyyaml>=6.0" "cronsim>=2.6"
+
+      - run: npm install -g @anthropic-ai/claude-code
+
+      - name: Ask Claude
+        id: claude
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # Through the environment, never pasted into the script, so the
+          # request is only ever text.
+          REQUEST: ${{ inputs.request }}
+        run: |
+          export TODAY=$(date -u +%F) TOMORROW=$(date -u -d tomorrow +%F)
+          NEXT_DAY=""
+          if git fetch -q origin ankigen-status 2> /dev/null; then
+            NEXT_DAY=$(git show "FETCH_HEAD:$PIPELINE/curriculum.json" 2> /dev/null \
+              | python -c "import json,sys; print(json.load(sys.stdin).get('next_day') or '')" 2> /dev/null || true)
+          fi
+          export NEXT_DAY="${NEXT_DAY:-(not known: no run recorded yet)}"
+          # A new pipeline's later rounds change what its first one made.
+          template=.github/edit-plan/change.md
+          [ ! -f "pipelines/$PIPELINE/profile.yaml" ] && template=.github/edit-plan/new.md
+          envsubst '$PIPELINE $TODAY $TOMORROW $NEXT_DAY $REQUEST' < "$template" > "$RUNNER_TEMP/prompt.md"
+
+          set +e
+          claude -p --output-format json \
+            --model claude-opus-5-5 --fallback-model claude-sonnet-5 \
+            --permission-mode acceptEdits \
+            --allowedTools "Read,Edit,Write,Glob,Grep,Bash(python -m ankigen.pipelines validate)" \
+            < "$RUNNER_TEMP/prompt.md" > "$RUNNER_TEMP/claude.json"
+          code=$?
+          set -e
+          python - "$RUNNER_TEMP/claude.json" "$code" > "$RUNNER_TEMP/reply.txt" <<'PY'
+          import json, sys
+          try:
+              out = json.load(open(sys.argv[1], encoding="utf-8"))
+          except (OSError, ValueError):
+              out = {}
+          ok = sys.argv[2] == "0" and not out.get("is_error") and out.get("subtype") == "success"
+          text = str(out.get("result") or "").strip()
+          print(text if ok and text else
+                "Claude could not finish: " + (text or out.get("subtype") or "no answer")[:500])
+          PY
+          cat "$RUNNER_TEMP/reply.txt"
+
+      # What Claude left is kept only if it stays in the pipeline's folder and
+      # validates. Otherwise it is dropped, and the reply says why, so the
+      # app shows the failure in the conversation.
+      - name: Check what changed
+        run: |
+          outside=$(git status --porcelain --untracked-files=all | cut -c4- | grep -v "^pipelines/$PIPELINE/" || true)
+          problem=""
+          if [ -n "$outside" ]; then
+            problem="Claude changed files outside pipelines/$PIPELINE/: $outside"
+          elif ! python -m ankigen.pipelines validate > "$RUNNER_TEMP/validate.txt" 2>&1; then
+            problem="The changed plan does not validate: $(cat "$RUNNER_TEMP/validate.txt")"
+          fi
+          if [ -n "$problem" ]; then
+            echo "::warning::$problem"
+            git reset -q --hard && git clean -qfd
+            printf '%s\n\nNothing was kept. %s\n' "$(cat "$RUNNER_TEMP/reply.txt")" "$problem" \
+              > "$RUNNER_TEMP/reply.txt"
+          fi
+
+      # One commit a round, empty when nothing changed: the branch is the
+      # conversation the app shows.
+      - name: Commit the round
+        env:
+          REQUEST: ${{ inputs.request }}
+        run: |
+          {
+            printf 'plan: %s\n\n' "$(printf '%s' "$REQUEST" | head -n1 | cut -c1-60)"
+            printf 'Asked:\n%s\n\nClaude:\n%s\n' "$REQUEST" "$(cat "$RUNNER_TEMP/reply.txt")"
+          } > "$RUNNER_TEMP/message.txt"
+          git add -A "pipelines/$PIPELINE"
+          git commit -q --allow-empty -F "$RUNNER_TEMP/message.txt"
+          git push -q origin "HEAD:refs/heads/$BRANCH"
+          {
+            echo "### Claude"
+            cat "$RUNNER_TEMP/reply.txt"
+          } >> "$GITHUB_STEP_SUMMARY"

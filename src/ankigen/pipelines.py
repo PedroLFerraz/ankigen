@@ -380,6 +380,32 @@ def curriculum(profile: Profile, next_day: date | None) -> dict:
     return {"next_day": _iso(next_day), "decks": decks}
 
 
+def refresh_curricula(status_dir: Path, cfg=None) -> list[str]:
+    """Rewrite each pipeline's curriculum.json from its profile as it is now,
+    so a plan changed from the app shows there at once, not after the next
+    run. The next day stays what the last run recorded; a pipeline that has
+    not run yet starts at its first deck. Returns the ids written."""
+    written = []
+    for path in sorted(root(cfg).glob(f"*/{SPEC_FILE}")):
+        try:
+            p = load(path.parent.name, cfg)
+            profile = p.profile()
+        except (ValidationError, FileNotFoundError, yaml.YAMLError):
+            continue                # CI and the next run say what is wrong
+        target = Path(status_dir) / p.id / "curriculum.json"
+        if target.exists():
+            last = json.loads(target.read_text(encoding="utf-8")).get("next_day")
+            next_day = date.fromisoformat(last) if last else None
+        else:
+            phased = profile.phased()
+            next_day = phased[0].start if phased else None
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(json.dumps(curriculum(profile, next_day), indent=2, default=str) + "\n",
+                          encoding="utf-8")
+        written.append(p.id)
+    return written
+
+
 def summarize(report: dict | None) -> dict:
     """The parts of a run's report the app shows on its list of runs."""
     if not report:
@@ -512,6 +538,8 @@ def main(argv: list[str] | None = None) -> int:
     p_env.add_argument("pipeline")
     p_schema = sub.add_parser("schema", help="pipeline.yaml's JSON Schema.")
     p_schema.add_argument("--write", action="store_true", help="Write it to pipelines/schema.json.")
+    p_cur = sub.add_parser("curriculum", help="Rewrite every curriculum.json on the status branch.")
+    p_cur.add_argument("--status-dir", required=True)
     p_rec = sub.add_parser("record", help="Write a run's outcome into the status branch.")
     p_rec.add_argument("pipeline")
     p_rec.add_argument("--status-dir", required=True)
@@ -564,6 +592,10 @@ def main(argv: list[str] | None = None) -> int:
             (root() / "schema.json").write_text(text, encoding="utf-8")
         else:
             print(text, end="")
+        return 0
+    if args.command == "curriculum":
+        print("curriculum.json rewritten for: "
+              + (", ".join(refresh_curricula(Path(args.status_dir))) or "none"))
         return 0
     return _record(args)
 

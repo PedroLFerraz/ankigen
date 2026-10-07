@@ -137,9 +137,19 @@ dates), the new deck joins the end of it at the same pace, starting the day
 after the last one finishes. Leave **quota** blank for that. Locally:
 `ankigen add-theme --deck "..." --about "..."`.
 
-**A new pipeline.** Add a folder under `pipelines/` with a `pipeline.yaml` and
-a `profile.yaml` (copy another pipeline's and change it), and push. The next
-tick picks it up at its scheduled time.
+**Change a plan, in words.** *edit plan* (what the app's Curriculum tab
+sends) with the **pipeline**, a **request** and a draft **branch**
+(`plan/<pipeline>/<anything>`). Claude Code edits `pipelines/<id>/` on that
+branch, checks it with `ankigen pipelines validate`, and commits the round:
+the request and its reply. Ask again on the same branch to iterate; merge it
+to apply, delete it to discard. Once merged, *curriculum* rewrites the
+curriculum the app shows, without waiting for the next run.
+
+**A new pipeline.** From the app: **New pipeline**, which is *edit plan* with
+**new** set, so Claude plans the whole curriculum on a draft. By hand: add a
+folder under `pipelines/` with a `pipeline.yaml` and a `profile.yaml` (copy
+another pipeline's and change it), and push. The next tick picks it up at
+its scheduled time.
 
 **Redo a day's pictures.** *run pipeline* with **stages** set to
 `images,export,report` and that day's **run_date**. No new cards are written;
