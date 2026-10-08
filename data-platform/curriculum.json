@@ -1,5 +1,5 @@
 {
-  "next_day": "2026-10-18",
+  "next_day": "2026-10-19",
   "decks": [
     {
       "deck": "Data Platform::01 Linux",
@@ -708,28 +708,28 @@
           "kind": "concept",
           "level": 3,
           "day": "2026-10-18",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "late-arriving data",
           "kind": "concept",
           "level": 3,
           "day": "2026-10-18",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "a daily job that ran twice and doubled a table",
           "kind": "scenario",
           "level": 4,
           "day": "2026-10-18",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "a query on object storage that costs far more than expected",
           "kind": "scenario",
           "level": 4,
           "day": "2026-10-18",
-          "status": "next"
+          "status": "done"
         }
       ]
     },
@@ -744,28 +744,28 @@
           "kind": "concept",
           "level": 1,
           "day": "2026-10-19",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "facts and dimensions: the star schema",
           "kind": "concept",
           "level": 1,
           "day": "2026-10-19",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "grain: what one row of a table means",
           "kind": "concept",
           "level": 1,
           "day": "2026-10-19",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "a CREATE TABLE for a fact table and a dimension table",
           "kind": "build",
           "level": 1,
           "day": "2026-10-19",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "surrogate keys versus natural keys",
