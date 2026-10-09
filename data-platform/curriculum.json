@@ -1,5 +1,5 @@
 {
-  "next_day": "2026-10-19",
+  "next_day": "2026-10-20",
   "decks": [
     {
       "deck": "Data Platform::01 Linux",
@@ -744,56 +744,56 @@
           "kind": "concept",
           "level": 1,
           "day": "2026-10-19",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "facts and dimensions: the star schema",
           "kind": "concept",
           "level": 1,
           "day": "2026-10-19",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "grain: what one row of a table means",
           "kind": "concept",
           "level": 1,
           "day": "2026-10-19",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "a CREATE TABLE for a fact table and a dimension table",
           "kind": "build",
           "level": 1,
           "day": "2026-10-19",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "surrogate keys versus natural keys",
           "kind": "concept",
           "level": 2,
           "day": "2026-10-20",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "slowly changing dimensions: type 1 versus type 2",
           "kind": "concept",
           "level": 2,
           "day": "2026-10-20",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "deduplicating rows with ROW_NUMBER over a partition",
           "kind": "build",
           "level": 2,
           "day": "2026-10-20",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "an upsert with MERGE",
           "kind": "build",
           "level": 2,
           "day": "2026-10-20",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "fact table types: transaction, periodic snapshot and accumulating snapshot",
