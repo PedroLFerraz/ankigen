@@ -1,0 +1,59 @@
+# Keeps the curriculum the app shows in step with the plan.
+#
+# Each run records curriculum.json on the ankigen-status branch, but a plan
+# changed from the app (edit-plan.yml, then Apply) would otherwise show only
+# after the next run. This rewrites it whenever pipelines/ changes on master,
+# keeping the next day the last run recorded.
+name: curriculum
+
+on:
+  push:
+    branches: [master]
+    paths: ["pipelines/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: write           # the ankigen-status branch
+
+concurrency:
+  group: curriculum
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      # Reading a profile needs only these, not the whole pipeline.
+      - run: pip install -q "pydantic>=2.5" "pydantic-settings>=2.2" "pyyaml>=6.0" "cronsim>=2.6"
+
+      - name: Rewrite curriculum.json
+        env:
+          PYTHONPATH: src
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if ! git ls-remote --exit-code --heads origin ankigen-status > /dev/null; then
+            echo "No ankigen-status branch yet; the first run makes it."
+            exit 0
+          fi
+          git fetch -q origin ankigen-status
+          git worktree add --detach status FETCH_HEAD
+          python -m ankigen.pipelines curriculum --status-dir status
+
+          cd status
+          git add -A
+          git commit -qm "curriculum: $(git -C .. log -1 --format=%s)" || exit 0
+          # A run may record at the same moment.
+          for _ in 1 2 3; do
+            git push -q origin HEAD:refs/heads/ankigen-status && exit 0
+            git fetch -q origin ankigen-status && git rebase -q FETCH_HEAD
+          done
+          echo "::error::Could not update ankigen-status."
+          exit 1

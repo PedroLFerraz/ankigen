@@ -1,6 +1,7 @@
 package com.pedrolopes.ankigen
 
 import android.app.Application
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -23,12 +24,14 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
+import java.util.concurrent.ConcurrentHashMap
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val paper = Paper.toArgb()
         enableEdgeToEdge(SystemBarStyle.light(paper, paper), SystemBarStyle.light(paper, paper))
+        GuideJob.schedule(this)
         setContent { AnkiGenTheme { AppScreen() } }
     }
 }
@@ -38,6 +41,8 @@ sealed interface Screen {
     data object Settings : Screen
     data class Pipeline(val id: String) : Screen
     data class RunFile(val id: String, val file: String) : Screen
+    data object NewPipeline : Screen
+    data class Draft(val id: String, val branch: String) : Screen
 }
 
 /** Everything one pipeline's screen shows. */
@@ -49,11 +54,15 @@ class Detail(
     val latest: Run?,
     val latestCards: List<Card>,
     val curriculum: Curriculum?,
-    val runFiles: List<String>,
+    /** Each run's file on the status branch, newest first, and the run when it reads. */
+    val runs: List<Pair<String, Run?>>,
     val active: List<JSONObject>,
+    /** The plan change being drafted for this pipeline, if any. */
+    val draftBranch: String?,
 )
 
 const val RUN_WORKFLOW = "run-pipeline.yml"
+const val PLAN_WORKFLOW = "edit-plan.yml"
 
 class AppModel(app: Application) : AndroidViewModel(app) {
     // ponytail: the token sits in private app storage, unencrypted, with
@@ -81,6 +90,14 @@ class AppModel(app: Application) : AndroidViewModel(app) {
     var message by mutableStateOf<String?>(null)
     var pipelines by mutableStateOf<List<Pipeline>?>(null)
         private set
+    /** Every plan/ branch: changes being drafted, and pipelines not made yet. */
+    var drafts by mutableStateOf<List<String>>(emptyList())
+        private set
+    var draft by mutableStateOf<Draft?>(null)
+        private set
+    /** When a request last went to Claude: its run takes a moment to show up. */
+    var askedAt = 0L
+        private set
     var detail by mutableStateOf<Detail?>(null)
         private set
     var runView by mutableStateOf<Pair<Run?, List<Card>>?>(null)
@@ -88,6 +105,8 @@ class AppModel(app: Application) : AndroidViewModel(app) {
 
     private var defaultBranch: String? = null
     private val gh get() = GitHub(repo, token)
+    // A run's record never changes once written.
+    private val runCache = ConcurrentHashMap<String, Run>()
 
     init {
         refreshHome()
@@ -98,6 +117,7 @@ class AppModel(app: Application) : AndroidViewModel(app) {
         when (screen) {
             is Screen.Pipeline -> loadPipeline(screen.id)
             is Screen.RunFile -> loadRunFile(screen.id, screen.file)
+            is Screen.Draft -> loadDraft(screen.id, screen.branch)
             else -> Unit
         }
     }
@@ -131,38 +151,39 @@ class AppModel(app: Application) : AndroidViewModel(app) {
         )
         guideFolder = uri
         prefs.edit { putString("guide_folder", uri.toString()) }
-        refreshHome()
+        task { syncGuides() }
     }
 
     fun folder(): GuideFolder? = guideFolder?.let { GuideFolder(getApplication(), it) }
 
-    fun saveGuide(pipeline: String, run: Run) = task { saveGuideNow(pipeline, run, auto = false) }
+    /** Saves the guides the folder is missing; quiet when there are none. */
+    private suspend fun syncGuides() {
+        val saved = io { Guides.sync(getApplication()) }
+        if (saved.isNotEmpty()) {
+            message = "Saved ${saved.singleOrNull() ?: "${saved.size} study guides"} to ${folder()?.label}."
+        }
+    }
 
-    /**
-     * Downloads a run's study guide from its artifact into the guide folder.
-     * [auto] is the quiet pass over each pipeline's latest run: it says
-     * nothing when there is nothing to do.
-     */
-    private suspend fun saveGuideNow(pipeline: String, r: Run, auto: Boolean) {
+    /** Opens a run's study guide, saving it to the folder first when it is not there. */
+    fun openGuide(pipeline: String, run: Run) = task {
+        val app = getApplication<Application>()
         val folder = folder()
-        val day = r.day
         when {
-            folder == null -> if (!auto) message = "Choose a folder for study guides in Settings first."
-            token.isBlank() -> if (!auto) message = "Downloading a study guide needs the GitHub token in Settings."
-            !r.hasPdf || day == null -> if (!auto) message = "That run has no study guide PDF."
+            folder == null -> message = "Choose a folder for study guides in Settings first."
+            token.isBlank() -> message = "Opening a study guide needs the GitHub token in Settings."
             else -> {
-                val file = GuideFolder.fileName(pipeline, day)
-                if (io { folder.has(file) }) {
-                    if (!auto) message = "$file is already in ${folder.label}."
-                    return
+                val uri = io { Guides.fetch(app, pipeline, run) }
+                if (uri == null) {
+                    message = "That run's files are gone: GitHub keeps them for 90 days."
+                    return@task
                 }
-                val pdf = io { gh.artifactFile(r.runId!!, r.artifact!!, ".pdf") }
-                if (pdf == null) {
-                    if (!auto) message = "That run's files are gone: GitHub keeps them for 90 days."
-                    return
+                val view = Intent(Intent.ACTION_VIEW).setDataAndType(uri, "application/pdf")
+                    .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
+                try {
+                    app.startActivity(view)
+                } catch (e: ActivityNotFoundException) {
+                    message = "Saved to ${folder.label}, but no app on this phone opens PDFs."
                 }
-                io { folder.write(file, pdf) }
-                message = "Saved $file to ${folder.label}."
             }
         }
     }
@@ -205,10 +226,8 @@ class AppModel(app: Application) : AndroidViewModel(app) {
                 Pipeline(id, spec, error, latestOf(id))
             }
         }
-        // Each pipeline's newest guide lands in the folder without asking.
-        pipelines.orEmpty().forEach { p ->
-            p.latest?.let { saveGuideNow(p.spec?.name ?: p.id, it, auto = true) }
-        }
+        drafts = io { gh.branches("plan/") }
+        syncGuides()
     }
 
     fun loadPipeline(id: String) = task {
@@ -226,7 +245,12 @@ class AppModel(app: Application) : AndroidViewModel(app) {
                 }
                 val latest = async { latestOf(id) }
                 val curriculum = async { gh.text("$id/curriculum.json", statusBranch)?.let { Curriculum(JSONObject(it)) } }
-                val runFiles = async { gh.list("$id/runs", statusBranch, dirs = false).sortedDescending() }
+                val runs = async {
+                    gh.list("$id/runs", statusBranch, dirs = false).sortedDescending()
+                        .map { file -> async { file to runOf(id, file) } }
+                        .map { it.await() }
+                }
+                val draftBranch = async { gh.branches("plan/$id/").maxOrNull() }
                 val active = async {
                     gh.runs(RUN_WORKFLOW).filter {
                         it.optString("status") != "completed" &&
@@ -244,12 +268,17 @@ class AppModel(app: Application) : AndroidViewModel(app) {
                     latest = run,
                     latestCards = cards,
                     curriculum = curriculum.await(),
-                    runFiles = runFiles.await(),
+                    runs = runs.await(),
                     active = active.await(),
+                    draftBranch = draftBranch.await(),
                 )
             }
         }
+        syncGuides()
     }
+
+    private fun runOf(id: String, file: String): Run? = runCache["$id/$file"]
+        ?: gh.text("$id/runs/$file", statusBranch)?.let { Run(JSONObject(it)) }?.also { runCache["$id/$file"] = it }
 
     private fun cardsOf(id: String, day: String): List<Card> =
         gh.text("$id/cards/$day.json", statusBranch)
@@ -259,7 +288,7 @@ class AppModel(app: Application) : AndroidViewModel(app) {
     fun loadRunFile(id: String, file: String) = task {
         runView = null
         runView = io {
-            val run = gh.text("$id/runs/$file", statusBranch)?.let { Run(JSONObject(it)) }
+            val run = runOf(id, file)
             run to run?.day?.let { cardsOf(id, it) }.orEmpty()
         }
     }
@@ -285,5 +314,83 @@ class AppModel(app: Application) : AndroidViewModel(app) {
         // GitHub takes a moment to list a dispatched run.
         delay(4_000)
         loadPipeline(id)
+    }
+
+    // ------------------------------------------------------------ plan drafts
+
+    fun loadDraft(id: String, branch: String) = task {
+        if (draft?.branch != branch) draft = null
+        val base = branch()
+        draft = io { draftOf(id, branch, base) }
+    }
+
+    private fun draftOf(id: String, branch: String, base: String): Draft {
+        val compare = try {
+            gh.compare(base, branch)
+        } catch (e: GitHub.Failure) {
+            if (e.code == 404) null else throw e       // the run has not pushed the branch yet
+        }
+        val commits = compare?.objects("commits").orEmpty()
+        return Draft(
+            pipeline = id,
+            branch = branch,
+            base = base,
+            isNew = pipelines?.none { it.id == id } ?: false,
+            rounds = commits.mapNotNull { Round.parse(it.getJSONObject("commit").getString("message")) },
+            files = compare?.objects("files").orEmpty().map { it.getString("filename") to it.optString("patch") },
+            run = gh.runs(PLAN_WORKFLOW, 20).firstOrNull { it.optString("display_title").endsWith(" · $branch") },
+            lastCommitAt = commits.lastOrNull()?.getJSONObject("commit")?.getJSONObject("committer")?.optString("date"),
+        )
+    }
+
+    /**
+     * Sends [request] to Claude: a new draft when [branch] is null, another
+     * round on it otherwise. [isNew] creates the pipeline instead.
+     */
+    fun ask(id: String, request: String, branch: String?, isNew: Boolean = false) = task {
+        val base = branch()
+        val target = branch ?: Draft.branchFor(id)
+        io {
+            gh.dispatch(PLAN_WORKFLOW, base, mapOf(
+                "pipeline" to id, "request" to request.trim(), "branch" to target, "new" to isNew.toString(),
+            ))
+        }
+        askedAt = System.currentTimeMillis()
+        val next = Screen.Draft(id, target)
+        if (screen == Screen.NewPipeline) stack.removeAt(stack.lastIndex)
+        if (screen != next) {
+            draft = null
+            stack.add(next)
+        }
+        message = "Asked. Claude takes a minute or two; this page follows along."
+        // GitHub takes a moment to list a dispatched run.
+        delay(4_000)
+        draft = io { draftOf(id, target, base) }
+    }
+
+    fun apply(d: Draft) = task {
+        val asked = d.rounds.joinToString("\n") { "- " + it.asked.lineSequence().first().take(100) }
+        io {
+            gh.merge(d.base, d.branch, "plan: ${if (d.isNew) "add" else "change"} ${d.pipeline}, from the app\n\n$asked")
+            gh.deleteBranch(d.branch)
+        }
+        message = if (d.isNew) "Applied: ${d.pipeline} runs on its schedule from now on."
+        else "Applied. The curriculum shows the change in a minute or so."
+        leaveDraft()
+    }
+
+    fun discard(d: Draft) = task {
+        io { gh.deleteBranch(d.branch) }
+        message = "Discarded."
+        leaveDraft()
+    }
+
+    private fun leaveDraft() {
+        draft = null
+        back()
+        when (val s = screen) {
+            is Screen.Pipeline -> loadPipeline(s.id)
+            else -> refreshHome()
+        }
     }
 }

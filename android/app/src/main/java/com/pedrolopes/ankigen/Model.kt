@@ -89,6 +89,8 @@ fun JSONObject.objects(key: String): List<JSONObject> =
 
 /** One run, as `ankigen pipelines record` writes it to the status branch. */
 class Run(val json: JSONObject) {
+    /** The pipeline's name when it ran. */
+    val name = json.str("name")
     val conclusion = json.str("conclusion") ?: "unknown"
     val ok get() = conclusion == "success"
     val day = json.str("curriculum_date")
@@ -159,6 +161,50 @@ class Card(json: JSONObject) {
     val guideRef = json.str("guide_ref")
     val picture = json.str("picture")
     val unverified = json.optBoolean("unverified")
+}
+
+/** One request to Claude and its reply: a commit edit-plan.yml made on a draft. */
+class Round(val asked: String, val reply: String) {
+    companion object {
+        /** "plan: …\n\nAsked:\n<request>\n\nClaude:\n<reply>", or null for any other commit. */
+        fun parse(message: String): Round? {
+            val body = message.substringAfter("\n\nAsked:\n", "").ifEmpty { return null }
+            return Round(body.substringBefore("\n\nClaude:\n").trim(), body.substringAfter("\n\nClaude:\n", "").trim())
+        }
+    }
+}
+
+/**
+ * A plan change Claude is drafting on plan/<pipeline>/<when>, which [base]
+ * gets when it is applied. [run] is the latest edit-plan run for it.
+ */
+class Draft(
+    val pipeline: String,
+    val branch: String,
+    val base: String,
+    val isNew: Boolean,
+    val rounds: List<Round>,
+    /** File name to unified diff. */
+    val files: List<Pair<String, String>>,
+    val run: JSONObject?,
+    private val lastCommitAt: String?,
+) {
+    val working get() = run != null && run.optString("status") != "completed"
+
+    /** The latest run failed before it could record a round. */
+    val failed get() = run != null && !working && run.optString("conclusion") != "success" &&
+        (lastCommitAt == null || run.optString("updated_at") > lastCommitAt)
+
+    companion object {
+        fun branchFor(pipeline: String, now: java.time.LocalDateTime = java.time.LocalDateTime.now()) =
+            "plan/$pipeline/" + now.format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss"))
+
+        fun pipelineOf(branch: String) = branch.removePrefix("plan/").substringBefore('/')
+
+        /** A pipeline id from its name: "Inglês B1" is "ingles-b1". */
+        fun idFor(name: String) = java.text.Normalizer.normalize(name.lowercase(), java.text.Normalizer.Form.NFD)
+            .replace(Regex("\\p{M}"), "").replace(Regex("[^a-z0-9]+"), "-").trim('-').take(40).trimEnd('-')
+    }
 }
 
 /** A pipeline as the home screen lists it. */

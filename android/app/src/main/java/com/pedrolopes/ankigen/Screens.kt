@@ -42,10 +42,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.delay
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
@@ -73,6 +77,8 @@ fun AppScreen(model: AppModel = viewModel()) {
                 Screen.Settings -> SettingsScreen(model)
                 is Screen.Pipeline -> PipelineScreen(model, screen.id)
                 is Screen.RunFile -> RunFileScreen(model, screen.id, screen.file)
+                Screen.NewPipeline -> NewPipelineScreen(model)
+                is Screen.Draft -> DraftScreen(model, screen.id, screen.branch)
             }
         }
         SnackbarHost(snackbar) { data ->
@@ -99,7 +105,8 @@ private fun TopBar(model: AppModel) {
             Screen.Home -> model::refreshHome
             is Screen.Pipeline -> ({ model.loadPipeline(s.id) })
             is Screen.RunFile -> ({ model.loadRunFile(s.id, s.file) })
-            Screen.Settings -> null
+            is Screen.Draft -> ({ model.loadDraft(s.id, s.branch) })
+            Screen.Settings, Screen.NewPipeline -> null
         }
         if (reload != null && !model.busy) {
             Text("Reload", Modifier.clickable(onClick = reload), Cyan, style = MaterialTheme.typography.labelLarge)
@@ -149,6 +156,19 @@ private fun HomeScreen(model: AppModel) {
         }
         items(pipelines.orEmpty(), key = { it.id }) { p ->
             PipelineRow(p) { model.open(Screen.Pipeline(p.id)) }
+        }
+        if (pipelines != null) {
+            val made = pipelines.map { it.id }.toSet()
+            items(model.drafts.filter { Draft.pipelineOf(it) !in made }, key = { it }) { branch ->
+                val id = Draft.pipelineOf(branch)
+                Slip(rule = ink(0.3f), modifier = Modifier.clickable { model.open(Screen.Draft(id, branch)) }) {
+                    Kicker("$id · draft", color = Cyan)
+                    Text("New pipeline, not applied yet ›", style = MaterialTheme.typography.titleMedium)
+                }
+            }
+            item {
+                SecondaryButton("New pipeline", { model.open(Screen.NewPipeline) }, Modifier.fillMaxWidth(), Cyan)
+            }
         }
     }
 }
@@ -233,9 +253,12 @@ private fun PipelineScreen(model: AppModel, id: String) {
         }
         item { Tabs(listOf("Latest", "Curriculum", "Runs", "Setup"), tab, { tab = it }) }
         when (tab) {
-            0 -> latest(d) { model.saveGuide(d.spec?.name ?: id, it) }
-            1 -> curriculum(d.curriculum, d.spec, showWritten) { showWritten = it }
-            2 -> runs(d.runFiles) { model.open(Screen.RunFile(id, it)) }
+            0 -> latest(d) { model.openGuide(id, it) }
+            1 -> {
+                item { PlanBox(model, id, d.draftBranch) }
+                curriculum(d.curriculum, d.spec, showWritten) { showWritten = it }
+            }
+            2 -> runs(d.runs, d.curriculum, { model.open(Screen.RunFile(id, it)) }) { model.openGuide(id, it) }
             else -> item {
                 if (d.spec != null) SpecEditor(d.spec) { model.saveSpec(id, it) }
                 else Text("pipeline.yaml has to read before it can be edited here.")
@@ -244,13 +267,13 @@ private fun PipelineScreen(model: AppModel, id: String) {
     }
 }
 
-private fun LazyListScope.latest(d: Detail, onSaveGuide: (Run) -> Unit) {
+private fun LazyListScope.latest(d: Detail, onOpenGuide: (Run) -> Unit) {
     val run = d.latest
     if (run == null) {
         note("No run recorded yet. Runs are recorded on the status branch from the first tick after the pipelines change is merged.")
         return
     }
-    item { RunSummary(run, d.curriculum) { onSaveGuide(run) } }
+    item { RunSummary(run, d.curriculum) { onOpenGuide(run) } }
     cards(run, d.latestCards)
 }
 
@@ -264,7 +287,7 @@ private fun LazyListScope.cards(run: Run, cards: List<Card>) {
 }
 
 @Composable
-private fun RunSummary(run: Run, curriculum: Curriculum?, onSaveGuide: () -> Unit) {
+private fun RunSummary(run: Run, curriculum: Curriculum?, onOpenGuide: () -> Unit) {
     val uri = LocalUriHandler.current
     Slip(rule = if (run.ok) Cyan else Magenta) {
         Kicker(
@@ -298,7 +321,7 @@ private fun RunSummary(run: Run, curriculum: Curriculum?, onSaveGuide: () -> Uni
         }
         run.error?.let { Text(it, color = Magenta, style = MaterialTheme.typography.bodyMedium) }
         if (run.hasPdf) {
-            SecondaryButton("Save the study guide PDF", onSaveGuide, Modifier.fillMaxWidth().padding(top = 4.dp))
+            SecondaryButton("Open the study guide PDF", onOpenGuide, Modifier.fillMaxWidth().padding(top = 4.dp))
         }
         run.url?.let { url ->
             Text("Open the run on GitHub ›", Modifier.clickable { uri.openUri(url) }, Cyan,
@@ -451,21 +474,44 @@ private fun LazyListScope.curriculum(
     }
 }
 
-private fun LazyListScope.runs(files: List<String>, onOpen: (String) -> Unit) {
-    if (files.isEmpty()) {
+private fun LazyListScope.runs(
+    runs: List<Pair<String, Run?>>,
+    curriculum: Curriculum?,
+    onOpen: (String) -> Unit,
+    onOpenGuide: (Run) -> Unit,
+) {
+    if (runs.isEmpty()) {
         note("No runs recorded yet.")
         return
     }
-    items(files) { file ->
+    note("Every run, newest first. Guides are kept by GitHub for 90 days and saved to your folder as they come.")
+    items(runs, key = { it.first }) { (file, run) ->
         // <curriculum day>-<run id>.json
-        val name = file.removeSuffix(".json")
+        val day = file.take(10)
         Row(
             Modifier.fillMaxWidth().clickable { onOpen(file) }.padding(vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(name.take(10), style = MaterialTheme.typography.titleSmall)
-            Spacer(Modifier.weight(1f))
-            Kicker("run ${name.drop(11)} ›")
+            Column(Modifier.weight(1f)) {
+                Text(
+                    curriculum?.number(day)?.let { "Day $it · $day" } ?: day,
+                    style = MaterialTheme.typography.titleSmall,
+                    color = if (run != null && !run.ok) Magenta else Ink,
+                )
+                Text(
+                    when {
+                        run == null -> "run ${file.removeSuffix(".json").drop(11)}"
+                        !run.ok -> "failed: ${run.error ?: run.conclusion}"
+                        else -> "${run.kept} cards" + if (run.hasPdf) " · study guide" else ""
+                    },
+                    style = MaterialTheme.typography.bodySmall, color = ink(0.55f), maxLines = 1,
+                )
+            }
+            if (run != null && run.hasPdf) {
+                Text("Open PDF", Modifier.clickable { onOpenGuide(run) }.padding(8.dp), Cyan,
+                    style = MaterialTheme.typography.labelLarge)
+            }
+            Kicker("›")
         }
         Rule()
     }
@@ -542,7 +588,7 @@ private fun RunFileScreen(model: AppModel, id: String, file: String) {
             return@LazyColumn
         }
         val known = model.detail?.takeIf { it.id == id }
-        item { RunSummary(run, known?.curriculum) { model.saveGuide(known?.spec?.name ?: id, run) } }
+        item { RunSummary(run, known?.curriculum) { model.openGuide(id, run) } }
         cards(run, view.second)
     }
 }
@@ -568,7 +614,7 @@ private fun SettingsScreen(model: AppModel) {
             label = { Text("GitHub token") },
             visualTransformation = PasswordVisualTransformation(),
             supportingText = {
-                Text("Reading a public repository needs none. Saving a pipeline and running one need a fine-grained token for this repository with Contents and Actions set to read and write.")
+                Text("Reading a public repository needs none. Saving, running, changing a plan and study guides need a fine-grained token for this repository with Contents and Actions set to read and write.")
             },
         )
         OutlinedTextField(branch, { branch = it }, Modifier.fillMaxWidth(), singleLine = true,
@@ -585,13 +631,227 @@ private fun SettingsScreen(model: AppModel) {
         Text("Study guides", style = MaterialTheme.typography.titleMedium)
         Text(
             model.folder()?.let {
-                "Saved to ${it.label}. Each pipeline's newest guide is saved when the app reloads; older ones from a run's page."
-            } ?: "Choose a folder, on the phone or in a cloud app like Drive, and each run's PDF is saved there. Needs the token.",
+                "Saved to ${it.label}, in a folder per pipeline: every guide, a few times a day in the background and whenever the app reloads. Open any day's from the Runs tab."
+            } ?: "Choose a folder, on the phone or in a cloud app like Drive, and every run's PDF is saved there, in a folder per pipeline, in the background too. Needs the token.",
             style = MaterialTheme.typography.bodyMedium, color = ink(0.62f),
         )
         SecondaryButton(
             if (model.guideFolder == null) "Choose a folder" else "Change the folder",
             { pick.launch(null) }, Modifier.fillMaxWidth(),
+        )
+    }
+}
+
+// ------------------------------------------------------------ changing the plan
+
+@Composable
+private fun PlanBox(model: AppModel, id: String, draftBranch: String?) {
+    Slip(rule = Cyan) {
+        Kicker("Change the plan", color = Cyan)
+        if (draftBranch != null) {
+            Text(
+                "A change is being drafted. Review it, ask Claude for more, then apply or discard it.",
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            SecondaryButton("Open the draft ›", { model.open(Screen.Draft(id, draftBranch)) }, Modifier.fillMaxWidth(), Cyan)
+        } else {
+            var request by rememberSaveable(id) { mutableStateOf("") }
+            OutlinedTextField(
+                request, { request = it }, Modifier.fillMaxWidth(), minLines = 2,
+                label = { Text("What to change") },
+                placeholder = { Text("e.g. Move Docker before Git, and add a deck on dbt after Spark.") },
+            )
+            Text(
+                "Claude edits the plan on a draft. Nothing changes until you apply it.",
+                style = MaterialTheme.typography.bodySmall, color = ink(0.55f),
+            )
+            PrimaryButton(
+                "Ask Claude", { model.ask(id, request, null); request = "" }, Modifier.fillMaxWidth(),
+                enabled = request.isNotBlank() && !model.busy,
+            )
+        }
+    }
+}
+
+@Composable
+private fun DraftScreen(model: AppModel, id: String, branch: String) {
+    val d = model.draft?.takeIf { it.branch == branch }
+    val uri = LocalUriHandler.current
+    var request by rememberSaveable(branch) { mutableStateOf("") }
+    // Follows Claude's run: a look every 15 seconds while it works, and for
+    // a while after asking, before GitHub lists the run.
+    LaunchedEffect(branch) {
+        while (true) {
+            delay(15_000)
+            val following = model.draft?.working == true || System.currentTimeMillis() - model.askedAt < 180_000
+            if (following && !model.busy) model.loadDraft(id, branch)
+        }
+    }
+
+    LazyColumn(
+        contentPadding = PaddingValues(horizontal = Gutter, vertical = 4.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        title(if (d?.isNew == true) "New pipeline" else "Plan change", kicker = "$id · draft")
+        if (d == null) {
+            if (!model.busy) note("Could not load this draft. Reload to try again.")
+            return@LazyColumn
+        }
+        items(d.rounds) { r ->
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Slip(rule = ink(0.3f)) {
+                    Kicker("You asked")
+                    Text(r.asked, style = MaterialTheme.typography.bodyMedium)
+                }
+                Slip(rule = Cyan) {
+                    Kicker("Claude", color = Cyan)
+                    Text(r.reply, style = MaterialTheme.typography.bodyMedium)
+                }
+            }
+        }
+        item {
+            val runUrl = d.run?.optString("html_url")
+            when {
+                d.working -> Row(
+                    Modifier.clickable { runUrl?.let(uri::openUri) },
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Spinner()
+                    Text("Claude is working on it ›", color = Cyan, style = MaterialTheme.typography.bodyMedium)
+                }
+                d.failed -> Text(
+                    "The last request failed on GitHub ›", Modifier.clickable { runUrl?.let(uri::openUri) },
+                    Magenta, style = MaterialTheme.typography.bodyMedium,
+                )
+                d.rounds.isEmpty() -> Text(
+                    "Waiting for Claude to start…", style = MaterialTheme.typography.bodyMedium, color = ink(0.62f),
+                )
+            }
+        }
+        if (d.files.isNotEmpty()) {
+            item { Kicker("What changed", Modifier.padding(top = 8.dp)) }
+            items(d.files) { (name, patch) -> DiffSlip(name, patch) }
+        }
+        item {
+            Column(Modifier.padding(top = 8.dp, bottom = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                OutlinedTextField(
+                    request, { request = it }, Modifier.fillMaxWidth(), minLines = 2,
+                    label = { Text("Ask for more changes") },
+                )
+                PrimaryButton(
+                    "Ask Claude", { model.ask(id, request, branch, d.isNew); request = "" }, Modifier.fillMaxWidth(),
+                    enabled = request.isNotBlank() && !d.working && !model.busy,
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    PrimaryButton(
+                        if (d.isNew) "Apply: create it" else "Apply", { model.apply(d) }, Modifier.weight(1f),
+                        enabled = d.files.isNotEmpty() && !d.working && !model.busy,
+                    )
+                    SecondaryButton("Discard", { model.discard(d) }, Modifier.weight(1f), Magenta)
+                }
+                Text(
+                    "Apply merges the draft into ${d.base}, and the next run goes by it.",
+                    style = MaterialTheme.typography.bodySmall, color = ink(0.55f),
+                )
+            }
+        }
+    }
+}
+
+/** A file's diff: added lines cyan, removed magenta, the rest grey. */
+@Composable
+private fun DiffSlip(name: String, patch: String) {
+    Slip(rule = ink(0.3f)) {
+        Kicker(name.removePrefix("pipelines/"))
+        if (patch.isBlank()) {
+            Text("Too large to show here.", style = MaterialTheme.typography.bodySmall, color = ink(0.55f))
+            return@Slip
+        }
+        Text(
+            buildAnnotatedString {
+                patch.lines().forEach { line ->
+                    val color = when {
+                        line.startsWith("@@") -> ink(0.35f)
+                        line.startsWith("+") -> Cyan700
+                        line.startsWith("-") -> Magenta
+                        else -> ink(0.55f)
+                    }
+                    withStyle(SpanStyle(color = color)) { append(if (line.startsWith("@@")) "⋯" else line) }
+                    append('\n')
+                }
+            },
+            style = MaterialTheme.typography.bodySmall.copy(fontFamily = Mono),
+        )
+    }
+}
+
+// ------------------------------------------------------------ a new pipeline
+
+@Composable
+private fun NewPipelineScreen(model: AppModel) {
+    var name by rememberSaveable { mutableStateOf("") }
+    var about by rememberSaveable { mutableStateOf("") }
+    var quota by rememberSaveable { mutableStateOf("20") }
+    var cron by rememberSaveable { mutableStateOf("17 6 * * *") }
+    var zone by rememberSaveable { mutableStateOf(ZoneId.systemDefault().id) }
+    val id = Draft.idFor(name)
+    val taken = model.pipelines.orEmpty().any { it.id == id } || model.drafts.any { Draft.pipelineOf(it) == id }
+    val nameProblem = when {
+        name.isBlank() -> null
+        id.isEmpty() -> "The name needs a letter or a digit."
+        taken -> "There is already a pipeline or a draft called $id."
+        else -> null
+    }
+    val cards = quota.toIntOrNull()
+    val ok = name.isNotBlank() && nameProblem == null && about.isNotBlank() && cards != null && cards in 1..100 &&
+        Cron.problem(cron) == null && zone.trim() in ZoneId.getAvailableZoneIds()
+
+    Column(
+        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = Gutter, vertical = 20.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text("New pipeline", style = MaterialTheme.typography.headlineSmall)
+        Text(
+            "Say what to learn. Claude plans the decks and topics from the ground up, on a draft you can " +
+                "review and change before anything runs.",
+            style = MaterialTheme.typography.bodyMedium, color = ink(0.62f),
+        )
+        OutlinedTextField(
+            name, { name = it }, Modifier.fillMaxWidth(), singleLine = true,
+            label = { Text("Name") }, isError = nameProblem != null,
+            supportingText = { Text(nameProblem ?: if (id.isEmpty()) "e.g. Spanish B1" else "Its folder: pipelines/$id") },
+        )
+        OutlinedTextField(
+            about, { about = it }, Modifier.fillMaxWidth(), minLines = 4,
+            label = { Text("What to learn") },
+            supportingText = { Text("The subject, where you are now, and where you want to get to.") },
+        )
+        OutlinedTextField(
+            quota, { quota = it.filter(Char::isDigit) }, Modifier.fillMaxWidth(), singleLine = true,
+            label = { Text("Cards a day") }, isError = cards == null || cards !in 1..100,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        )
+        OutlinedTextField(
+            cron, { cron = it }, Modifier.fillMaxWidth(), singleLine = true,
+            label = { Text("Cron: minute hour day month weekday") }, isError = Cron.problem(cron) != null,
+            supportingText = { Text(Cron.problem(cron) ?: "Avoid minute 0; GitHub drops runs on the hour.") },
+        )
+        OutlinedTextField(
+            zone, { zone = it }, Modifier.fillMaxWidth(), singleLine = true,
+            label = { Text("Time zone") }, isError = zone.trim() !in ZoneId.getAvailableZoneIds(),
+        )
+        PrimaryButton(
+            "Ask Claude to plan it",
+            {
+                model.ask(
+                    id,
+                    "Name: ${name.trim()}\nSchedule: cron \"${cron.trim()}\", time zone ${zone.trim()}\n" +
+                        "Cards a day: $cards\nWhat to learn:\n${about.trim()}",
+                    branch = null, isNew = true,
+                )
+            },
+            Modifier.fillMaxWidth(), enabled = ok && !model.busy,
         )
     }
 }

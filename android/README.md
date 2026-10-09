@@ -9,6 +9,7 @@ backend.
 | Latest run, past runs, each day's cards, the curriculum | the `ankigen-status` branch, written by every run |
 | Setup: name, on/off, cron, time zone, guide, push, call budget | commits `pipeline.yaml` (CI validates it) |
 | Run the next day now | dispatches `run-pipeline.yml` |
+| Change the plan, New pipeline | dispatches `edit-plan.yml`; Apply merges its `plan/` branch, Discard deletes it |
 | Study guide PDFs, saved to a folder you pick | each run's artifact (needs the token) |
 
 **Where the curriculum is.** Each run writes the day after the last one
@@ -17,10 +18,20 @@ the dates in `profile.yaml` stop matching the days they are written on. The
 app numbers the days instead: "next run writes day 15 of 82 · 9 days ahead of
 the plan", and beside each day still to come, when the schedule will write it.
 
+**Changing the plan.** On the Curriculum tab, say what to change. Claude
+edits the plan on a draft branch and replies; the draft shows each request,
+each reply and the diff. Ask for more until it is right, then Apply (merged,
+and the curriculum updates within a minute) or Discard. **New pipeline** on
+the home screen works the same way: describe the subject and Claude plans
+every deck. Uses the Claude subscription, about a minute a round.
+
 **Study guides.** In Settings, choose a folder (on the phone, or in a cloud
-app such as Drive). Each pipeline's newest guide is saved there as
-`<pipeline> <curriculum day>.pdf` whenever the app reloads; an older run's
-guide is saved from its page. GitHub keeps a run's files for 90 days.
+app such as Drive). Every guide is saved there, in a folder per pipeline, as
+`<pipeline>/<pipeline> <curriculum day>.pdf`: every 6 hours in the
+background, and whenever the app reloads. A guide deleted from its folder is
+not saved again. Any day's guide opens from
+the Runs tab, and is saved again then if it is missing. GitHub keeps a
+run's files for 90 days.
 
 ## Install
 
