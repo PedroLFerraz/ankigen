@@ -1,0 +1,238 @@
+# História do Brasil, em português, no ritmo do Anki.
+#
+# Para o PDF do dia bater com o que o Anki mostra, o Anki tem que mostrar
+# exatamente os cards que esta pipeline escreve, na ordem em que chegam:
+#   - sem primeiro dia gigante (nenhum first_day_quota): 10 cards todo dia;
+#   - nas opções do baralho "História do Brasil": Novos cards/dia = 10,
+#     ordem de coleta "Posição crescente", ordem dos novos "Ordem de coleta".
+# Se você pular um dia no Anki, o PDF passa a ficar um dia à frente.
+
+learner:
+  level: "adulto que estudou História do Brasil na escola e esqueceu quase tudo"
+  language: "português do Brasil"
+  goals:
+    - "Entender a história do Brasil em ordem, da colonização até hoje"
+    - "Saber as datas, os nomes e os acontecimentos principais de cada período"
+    - "Entender as causas e as consequências: por que cada coisa aconteceu"
+
+style:
+  max_answer_words: 30
+  examples_per_prompt: 4
+  rules:
+    - Uma pergunta por fato ou ideia; prefira o que um bom livro didático cobraria.
+    - Dê a data ou o período quando ele ajudar a situar o fato.
+    - Quando houver um equívoco comum (um mito escolar), escreva o card para corrigi-lo.
+
+weak_cards:
+  enabled: true
+  min_lapses: 2
+  max_ease: 2100
+  max_per_deck: 1
+
+global_quota: 10
+verify: true
+images: true
+inbox: ""
+
+# Cada baralho começa no dia seguinte ao fim do anterior, 2 tópicos (10 cards)
+# por dia, em ordem cronológica. `ankigen validate` mostra as datas.
+decks:
+  - deck: História do Brasil::01 Antes de 1500 e a Chegada dos Portugueses
+    new_deck: true
+    start: 2026-10-10
+    daily_quota: 10
+    image_context: "história do Brasil"
+    levels:
+      1:
+        - concept: "os povos indígenas antes de 1500: tupis, jês e aruaques"
+        - concept: "a expansão marítima portuguesa e a rota para as Índias"
+        - concept: "o Tratado de Tordesilhas (1494)"
+        - concept: "a chegada de Cabral em 1500"
+        - concept: "a carta de Pero Vaz de Caminha"
+        - concept: "o pau-brasil, o escambo e as feitorias"
+        - concept: "o período pré-colonial (1500-1530) e as expedições guarda-costas"
+        - concept: "o contato com os indígenas: doenças, trabalho e resistência"
+
+  - deck: História do Brasil::02 Brasil Colônia
+    new_deck: true
+    start: 2026-10-14
+    daily_quota: 10
+    image_context: "Brasil Colônia"
+    levels:
+      1:
+        - concept: "as capitanias hereditárias"
+        - concept: "o governo-geral e Tomé de Sousa"
+        - concept: "os jesuítas, a catequese e as missões"
+        - concept: "o ciclo do açúcar e o engenho"
+        - concept: "o tráfico de africanos escravizados"
+        - concept: "os quilombos e Palmares"
+        - concept: "a União Ibérica (1580-1640)"
+        - concept: "as invasões holandesas e Maurício de Nassau"
+        - concept: "os bandeirantes e a expansão para o interior"
+        - concept: "o ciclo do ouro em Minas Gerais"
+        - concept: "o Tratado de Madri (1750) e as novas fronteiras"
+        - concept: "o Marquês de Pombal e o Brasil"
+      3:
+        - concept: "a Inconfidência Mineira (1789)"
+        - concept: "a Conjuração Baiana (1798)"
+
+  - deck: História do Brasil::03 Período Joanino e Independência
+    new_deck: true
+    start: 2026-10-21
+    daily_quota: 10
+    image_context: "história do Brasil"
+    levels:
+      1:
+        - concept: "a vinda da família real em 1808 e por quê"
+        - concept: "a abertura dos portos e os tratados de 1810"
+        - concept: "o Reino Unido de Portugal, Brasil e Algarves (1815)"
+        - concept: "a Revolução Pernambucana de 1817"
+        - concept: "a Revolução do Porto e a volta de D. João VI"
+        - concept: "o Dia do Fico e a Independência em 1822"
+        - concept: "as guerras de independência e o 2 de Julho na Bahia"
+      3:
+        - concept: "por que o Brasil não se dividiu em vários países como a América espanhola"
+
+  - deck: História do Brasil::04 Primeiro Reinado e Regências
+    new_deck: true
+    start: 2026-10-25
+    daily_quota: 10
+    image_context: "Império do Brasil"
+    levels:
+      1:
+        - concept: "a Constituição de 1824 e o Poder Moderador"
+        - concept: "a Confederação do Equador (1824)"
+        - concept: "a Guerra da Cisplatina"
+        - concept: "a abdicação de D. Pedro I em 1831"
+        - concept: "o Período Regencial: regência trina e una"
+        - concept: "o Ato Adicional de 1834"
+        - concept: "a Cabanagem"
+        - concept: "a Revolução Farroupilha"
+        - concept: "a Sabinada e a Balaiada"
+        - concept: "a Revolta dos Malês (1835)"
+        - concept: "o Golpe da Maioridade (1840)"
+      3:
+        - concept: "por que as regências tiveram tantas revoltas"
+
+  - deck: História do Brasil::05 Segundo Reinado
+    new_deck: true
+    start: 2026-10-31
+    daily_quota: 10
+    image_context: "Império do Brasil"
+    levels:
+      1:
+        - concept: "o parlamentarismo às avessas"
+        - concept: "o café: do Vale do Paraíba ao Oeste Paulista"
+        - concept: "a Lei Eusébio de Queirós (1850) e o fim do tráfico"
+        - concept: "a Lei de Terras de 1850"
+        - concept: "a imigração europeia e o trabalho livre"
+        - concept: "o Barão de Mauá e a primeira industrialização"
+        - concept: "a Guerra do Paraguai"
+        - concept: "a Lei do Ventre Livre e a Lei dos Sexagenários"
+        - concept: "o movimento abolicionista"
+        - concept: "a Lei Áurea (1888)"
+        - concept: "a Questão Religiosa e a Questão Militar"
+        - concept: "a Proclamação da República (1889)"
+      3:
+        - concept: "o pós-abolição: o que aconteceu com os libertos"
+        - concept: "por que o Brasil foi o último país das Américas a abolir a escravidão"
+
+  - deck: História do Brasil::06 República Velha
+    new_deck: true
+    start: 2026-11-07
+    daily_quota: 10
+    image_context: "República Velha Brasil"
+    levels:
+      1:
+        - concept: "o Governo Provisório e a Constituição de 1891"
+        - concept: "a República da Espada: Deodoro e Floriano"
+        - concept: "a Guerra de Canudos"
+        - concept: "a política dos governadores"
+        - concept: "a política do café com leite"
+        - concept: "o coronelismo e o voto de cabresto"
+        - concept: "o Convênio de Taubaté e a valorização do café"
+        - concept: "o ciclo da borracha"
+        - concept: "a Revolta da Vacina (1904)"
+        - concept: "a Revolta da Chibata (1910)"
+        - concept: "a Guerra do Contestado"
+        - concept: "a Semana de Arte Moderna de 1922"
+        - concept: "o tenentismo e a Coluna Prestes"
+        - concept: "a crise de 1929 e a Revolução de 1930"
+
+  - deck: História do Brasil::07 Era Vargas
+    new_deck: true
+    start: 2026-11-14
+    daily_quota: 10
+    image_context: "Era Vargas"
+    levels:
+      1:
+        - concept: "o Governo Provisório de Vargas (1930-1934)"
+        - concept: "a Revolução Constitucionalista de 1932"
+        - concept: "a Constituição de 1934 e o voto feminino"
+        - concept: "a Ação Integralista e a Aliança Nacional Libertadora"
+        - concept: "a Intentona Comunista de 1935"
+        - concept: "o golpe e o Estado Novo (1937)"
+        - concept: "o DIP, a censura e a propaganda"
+        - concept: "a CLT e o trabalhismo"
+        - concept: "a CSN e a industrialização de base"
+        - concept: "o Brasil na Segunda Guerra e a FEB"
+        - concept: "a queda de Vargas em 1945"
+        - concept: "o segundo governo Vargas, a Petrobras e o suicídio em 1954"
+
+  - deck: História do Brasil::08 República de 1946 a 1964
+    new_deck: true
+    start: 2026-11-20
+    daily_quota: 10
+    image_context: "história do Brasil"
+    levels:
+      1:
+        - concept: "Dutra e a Constituição de 1946"
+        - concept: "JK e o Plano de Metas"
+        - concept: "a construção de Brasília"
+        - concept: "Jânio Quadros e a renúncia"
+        - concept: "a crise de 1961 e o parlamentarismo"
+        - concept: "Jango e as Reformas de Base"
+        - concept: "o Comício da Central e a Marcha da Família"
+        - concept: "o golpe de 1964"
+
+  - deck: História do Brasil::09 Ditadura Militar
+    new_deck: true
+    start: 2026-11-24
+    daily_quota: 10
+    image_context: "ditadura militar Brasil"
+    levels:
+      1:
+        - concept: "Castelo Branco e o AI-1"
+        - concept: "o bipartidarismo: ARENA e MDB"
+        - concept: "o AI-5 (1968)"
+        - concept: "a censura à imprensa e à cultura"
+        - concept: "a luta armada e as guerrilhas"
+        - concept: "o milagre econômico e a dívida externa"
+        - concept: "a repressão: DOI-CODI e tortura"
+        - concept: "a morte de Vladimir Herzog"
+        - concept: "Geisel e a abertura lenta, gradual e segura"
+        - concept: "a Lei da Anistia (1979)"
+        - concept: "a volta do pluripartidarismo"
+        - concept: "as greves do ABC e o novo sindicalismo"
+        - concept: "as Diretas Já"
+        - concept: "a eleição de Tancredo e o fim da ditadura"
+
+  - deck: História do Brasil::10 Nova República
+    new_deck: true
+    start: 2026-12-01
+    daily_quota: 10
+    image_context: "história do Brasil"
+    levels:
+      1:
+        - concept: "Sarney, a hiperinflação e o Plano Cruzado"
+        - concept: "a Constituição de 1988"
+        - concept: "Collor e o confisco da poupança"
+        - concept: "o impeachment de Collor"
+        - concept: "Itamar Franco e o Plano Real"
+        - concept: "FHC: privatizações e a reeleição"
+        - concept: "Lula e os programas sociais"
+        - concept: "o Mensalão"
+        - concept: "as Jornadas de Junho de 2013"
+        - concept: "a Lava Jato"
+        - concept: "o impeachment de Dilma em 2016"
+        - concept: "Temer e o teto de gastos"
