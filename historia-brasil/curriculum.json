@@ -1,0 +1,897 @@
+{
+  "next_day": "2026-10-10",
+  "decks": [
+    {
+      "deck": "Hist\u00f3ria do Brasil::01 Antes de 1500 e a Chegada dos Portugueses",
+      "start": "2026-10-10",
+      "last_day": "2026-10-13",
+      "daily_quota": 10,
+      "topics": [
+        {
+          "topic": "os povos ind\u00edgenas antes de 1500: tupis, j\u00eas e aruaques",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-10",
+          "status": "next"
+        },
+        {
+          "topic": "a expans\u00e3o mar\u00edtima portuguesa e a rota para as \u00cdndias",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-10",
+          "status": "next"
+        },
+        {
+          "topic": "o Tratado de Tordesilhas (1494)",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-11",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a chegada de Cabral em 1500",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-11",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a carta de Pero Vaz de Caminha",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-12",
+          "status": "upcoming"
+        },
+        {
+          "topic": "o pau-brasil, o escambo e as feitorias",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-12",
+          "status": "upcoming"
+        },
+        {
+          "topic": "o per\u00edodo pr\u00e9-colonial (1500-1530) e as expedi\u00e7\u00f5es guarda-costas",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-13",
+          "status": "upcoming"
+        },
+        {
+          "topic": "o contato com os ind\u00edgenas: doen\u00e7as, trabalho e resist\u00eancia",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-13",
+          "status": "upcoming"
+        }
+      ]
+    },
+    {
+      "deck": "Hist\u00f3ria do Brasil::02 Brasil Col\u00f4nia",
+      "start": "2026-10-14",
+      "last_day": "2026-10-20",
+      "daily_quota": 10,
+      "topics": [
+        {
+          "topic": "as capitanias heredit\u00e1rias",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-14",
+          "status": "upcoming"
+        },
+        {
+          "topic": "o governo-geral e Tom\u00e9 de Sousa",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-14",
+          "status": "upcoming"
+        },
+        {
+          "topic": "os jesu\u00edtas, a catequese e as miss\u00f5es",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-15",
+          "status": "upcoming"
+        },
+        {
+          "topic": "o ciclo do a\u00e7\u00facar e o engenho",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-15",
+          "status": "upcoming"
+        },
+        {
+          "topic": "o tr\u00e1fico de africanos escravizados",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-16",
+          "status": "upcoming"
+        },
+        {
+          "topic": "os quilombos e Palmares",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-16",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a Uni\u00e3o Ib\u00e9rica (1580-1640)",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-17",
+          "status": "upcoming"
+        },
+        {
+          "topic": "as invas\u00f5es holandesas e Maur\u00edcio de Nassau",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-17",
+          "status": "upcoming"
+        },
+        {
+          "topic": "os bandeirantes e a expans\u00e3o para o interior",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-18",
+          "status": "upcoming"
+        },
+        {
+          "topic": "o ciclo do ouro em Minas Gerais",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-18",
+          "status": "upcoming"
+        },
+        {
+          "topic": "o Tratado de Madri (1750) e as novas fronteiras",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-19",
+          "status": "upcoming"
+        },
+        {
+          "topic": "o Marqu\u00eas de Pombal e o Brasil",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-19",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a Inconfid\u00eancia Mineira (1789)",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-10-20",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a Conjura\u00e7\u00e3o Baiana (1798)",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-10-20",
+          "status": "upcoming"
+        }
+      ]
+    },
+    {
+      "deck": "Hist\u00f3ria do Brasil::03 Per\u00edodo Joanino e Independ\u00eancia",
+      "start": "2026-10-21",
+      "last_day": "2026-10-24",
+      "daily_quota": 10,
+      "topics": [
+        {
+          "topic": "a vinda da fam\u00edlia real em 1808 e por qu\u00ea",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-21",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a abertura dos portos e os tratados de 1810",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-21",
+          "status": "upcoming"
+        },
+        {
+          "topic": "o Reino Unido de Portugal, Brasil e Algarves (1815)",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-22",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a Revolu\u00e7\u00e3o Pernambucana de 1817",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-22",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a Revolu\u00e7\u00e3o do Porto e a volta de D. Jo\u00e3o VI",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-23",
+          "status": "upcoming"
+        },
+        {
+          "topic": "o Dia do Fico e a Independ\u00eancia em 1822",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-23",
+          "status": "upcoming"
+        },
+        {
+          "topic": "as guerras de independ\u00eancia e o 2 de Julho na Bahia",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-24",
+          "status": "upcoming"
+        },
+        {
+          "topic": "por que o Brasil n\u00e3o se dividiu em v\u00e1rios pa\u00edses como a Am\u00e9rica espanhola",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-10-24",
+          "status": "upcoming"
+        }
+      ]
+    },
+    {
+      "deck": "Hist\u00f3ria do Brasil::04 Primeiro Reinado e Reg\u00eancias",
+      "start": "2026-10-25",
+      "last_day": "2026-10-30",
+      "daily_quota": 10,
+      "topics": [
+        {
+          "topic": "a Constitui\u00e7\u00e3o de 1824 e o Poder Moderador",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-25",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a Confedera\u00e7\u00e3o do Equador (1824)",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-25",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a Guerra da Cisplatina",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-26",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a abdica\u00e7\u00e3o de D. Pedro I em 1831",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-26",
+          "status": "upcoming"
+        },
+        {
+          "topic": "o Per\u00edodo Regencial: reg\u00eancia trina e una",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-27",
+          "status": "upcoming"
+        },
+        {
+          "topic": "o Ato Adicional de 1834",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-27",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a Cabanagem",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-28",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a Revolu\u00e7\u00e3o Farroupilha",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-28",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a Sabinada e a Balaiada",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-29",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a Revolta dos Mal\u00eas (1835)",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-29",
+          "status": "upcoming"
+        },
+        {
+          "topic": "o Golpe da Maioridade (1840)",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-30",
+          "status": "upcoming"
+        },
+        {
+          "topic": "por que as reg\u00eancias tiveram tantas revoltas",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-10-30",
+          "status": "upcoming"
+        }
+      ]
+    },
+    {
+      "deck": "Hist\u00f3ria do Brasil::05 Segundo Reinado",
+      "start": "2026-10-31",
+      "last_day": "2026-11-06",
+      "daily_quota": 10,
+      "topics": [
+        {
+          "topic": "o parlamentarismo \u00e0s avessas",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-31",
+          "status": "upcoming"
+        },
+        {
+          "topic": "o caf\u00e9: do Vale do Para\u00edba ao Oeste Paulista",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-10-31",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a Lei Eus\u00e9bio de Queir\u00f3s (1850) e o fim do tr\u00e1fico",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-01",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a Lei de Terras de 1850",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-01",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a imigra\u00e7\u00e3o europeia e o trabalho livre",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-02",
+          "status": "upcoming"
+        },
+        {
+          "topic": "o Bar\u00e3o de Mau\u00e1 e a primeira industrializa\u00e7\u00e3o",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-02",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a Guerra do Paraguai",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-03",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a Lei do Ventre Livre e a Lei dos Sexagen\u00e1rios",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-03",
+          "status": "upcoming"
+        },
+        {
+          "topic": "o movimento abolicionista",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-04",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a Lei \u00c1urea (1888)",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-04",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a Quest\u00e3o Religiosa e a Quest\u00e3o Militar",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-05",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a Proclama\u00e7\u00e3o da Rep\u00fablica (1889)",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-05",
+          "status": "upcoming"
+        },
+        {
+          "topic": "o p\u00f3s-aboli\u00e7\u00e3o: o que aconteceu com os libertos",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-11-06",
+          "status": "upcoming"
+        },
+        {
+          "topic": "por que o Brasil foi o \u00faltimo pa\u00eds das Am\u00e9ricas a abolir a escravid\u00e3o",
+          "kind": "concept",
+          "level": 3,
+          "day": "2026-11-06",
+          "status": "upcoming"
+        }
+      ]
+    },
+    {
+      "deck": "Hist\u00f3ria do Brasil::06 Rep\u00fablica Velha",
+      "start": "2026-11-07",
+      "last_day": "2026-11-13",
+      "daily_quota": 10,
+      "topics": [
+        {
+          "topic": "o Governo Provis\u00f3rio e a Constitui\u00e7\u00e3o de 1891",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-07",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a Rep\u00fablica da Espada: Deodoro e Floriano",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-07",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a Guerra de Canudos",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-08",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a pol\u00edtica dos governadores",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-08",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a pol\u00edtica do caf\u00e9 com leite",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-09",
+          "status": "upcoming"
+        },
+        {
+          "topic": "o coronelismo e o voto de cabresto",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-09",
+          "status": "upcoming"
+        },
+        {
+          "topic": "o Conv\u00eanio de Taubat\u00e9 e a valoriza\u00e7\u00e3o do caf\u00e9",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-10",
+          "status": "upcoming"
+        },
+        {
+          "topic": "o ciclo da borracha",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-10",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a Revolta da Vacina (1904)",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-11",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a Revolta da Chibata (1910)",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-11",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a Guerra do Contestado",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-12",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a Semana de Arte Moderna de 1922",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-12",
+          "status": "upcoming"
+        },
+        {
+          "topic": "o tenentismo e a Coluna Prestes",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-13",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a crise de 1929 e a Revolu\u00e7\u00e3o de 1930",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-13",
+          "status": "upcoming"
+        }
+      ]
+    },
+    {
+      "deck": "Hist\u00f3ria do Brasil::07 Era Vargas",
+      "start": "2026-11-14",
+      "last_day": "2026-11-19",
+      "daily_quota": 10,
+      "topics": [
+        {
+          "topic": "o Governo Provis\u00f3rio de Vargas (1930-1934)",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-14",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a Revolu\u00e7\u00e3o Constitucionalista de 1932",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-14",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a Constitui\u00e7\u00e3o de 1934 e o voto feminino",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-15",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a A\u00e7\u00e3o Integralista e a Alian\u00e7a Nacional Libertadora",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-15",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a Intentona Comunista de 1935",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-16",
+          "status": "upcoming"
+        },
+        {
+          "topic": "o golpe e o Estado Novo (1937)",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-16",
+          "status": "upcoming"
+        },
+        {
+          "topic": "o DIP, a censura e a propaganda",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-17",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a CLT e o trabalhismo",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-17",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a CSN e a industrializa\u00e7\u00e3o de base",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-18",
+          "status": "upcoming"
+        },
+        {
+          "topic": "o Brasil na Segunda Guerra e a FEB",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-18",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a queda de Vargas em 1945",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-19",
+          "status": "upcoming"
+        },
+        {
+          "topic": "o segundo governo Vargas, a Petrobras e o suic\u00eddio em 1954",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-19",
+          "status": "upcoming"
+        }
+      ]
+    },
+    {
+      "deck": "Hist\u00f3ria do Brasil::08 Rep\u00fablica de 1946 a 1964",
+      "start": "2026-11-20",
+      "last_day": "2026-11-23",
+      "daily_quota": 10,
+      "topics": [
+        {
+          "topic": "Dutra e a Constitui\u00e7\u00e3o de 1946",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-20",
+          "status": "upcoming"
+        },
+        {
+          "topic": "JK e o Plano de Metas",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-20",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a constru\u00e7\u00e3o de Bras\u00edlia",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-21",
+          "status": "upcoming"
+        },
+        {
+          "topic": "J\u00e2nio Quadros e a ren\u00fancia",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-21",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a crise de 1961 e o parlamentarismo",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-22",
+          "status": "upcoming"
+        },
+        {
+          "topic": "Jango e as Reformas de Base",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-22",
+          "status": "upcoming"
+        },
+        {
+          "topic": "o Com\u00edcio da Central e a Marcha da Fam\u00edlia",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-23",
+          "status": "upcoming"
+        },
+        {
+          "topic": "o golpe de 1964",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-23",
+          "status": "upcoming"
+        }
+      ]
+    },
+    {
+      "deck": "Hist\u00f3ria do Brasil::09 Ditadura Militar",
+      "start": "2026-11-24",
+      "last_day": "2026-11-30",
+      "daily_quota": 10,
+      "topics": [
+        {
+          "topic": "Castelo Branco e o AI-1",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-24",
+          "status": "upcoming"
+        },
+        {
+          "topic": "o bipartidarismo: ARENA e MDB",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-24",
+          "status": "upcoming"
+        },
+        {
+          "topic": "o AI-5 (1968)",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-25",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a censura \u00e0 imprensa e \u00e0 cultura",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-25",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a luta armada e as guerrilhas",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-26",
+          "status": "upcoming"
+        },
+        {
+          "topic": "o milagre econ\u00f4mico e a d\u00edvida externa",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-26",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a repress\u00e3o: DOI-CODI e tortura",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-27",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a morte de Vladimir Herzog",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-27",
+          "status": "upcoming"
+        },
+        {
+          "topic": "Geisel e a abertura lenta, gradual e segura",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-28",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a Lei da Anistia (1979)",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-28",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a volta do pluripartidarismo",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-29",
+          "status": "upcoming"
+        },
+        {
+          "topic": "as greves do ABC e o novo sindicalismo",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-29",
+          "status": "upcoming"
+        },
+        {
+          "topic": "as Diretas J\u00e1",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-30",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a elei\u00e7\u00e3o de Tancredo e o fim da ditadura",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-11-30",
+          "status": "upcoming"
+        }
+      ]
+    },
+    {
+      "deck": "Hist\u00f3ria do Brasil::10 Nova Rep\u00fablica",
+      "start": "2026-12-01",
+      "last_day": "2026-12-06",
+      "daily_quota": 10,
+      "topics": [
+        {
+          "topic": "Sarney, a hiperinfla\u00e7\u00e3o e o Plano Cruzado",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-12-01",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a Constitui\u00e7\u00e3o de 1988",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-12-01",
+          "status": "upcoming"
+        },
+        {
+          "topic": "Collor e o confisco da poupan\u00e7a",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-12-02",
+          "status": "upcoming"
+        },
+        {
+          "topic": "o impeachment de Collor",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-12-02",
+          "status": "upcoming"
+        },
+        {
+          "topic": "Itamar Franco e o Plano Real",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-12-03",
+          "status": "upcoming"
+        },
+        {
+          "topic": "FHC: privatiza\u00e7\u00f5es e a reelei\u00e7\u00e3o",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-12-03",
+          "status": "upcoming"
+        },
+        {
+          "topic": "Lula e os programas sociais",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-12-04",
+          "status": "upcoming"
+        },
+        {
+          "topic": "o Mensal\u00e3o",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-12-04",
+          "status": "upcoming"
+        },
+        {
+          "topic": "as Jornadas de Junho de 2013",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-12-05",
+          "status": "upcoming"
+        },
+        {
+          "topic": "a Lava Jato",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-12-05",
+          "status": "upcoming"
+        },
+        {
+          "topic": "o impeachment de Dilma em 2016",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-12-06",
+          "status": "upcoming"
+        },
+        {
+          "topic": "Temer e o teto de gastos",
+          "kind": "concept",
+          "level": 1,
+          "day": "2026-12-06",
+          "status": "upcoming"
+        }
+      ]
+    }
+  ]
+}
