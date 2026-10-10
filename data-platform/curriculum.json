@@ -1,5 +1,5 @@
 {
-  "next_day": "2026-10-20",
+  "next_day": "2026-10-21",
   "decks": [
     {
       "deck": "Data Platform::01 Linux",
@@ -772,56 +772,56 @@
           "kind": "concept",
           "level": 2,
           "day": "2026-10-20",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "slowly changing dimensions: type 1 versus type 2",
           "kind": "concept",
           "level": 2,
           "day": "2026-10-20",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "deduplicating rows with ROW_NUMBER over a partition",
           "kind": "build",
           "level": 2,
           "day": "2026-10-20",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "an upsert with MERGE",
           "kind": "build",
           "level": 2,
           "day": "2026-10-20",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "fact table types: transaction, periodic snapshot and accumulating snapshot",
           "kind": "concept",
           "level": 2,
           "day": "2026-10-21",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "the medallion layers: bronze, silver and gold",
           "kind": "concept",
           "level": 2,
           "day": "2026-10-21",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "dbt: models, ref and the DAG they build",
           "kind": "concept",
           "level": 3,
           "day": "2026-10-21",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "a dbt model and its tests in schema.yml",
           "kind": "build",
           "level": 3,
           "day": "2026-10-21",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "incremental models in dbt",

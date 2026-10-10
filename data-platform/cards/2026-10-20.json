@@ -1,0 +1,150 @@
+{
+  "pipeline": "data-platform",
+  "run_date": "2026-10-20",
+  "cards": [
+    {
+      "deck": "Data Platform::05 Modelling & SQL",
+      "card_type": "basic",
+      "front": "In a type 2 dimension, how does a query pick only each customer's current version?",
+      "back": "It filters on a marker the design adds, such as `is_current = true` or an empty `valid_to` end date.",
+      "topic": "slowly changing dimensions: type 1 versus type 2",
+      "guide_ref": "2.5",
+      "picture": null,
+      "refill": true,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "Data Platform::05 Modelling & SQL",
+      "card_type": "cloze",
+      "front": "Keep only the latest version of each order from a raw table that has duplicates\nWITH ranked AS (\n  SELECT *,\n         [1] [2] (\n           [3] order_id\n           ORDER BY updated_at [4]\n         ) AS rn\n  FROM raw_orders\n)\nSELECT * FROM ranked\n[5];",
+      "back": "[1] ROW_NUMBER(); [2] OVER; [3] PARTITION BY; [4] DESC; [5] WHERE rn = 1",
+      "topic": "deduplicating rows with ROW_NUMBER over a partition",
+      "guide_ref": "3.1",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "Data Platform::05 Modelling & SQL",
+      "card_type": "basic",
+      "front": "A dimension adds a new row each time a customer's city changes. Why can't `customer_id` be its primary key?",
+      "back": "`customer_id` repeats on several rows, one per version, so a surrogate key is added to identify each version.",
+      "topic": "surrogate keys versus natural keys",
+      "guide_ref": "1.1",
+      "picture": "drawn",
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    },
+    {
+      "deck": "Data Platform::05 Modelling & SQL",
+      "card_type": "basic",
+      "front": "What is a surrogate key, compared to a natural key?",
+      "back": "A generated ID with no business meaning, unlike a natural key such as an email or order number.",
+      "topic": "surrogate keys versus natural keys",
+      "guide_ref": "1.3",
+      "picture": null,
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    },
+    {
+      "deck": "Data Platform::05 Modelling & SQL",
+      "card_type": "basic",
+      "front": "Why does `fact_sales` store `customer_key` rather than `customer_id`?",
+      "back": "So each sale joins to the customer version that was current when it happened, e.g. the old city.",
+      "topic": "surrogate keys versus natural keys",
+      "guide_ref": "1.5",
+      "picture": null,
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    },
+    {
+      "deck": "Data Platform::05 Modelling & SQL",
+      "card_type": "basic",
+      "front": "What does a type 2 slowly changing dimension do when an attribute changes?",
+      "back": "It closes the current row and inserts a new row with the new value, keeping every past version.",
+      "topic": "slowly changing dimensions: type 1 versus type 2",
+      "guide_ref": "2.3",
+      "picture": "drawn",
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "Data Platform::05 Modelling & SQL",
+      "card_type": "basic",
+      "front": "Why can an identity surrogate key column in PostgreSQL have gaps, like 1, 2, 5?",
+      "back": "Its sequence hands out numbers outside the transaction, so rolled-back or failed inserts never return theirs.",
+      "topic": "surrogate keys versus natural keys",
+      "guide_ref": "1.4",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "Data Platform::05 Modelling & SQL",
+      "card_type": "basic",
+      "front": "Why does a type 2 dimension need a surrogate key?",
+      "back": "The natural key, such as customer_id, repeats once per version, so only a new key identifies each row.",
+      "topic": "slowly changing dimensions: type 1 versus type 2",
+      "guide_ref": "2.4",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "Data Platform::05 Modelling & SQL",
+      "card_type": "cloze",
+      "front": "Upsert staged customer rows into a dimension table in a single PostgreSQL MERGE statement.\nMERGE INTO dim_customer AS t\n[1] staging_customer AS s\n[2]\n[3]\n  [4] name = s.name, city = s.city\n[5]\n  INSERT (customer_id, name, city)\n  VALUES (s.customer_id, s.name, s.city);",
+      "back": "[1] USING; [2] ON t.customer_id = s.customer_id; [3] WHEN MATCHED THEN; [4] UPDATE SET; [5] WHEN NOT MATCHED THEN",
+      "topic": "an upsert with MERGE",
+      "guide_ref": "4.1",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "Data Platform::05 Modelling & SQL",
+      "card_type": "basic",
+      "front": "If a customer moves city in a type 1 dimension, do their past sales keep the old city?",
+      "back": "No, old sales now join to the new city, so historical reports change after the overwrite.",
+      "topic": "slowly changing dimensions: type 1 versus type 2",
+      "guide_ref": "2.1",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "Data Platform::05 Modelling & SQL",
+      "card_type": "basic",
+      "front": "Does adding a surrogate key stop the same customer being loaded twice?",
+      "back": "No, each duplicate just gets a new key, so you still need a unique check on the natural key.",
+      "topic": "surrogate keys versus natural keys",
+      "guide_ref": "1.2",
+      "picture": null,
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    },
+    {
+      "deck": "Data Platform::05 Modelling & SQL",
+      "card_type": "basic",
+      "front": "In a type 2 design, how does a fact row stay tied to the right version?",
+      "back": "It stores the surrogate key of the dimension version that was current when the event happened.",
+      "topic": "slowly changing dimensions: type 1 versus type 2",
+      "guide_ref": "2.2",
+      "picture": null,
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    }
+  ]
+}
