@@ -1,0 +1,86 @@
+{
+  "pipeline": "data-platform",
+  "name": "Data Platform",
+  "run_id": "38126956176",
+  "run_url": "https://github.com/PedroLFerraz/ankigen/actions/runs/38126956176",
+  "trigger": "schedule",
+  "scheduled_for": "2026-10-11T08:17:00Z",
+  "attempt": 1,
+  "conclusion": "success",
+  "curriculum_date": "2026-10-21",
+  "started_at": "2026-10-11T09:02:55Z",
+  "finished_at": "2026-10-11T09:11:56Z",
+  "artifact": "cards-data-platform-2026-10-21",
+  "cards": {
+    "kept": 16,
+    "dropped": 0,
+    "by_deck": [
+      {
+        "deck": "Data Platform::05 Modelling & SQL",
+        "kept": 16,
+        "generated": 16
+      }
+    ]
+  },
+  "guide": {
+    "chapters": 4,
+    "sections": 20,
+    "disputed": 0,
+    "unchecked": 0,
+    "missing": 0,
+    "pdf": true
+  },
+  "llm_calls": 16,
+  "tokens": {
+    "prompt": 8398,
+    "completion": 5506
+  },
+  "stages": [
+    {
+      "stage": "ingest",
+      "status": "success",
+      "seconds": 0.486
+    },
+    {
+      "stage": "target",
+      "status": "success",
+      "seconds": 0.265
+    },
+    {
+      "stage": "generate",
+      "status": "success",
+      "seconds": 59.559
+    },
+    {
+      "stage": "verify",
+      "status": "success",
+      "seconds": 47.054
+    },
+    {
+      "stage": "dedup",
+      "status": "success",
+      "seconds": 5.108
+    },
+    {
+      "stage": "refill",
+      "status": "success",
+      "seconds": 0.029
+    },
+    {
+      "stage": "images",
+      "status": "success",
+      "seconds": 0.27
+    },
+    {
+      "stage": "guide",
+      "status": "success",
+      "seconds": 366.619
+    },
+    {
+      "stage": "export",
+      "status": "success",
+      "seconds": 0.032
+    }
+  ],
+  "error": null
+}
