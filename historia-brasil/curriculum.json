@@ -1,5 +1,5 @@
 {
-  "next_day": "2026-10-10",
+  "next_day": "2026-10-12",
   "decks": [
     {
       "deck": "Hist\u00f3ria do Brasil::01 Antes de 1500 e a Chegada dos Portugueses",
@@ -12,42 +12,42 @@
           "kind": "concept",
           "level": 1,
           "day": "2026-10-10",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "a expans\u00e3o mar\u00edtima portuguesa e a rota para as \u00cdndias",
           "kind": "concept",
           "level": 1,
           "day": "2026-10-10",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "o Tratado de Tordesilhas (1494)",
           "kind": "concept",
           "level": 1,
           "day": "2026-10-11",
-          "status": "upcoming"
+          "status": "done"
         },
         {
           "topic": "a chegada de Cabral em 1500",
           "kind": "concept",
           "level": 1,
           "day": "2026-10-11",
-          "status": "upcoming"
+          "status": "done"
         },
         {
           "topic": "a carta de Pero Vaz de Caminha",
           "kind": "concept",
           "level": 1,
           "day": "2026-10-12",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "o pau-brasil, o escambo e as feitorias",
           "kind": "concept",
           "level": 1,
           "day": "2026-10-12",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "o per\u00edodo pr\u00e9-colonial (1500-1530) e as expedi\u00e7\u00f5es guarda-costas",

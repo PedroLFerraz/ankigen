@@ -1,0 +1,126 @@
+{
+  "pipeline": "historia-brasil",
+  "run_date": "2026-10-11",
+  "cards": [
+    {
+      "deck": "História do Brasil::01 Antes de 1500 e a Chegada dos Portugueses",
+      "card_type": "basic",
+      "front": "Em que região do atual Brasil a esquadra de Cabral chegou em 1500?",
+      "back": "No litoral sul da atual Bahia, na região de Porto Seguro.",
+      "topic": "a chegada de Cabral em 1500",
+      "guide_ref": "2.2",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::01 Antes de 1500 e a Chegada dos Portugueses",
+      "card_type": "basic",
+      "front": "Em que data a esquadra de Pedro Álvares Cabral chegou ao Brasil?",
+      "back": "Em 22 de abril de 1500.",
+      "topic": "a chegada de Cabral em 1500",
+      "guide_ref": "2.1",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::01 Antes de 1500 e a Chegada dos Portugueses",
+      "card_type": "basic",
+      "front": "Pelo Tratado de Tordesilhas, que parte do Brasil atual ficava com Portugal?",
+      "back": "Só uma faixa no leste, mais ou menos de Belém (PA) até Laguna (SC).",
+      "topic": "o Tratado de Tordesilhas (1494)",
+      "guide_ref": "1.4",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::01 Antes de 1500 e a Chegada dos Portugueses",
+      "card_type": "basic",
+      "front": "Por que Portugal e Espanha assinaram o Tratado de Tordesilhas?",
+      "back": "Depois da viagem de Colombo (1492), os dois disputavam as novas terras e quiseram evitar um conflito.",
+      "topic": "o Tratado de Tordesilhas (1494)",
+      "guide_ref": "1.5",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::01 Antes de 1500 e a Chegada dos Portugueses",
+      "card_type": "basic",
+      "front": "Que documento escrito em 1500 descreveu ao rei de Portugal a chegada à nova terra?",
+      "back": "A carta de Pero Vaz de Caminha ao rei D. Manuel I.",
+      "topic": "a chegada de Cabral em 1500",
+      "guide_ref": "2.5",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::01 Antes de 1500 e a Chegada dos Portugueses",
+      "card_type": "basic",
+      "front": "O que foi o Tratado de Tordesilhas (1494)?",
+      "back": "Um acordo entre Portugal e Espanha que dividiu entre os dois as terras já descobertas e as que seriam descobertas.",
+      "topic": "o Tratado de Tordesilhas (1494)",
+      "guide_ref": "1.3",
+      "picture": null,
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::01 Antes de 1500 e a Chegada dos Portugueses",
+      "card_type": "basic",
+      "front": "Por que muitos historiadores evitam dizer que Cabral \"descobriu\" o Brasil em 1500?",
+      "back": "Porque a terra já era habitada por milhões de indígenas havia milhares de anos.",
+      "topic": "a chegada de Cabral em 1500",
+      "guide_ref": "2.3",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::01 Antes de 1500 e a Chegada dos Portugueses",
+      "card_type": "basic",
+      "front": "Como o Tratado de Tordesilhas dividia as terras?",
+      "back": "Por uma linha imaginária a 370 léguas a oeste de Cabo Verde: o leste ficava com Portugal, o oeste com a Espanha.",
+      "topic": "o Tratado de Tordesilhas (1494)",
+      "guide_ref": "1.2",
+      "picture": null,
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::01 Antes de 1500 e a Chegada dos Portugueses",
+      "card_type": "basic",
+      "front": "Qual era o destino oficial da viagem de Cabral em 1500?",
+      "back": "As Índias, especialmente Calicute, para comprar especiarias e fortalecer o comércio português.",
+      "topic": "a chegada de Cabral em 1500",
+      "guide_ref": "2.4",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::01 Antes de 1500 e a Chegada dos Portugueses",
+      "card_type": "basic",
+      "front": "As fronteiras atuais do Brasil seguem a linha de Tordesilhas?",
+      "back": "Não: os portugueses ocuparam terras a oeste da linha, e o Tratado de Madri (1750) reconheceu isso.",
+      "topic": "o Tratado de Tordesilhas (1494)",
+      "guide_ref": "1.1",
+      "picture": null,
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    }
+  ]
+}
