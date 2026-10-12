@@ -1,0 +1,126 @@
+{
+  "pipeline": "historia-brasil",
+  "run_date": "2026-10-12",
+  "cards": [
+    {
+      "deck": "História do Brasil::01 Antes de 1500 e a Chegada dos Portugueses",
+      "card_type": "basic",
+      "front": "Em que data e lugar Pero Vaz de Caminha concluiu sua carta ao rei D. Manuel I?",
+      "back": "Em 1º de maio de 1500, em Porto Seguro, no litoral da atual Bahia.",
+      "topic": "a carta de Pero Vaz de Caminha",
+      "guide_ref": "1.2",
+      "picture": null,
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::01 Antes de 1500 e a Chegada dos Portugueses",
+      "card_type": "basic",
+      "front": "Que função Pero Vaz de Caminha tinha na esquadra de Cabral em 1500?",
+      "back": "Era o escrivão da esquadra, encarregado de registrar por escrito os acontecimentos da viagem.",
+      "topic": "a carta de Pero Vaz de Caminha",
+      "guide_ref": "1.5",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::01 Antes de 1500 e a Chegada dos Portugueses",
+      "card_type": "basic",
+      "front": "Por que a carta de Pero Vaz de Caminha é chamada de \"certidão de nascimento do Brasil\"?",
+      "back": "Porque é o primeiro documento escrito que descreve a terra e os indígenas do atual Brasil.",
+      "topic": "a carta de Pero Vaz de Caminha",
+      "guide_ref": "1.3",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::01 Antes de 1500 e a Chegada dos Portugueses",
+      "card_type": "basic",
+      "front": "Quando a carta de Pero Vaz de Caminha foi publicada pela primeira vez?",
+      "back": "Só em 1817, mais de três séculos depois; antes ficou guardada no arquivo da Torre do Tombo, em Lisboa.",
+      "topic": "a carta de Pero Vaz de Caminha",
+      "guide_ref": "1.4",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::01 Antes de 1500 e a Chegada dos Portugueses",
+      "card_type": "basic",
+      "front": "Qual foi a principal atividade econômica dos portugueses no Brasil de 1500 a cerca de 1530?",
+      "back": "A extração do pau-brasil, no chamado período pré-colonial.",
+      "topic": "o pau-brasil, o escambo e as feitorias",
+      "guide_ref": "2.4",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::01 Antes de 1500 e a Chegada dos Portugueses",
+      "card_type": "basic",
+      "front": "Quem tinha o direito de explorar o pau-brasil?",
+      "back": "Era monopólio da Coroa portuguesa, que concedia a exploração a comerciantes em troca de pagamento.",
+      "topic": "o pau-brasil, o escambo e as feitorias",
+      "guide_ref": "2.5",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::01 Antes de 1500 e a Chegada dos Portugueses",
+      "card_type": "basic",
+      "front": "O que foi o escambo na extração do pau-brasil?",
+      "back": "A troca, sem dinheiro, do trabalho indígena de cortar e carregar a madeira por objetos como facas e machados.",
+      "topic": "o pau-brasil, o escambo e as feitorias",
+      "guide_ref": "2.2",
+      "picture": null,
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::01 Antes de 1500 e a Chegada dos Portugueses",
+      "card_type": "basic",
+      "front": "O que eram as feitorias no litoral do Brasil?",
+      "back": "Postos simples, às vezes fortificados, onde o pau-brasil ficava guardado até os navios o levarem para a Europa.",
+      "topic": "o pau-brasil, o escambo e as feitorias",
+      "guide_ref": "2.1",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::01 Antes de 1500 e a Chegada dos Portugueses",
+      "card_type": "basic",
+      "front": "A frase \"em se plantando, tudo dá\" aparece literalmente na carta de Caminha?",
+      "back": "Não. A carta diz que, querendo aproveitar a terra, \"dar-se-á nela tudo\"; a frase famosa é uma simplificação posterior.",
+      "topic": "a carta de Pero Vaz de Caminha",
+      "guide_ref": "1.1",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::01 Antes de 1500 e a Chegada dos Portugueses",
+      "card_type": "basic",
+      "front": "Para que os europeus usavam o pau-brasil?",
+      "back": "Da madeira se tirava um corante vermelho, usado na Europa para tingir tecidos.",
+      "topic": "o pau-brasil, o escambo e as feitorias",
+      "guide_ref": "2.3",
+      "picture": "found",
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    }
+  ]
+}

@@ -1,16 +1,16 @@
 {
   "pipeline": "historia-brasil",
   "name": "Hist\u00f3ria do Brasil",
-  "run_id": "38126956176",
-  "run_url": "https://github.com/PedroLFerraz/ankigen/actions/runs/38126956176",
+  "run_id": "38272310731",
+  "run_url": "https://github.com/PedroLFerraz/ankigen/actions/runs/38272310731",
   "trigger": "schedule",
-  "scheduled_for": "2026-10-11T08:23:00Z",
+  "scheduled_for": "2026-10-12T08:23:00Z",
   "attempt": 1,
   "conclusion": "success",
-  "curriculum_date": "2026-10-11",
-  "started_at": "2026-10-11T09:12:05Z",
-  "finished_at": "2026-10-11T09:18:53Z",
-  "artifact": "cards-historia-brasil-2026-10-11",
+  "curriculum_date": "2026-10-12",
+  "started_at": "2026-10-12T15:56:18Z",
+  "finished_at": "2026-10-12T16:03:24Z",
+  "artifact": "cards-historia-brasil-2026-10-12",
   "cards": {
     "kept": 10,
     "dropped": 0,
@@ -30,56 +30,56 @@
     "missing": 0,
     "pdf": true
   },
-  "llm_calls": 8,
+  "llm_calls": 9,
   "tokens": {
-    "prompt": 3694,
-    "completion": 2544
+    "prompt": 4349,
+    "completion": 2448
   },
   "stages": [
     {
       "stage": "ingest",
       "status": "success",
-      "seconds": 1.027
+      "seconds": 0.372
     },
     {
       "stage": "target",
       "status": "success",
-      "seconds": 0.168
+      "seconds": 0.101
     },
     {
       "stage": "generate",
       "status": "success",
-      "seconds": 26.991
+      "seconds": 27.947
     },
     {
       "stage": "verify",
       "status": "success",
-      "seconds": 19.892
+      "seconds": 21.869
     },
     {
       "stage": "dedup",
       "status": "success",
-      "seconds": 129.525
+      "seconds": 3.742
     },
     {
       "stage": "refill",
       "status": "success",
-      "seconds": 0.015
+      "seconds": 0.009
     },
     {
       "stage": "images",
       "status": "success",
-      "seconds": 25.996
+      "seconds": 19.153
     },
     {
       "stage": "guide",
       "status": "success",
-      "seconds": 138.0
+      "seconds": 298.33
     },
     {
       "stage": "export",
       "status": "success",
-      "seconds": 0.043
+      "seconds": 0.028
     }
   ],
   "error": null

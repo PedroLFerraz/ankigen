@@ -1,5 +1,5 @@
 {
-  "next_day": "2026-10-12",
+  "next_day": "2026-10-13",
   "decks": [
     {
       "deck": "Hist\u00f3ria do Brasil::01 Antes de 1500 e a Chegada dos Portugueses",
@@ -40,28 +40,28 @@
           "kind": "concept",
           "level": 1,
           "day": "2026-10-12",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "o pau-brasil, o escambo e as feitorias",
           "kind": "concept",
           "level": 1,
           "day": "2026-10-12",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "o per\u00edodo pr\u00e9-colonial (1500-1530) e as expedi\u00e7\u00f5es guarda-costas",
           "kind": "concept",
           "level": 1,
           "day": "2026-10-13",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "o contato com os ind\u00edgenas: doen\u00e7as, trabalho e resist\u00eancia",
           "kind": "concept",
           "level": 1,
           "day": "2026-10-13",
-          "status": "upcoming"
+          "status": "next"
         }
       ]
     },
