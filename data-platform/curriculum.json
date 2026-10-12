@@ -1,5 +1,5 @@
 {
-  "next_day": "2026-10-22",
+  "next_day": "2026-10-23",
   "decks": [
     {
       "deck": "Data Platform::01 Linux",
@@ -828,35 +828,35 @@
           "kind": "concept",
           "level": 3,
           "day": "2026-10-22",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "reading a query plan to find the expensive step",
           "kind": "concept",
           "level": 3,
           "day": "2026-10-22",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "a join that multiplies rows because the grain was wrong",
           "kind": "scenario",
           "level": 4,
           "day": "2026-10-22",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "a type 2 dimension joined without its validity dates",
           "kind": "scenario",
           "level": 4,
           "day": "2026-10-22",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "data contracts with the teams that produce the data",
           "kind": "concept",
           "level": 4,
           "day": "2026-10-23",
-          "status": "upcoming"
+          "status": "next"
         }
       ]
     },
