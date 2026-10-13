@@ -1,0 +1,66 @@
+{
+  "pipeline": "data-platform",
+  "run_date": "2026-10-23",
+  "cards": [
+    {
+      "deck": "Data Platform::05 Modelling & SQL",
+      "card_type": "basic",
+      "front": "Why should a data contract cover a published interface, such as a view, rather than the producer's internal tables?",
+      "back": "The producer can then refactor its internal tables freely; only the published interface has to stay stable.",
+      "topic": "data contracts with the teams that produce the data",
+      "guide_ref": "1.5",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "Data Platform::05 Modelling & SQL",
+      "card_type": "basic",
+      "front": "A producer adds a new value to a `status` column. Why can that break consumers without any error?",
+      "back": "Their `CASE` mappings send the unknown value to `ELSE` or `NULL`, so reports go quietly wrong.",
+      "topic": "data contracts with the teams that produce the data",
+      "guide_ref": "1.1",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "Data Platform::05 Modelling & SQL",
+      "card_type": "basic",
+      "front": "A producer relaxes a column from `NOT NULL` to nullable. Why is that a breaking change for consumers?",
+      "back": "Consumers assumed a value was always there, so joins, filters and counts can silently drop or miss rows.",
+      "topic": "data contracts with the teams that produce the data",
+      "guide_ref": "1.2",
+      "picture": null,
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    },
+    {
+      "deck": "Data Platform::05 Modelling & SQL",
+      "card_type": "basic",
+      "front": "Why enforce a data contract in the producer's CI rather than only in the consumer's pipeline?",
+      "back": "Consumer checks catch a break after bad data has landed; producer CI blocks the change before it ships.",
+      "topic": "data contracts with the teams that produce the data",
+      "guide_ref": "1.4",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "Data Platform::05 Modelling & SQL",
+      "card_type": "basic",
+      "front": "A producer switches `amount` from cents to euros, keeping the same name and type. Why does a schema check pass?",
+      "back": "Schema checks compare names and types only; units and meaning need their own documented terms and value checks.",
+      "topic": "data contracts with the teams that produce the data",
+      "guide_ref": "1.3",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    }
+  ]
+}

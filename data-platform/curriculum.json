@@ -1,5 +1,5 @@
 {
-  "next_day": "2026-10-23",
+  "next_day": "2026-10-24",
   "decks": [
     {
       "deck": "Data Platform::01 Linux",
@@ -856,7 +856,7 @@
           "kind": "concept",
           "level": 4,
           "day": "2026-10-23",
-          "status": "next"
+          "status": "done"
         }
       ]
     },
@@ -871,28 +871,28 @@
           "kind": "concept",
           "level": 1,
           "day": "2026-10-24",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "images versus containers",
           "kind": "concept",
           "level": 1,
           "day": "2026-10-24",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "containers versus virtual machines",
           "kind": "concept",
           "level": 1,
           "day": "2026-10-24",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "running a container: docker run, -d, --name and --rm",
           "kind": "command",
           "level": 1,
           "day": "2026-10-24",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "ports and environment variables: docker run -p and -e",
