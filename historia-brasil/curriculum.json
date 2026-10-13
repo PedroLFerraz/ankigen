@@ -1,5 +1,5 @@
 {
-  "next_day": "2026-10-13",
+  "next_day": "2026-10-14",
   "decks": [
     {
       "deck": "Hist\u00f3ria do Brasil::01 Antes de 1500 e a Chegada dos Portugueses",
@@ -54,14 +54,14 @@
           "kind": "concept",
           "level": 1,
           "day": "2026-10-13",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "o contato com os ind\u00edgenas: doen\u00e7as, trabalho e resist\u00eancia",
           "kind": "concept",
           "level": 1,
           "day": "2026-10-13",
-          "status": "next"
+          "status": "done"
         }
       ]
     },
@@ -76,14 +76,14 @@
           "kind": "concept",
           "level": 1,
           "day": "2026-10-14",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "o governo-geral e Tom\u00e9 de Sousa",
           "kind": "concept",
           "level": 1,
           "day": "2026-10-14",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "os jesu\u00edtas, a catequese e as miss\u00f5es",

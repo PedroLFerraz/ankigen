@@ -1,0 +1,86 @@
+{
+  "pipeline": "historia-brasil",
+  "name": "Hist\u00f3ria do Brasil",
+  "run_id": "38393569171",
+  "run_url": "https://github.com/PedroLFerraz/ankigen/actions/runs/38393569171",
+  "trigger": "schedule",
+  "scheduled_for": "2026-10-13T08:23:00Z",
+  "attempt": 1,
+  "conclusion": "success",
+  "curriculum_date": "2026-10-13",
+  "started_at": "2026-10-13T11:58:44Z",
+  "finished_at": "2026-10-13T12:03:18Z",
+  "artifact": "cards-historia-brasil-2026-10-13",
+  "cards": {
+    "kept": 10,
+    "dropped": 1,
+    "by_deck": [
+      {
+        "deck": "Hist\u00f3ria do Brasil::01 Antes de 1500 e a Chegada dos Portugueses",
+        "kept": 10,
+        "generated": 11
+      }
+    ]
+  },
+  "guide": {
+    "chapters": 2,
+    "sections": 12,
+    "disputed": 0,
+    "unchecked": 0,
+    "missing": 0,
+    "pdf": true
+  },
+  "llm_calls": 10,
+  "tokens": {
+    "prompt": 4642,
+    "completion": 2900
+  },
+  "stages": [
+    {
+      "stage": "ingest",
+      "status": "success",
+      "seconds": 0.48
+    },
+    {
+      "stage": "target",
+      "status": "success",
+      "seconds": 0.14
+    },
+    {
+      "stage": "generate",
+      "status": "success",
+      "seconds": 31.926
+    },
+    {
+      "stage": "verify",
+      "status": "success",
+      "seconds": 21.036
+    },
+    {
+      "stage": "dedup",
+      "status": "success",
+      "seconds": 4.227
+    },
+    {
+      "stage": "refill",
+      "status": "success",
+      "seconds": 9.787
+    },
+    {
+      "stage": "images",
+      "status": "success",
+      "seconds": 0.021
+    },
+    {
+      "stage": "guide",
+      "status": "success",
+      "seconds": 136.01
+    },
+    {
+      "stage": "export",
+      "status": "success",
+      "seconds": 0.152
+    }
+  ],
+  "error": null
+}

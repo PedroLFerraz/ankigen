@@ -1,0 +1,126 @@
+{
+  "pipeline": "historia-brasil",
+  "run_date": "2026-10-13",
+  "cards": [
+    {
+      "deck": "História do Brasil::01 Antes de 1500 e a Chegada dos Portugueses",
+      "card_type": "basic",
+      "front": "É verdade que Portugal ignorou completamente o Brasil entre 1500 e 1530?",
+      "back": "Não: enviou expedições exploradoras e guarda-costas e montou feitorias, mas não povoou o território.",
+      "topic": "o período pré-colonial (1500-1530) e as expedições guarda-costas",
+      "guide_ref": "1.4",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::01 Antes de 1500 e a Chegada dos Portugueses",
+      "card_type": "basic",
+      "front": "O que foram as expedições guarda-costas no período pré-colonial?",
+      "back": "Expedições portuguesas que patrulhavam o litoral brasileiro para expulsar contrabandistas de pau-brasil, sobretudo franceses.",
+      "topic": "o período pré-colonial (1500-1530) e as expedições guarda-costas",
+      "guide_ref": "1.1",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::01 Antes de 1500 e a Chegada dos Portugueses",
+      "card_type": "basic",
+      "front": "Como os portugueses conseguiam que os indígenas cortassem o pau-brasil no período pré-colonial?",
+      "back": "Pelo escambo: trocavam o trabalho indígena por objetos como machados, facas e espelhos, sem pagar em dinheiro.",
+      "topic": "o período pré-colonial (1500-1530) e as expedições guarda-costas",
+      "guide_ref": "1.5",
+      "picture": null,
+      "refill": true,
+      "near_dup": true,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::01 Antes de 1500 e a Chegada dos Portugueses",
+      "card_type": "basic",
+      "front": "Os portugueses escravizaram indígenas no Brasil colonial?",
+      "back": "Sim. Sobretudo no século XVI, muitos indígenas foram capturados e forçados a trabalhar, por exemplo nos engenhos de açúcar.",
+      "topic": "o contato com os indígenas: doenças, trabalho e resistência",
+      "guide_ref": "2.2",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::01 Antes de 1500 e a Chegada dos Portugueses",
+      "card_type": "basic",
+      "front": "O que foi a Confederação dos Tamoios?",
+      "back": "Uma aliança de povos indígenas do litoral de SP e RJ, apoiada por franceses, contra os portugueses (décadas de 1550-1560).",
+      "topic": "o contato com os indígenas: doenças, trabalho e resistência",
+      "guide_ref": "2.1",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::01 Antes de 1500 e a Chegada dos Portugueses",
+      "card_type": "basic",
+      "front": "Por que os franceses vinham ao litoral do Brasil no período pré-colonial?",
+      "back": "Não aceitavam o Tratado de Tordesilhas e trocavam mercadorias com os indígenas por pau-brasil.",
+      "topic": "o período pré-colonial (1500-1530) e as expedições guarda-costas",
+      "guide_ref": "1.2",
+      "picture": null,
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::01 Antes de 1500 e a Chegada dos Portugueses",
+      "card_type": "basic",
+      "front": "Qual foi a principal causa da morte de indígenas depois da chegada dos europeus?",
+      "back": "As doenças trazidas pelos europeus, como varíola, gripe e sarampo.",
+      "topic": "o contato com os indígenas: doenças, trabalho e resistência",
+      "guide_ref": "2.4",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::01 Antes de 1500 e a Chegada dos Portugueses",
+      "card_type": "basic",
+      "front": "Quem comandou as principais expedições guarda-costas, e em que anos elas partiram?",
+      "back": "Cristóvão Jacques, em expedições que partiram em 1516 e em 1526.",
+      "topic": "o período pré-colonial (1500-1530) e as expedições guarda-costas",
+      "guide_ref": "1.3",
+      "picture": null,
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::01 Antes de 1500 e a Chegada dos Portugueses",
+      "card_type": "basic",
+      "front": "É verdade que os portugueses passaram a usar africanos porque os indígenas eram \"preguiçosos\"?",
+      "back": "Não, é um mito. Os indígenas resistiam e morriam de doenças, e o tráfico de africanos dava lucro.",
+      "topic": "o contato com os indígenas: doenças, trabalho e resistência",
+      "guide_ref": "2.5",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::01 Antes de 1500 e a Chegada dos Portugueses",
+      "card_type": "basic",
+      "front": "Por que as doenças trazidas pelos europeus mataram tantos indígenas?",
+      "back": "Os indígenas nunca tinham tido contato com essas doenças, por isso não tinham defesas (imunidade) contra elas.",
+      "topic": "o contato com os indígenas: doenças, trabalho e resistência",
+      "guide_ref": "2.3",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    }
+  ]
+}
