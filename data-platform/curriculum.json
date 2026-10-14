@@ -1,5 +1,5 @@
 {
-  "next_day": "2026-10-24",
+  "next_day": "2026-10-25",
   "decks": [
     {
       "deck": "Data Platform::01 Linux",
@@ -871,56 +871,56 @@
           "kind": "concept",
           "level": 1,
           "day": "2026-10-24",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "images versus containers",
           "kind": "concept",
           "level": 1,
           "day": "2026-10-24",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "containers versus virtual machines",
           "kind": "concept",
           "level": 1,
           "day": "2026-10-24",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "running a container: docker run, -d, --name and --rm",
           "kind": "command",
           "level": 1,
           "day": "2026-10-24",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "ports and environment variables: docker run -p and -e",
           "kind": "command",
           "level": 1,
           "day": "2026-10-25",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "seeing what runs: docker ps, docker ps -a and docker logs",
           "kind": "command",
           "level": 1,
           "day": "2026-10-25",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "getting inside and stopping: docker exec -it, docker stop and docker rm",
           "kind": "command",
           "level": 1,
           "day": "2026-10-25",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "images: docker pull, docker images and docker rmi",
           "kind": "command",
           "level": 1,
           "day": "2026-10-25",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "a first Dockerfile for a Python script: FROM, COPY and CMD",

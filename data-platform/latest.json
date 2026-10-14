@@ -1,85 +1,85 @@
 {
   "pipeline": "data-platform",
   "name": "Data Platform",
-  "run_id": "38393569171",
-  "run_url": "https://github.com/PedroLFerraz/ankigen/actions/runs/38393569171",
+  "run_id": "38575191409",
+  "run_url": "https://github.com/PedroLFerraz/ankigen/actions/runs/38575191409",
   "trigger": "schedule",
-  "scheduled_for": "2026-10-13T08:17:00Z",
+  "scheduled_for": "2026-10-14T08:17:00Z",
   "attempt": 1,
   "conclusion": "success",
-  "curriculum_date": "2026-10-23",
-  "started_at": "2026-10-13T11:55:37Z",
-  "finished_at": "2026-10-13T11:58:34Z",
-  "artifact": "cards-data-platform-2026-10-23",
+  "curriculum_date": "2026-10-24",
+  "started_at": "2026-10-14T13:50:41Z",
+  "finished_at": "2026-10-14T13:59:04Z",
+  "artifact": "cards-data-platform-2026-10-24",
   "cards": {
-    "kept": 5,
-    "dropped": 0,
+    "kept": 20,
+    "dropped": 4,
     "by_deck": [
       {
-        "deck": "Data Platform::05 Modelling & SQL",
-        "kept": 5,
-        "generated": 5
+        "deck": "Data Platform::06 Docker",
+        "kept": 20,
+        "generated": 24
       }
     ]
   },
   "guide": {
-    "chapters": 1,
-    "sections": 6,
+    "chapters": 4,
+    "sections": 24,
     "disputed": 0,
     "unchecked": 0,
     "missing": 0,
     "pdf": true
   },
-  "llm_calls": 4,
+  "llm_calls": 20,
   "tokens": {
-    "prompt": 2202,
-    "completion": 1202
+    "prompt": 7517,
+    "completion": 5229
   },
   "stages": [
     {
       "stage": "ingest",
       "status": "success",
-      "seconds": 0.526
+      "seconds": 0.502
     },
     {
       "stage": "target",
       "status": "success",
-      "seconds": 0.161
+      "seconds": 0.265
     },
     {
       "stage": "generate",
       "status": "success",
-      "seconds": 14.823
+      "seconds": 55.453
     },
     {
       "stage": "verify",
       "status": "success",
-      "seconds": 3.467
+      "seconds": 30.061
     },
     {
       "stage": "dedup",
       "status": "success",
-      "seconds": 4.702
+      "seconds": 4.645
     },
     {
       "stage": "refill",
       "status": "success",
-      "seconds": 0.055
+      "seconds": 26.222
     },
     {
       "stage": "images",
       "status": "success",
-      "seconds": 0.116
+      "seconds": 0.446
     },
     {
       "stage": "guide",
       "status": "success",
-      "seconds": 97.705
+      "seconds": 331.026
     },
     {
       "stage": "export",
       "status": "success",
-      "seconds": 0.033
+      "seconds": 0.025
     }
   ],
   "error": null
