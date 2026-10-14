@@ -1,24 +1,24 @@
 {
   "pipeline": "historia-brasil",
   "name": "Hist\u00f3ria do Brasil",
-  "run_id": "38393569171",
-  "run_url": "https://github.com/PedroLFerraz/ankigen/actions/runs/38393569171",
+  "run_id": "38575191409",
+  "run_url": "https://github.com/PedroLFerraz/ankigen/actions/runs/38575191409",
   "trigger": "schedule",
-  "scheduled_for": "2026-10-13T08:23:00Z",
+  "scheduled_for": "2026-10-14T08:23:00Z",
   "attempt": 1,
   "conclusion": "success",
-  "curriculum_date": "2026-10-13",
-  "started_at": "2026-10-13T11:58:44Z",
-  "finished_at": "2026-10-13T12:03:18Z",
-  "artifact": "cards-historia-brasil-2026-10-13",
+  "curriculum_date": "2026-10-14",
+  "started_at": "2026-10-14T13:59:16Z",
+  "finished_at": "2026-10-14T14:03:50Z",
+  "artifact": "cards-historia-brasil-2026-10-14",
   "cards": {
     "kept": 10,
-    "dropped": 1,
+    "dropped": 0,
     "by_deck": [
       {
-        "deck": "Hist\u00f3ria do Brasil::01 Antes de 1500 e a Chegada dos Portugueses",
+        "deck": "Hist\u00f3ria do Brasil::02 Brasil Col\u00f4nia",
         "kept": 10,
-        "generated": 11
+        "generated": 10
       }
     ]
   },
@@ -30,56 +30,56 @@
     "missing": 0,
     "pdf": true
   },
-  "llm_calls": 10,
+  "llm_calls": 8,
   "tokens": {
-    "prompt": 4642,
-    "completion": 2900
+    "prompt": 4345,
+    "completion": 1969
   },
   "stages": [
     {
       "stage": "ingest",
       "status": "success",
-      "seconds": 0.48
+      "seconds": 0.46
     },
     {
       "stage": "target",
       "status": "success",
-      "seconds": 0.14
+      "seconds": 0.138
     },
     {
       "stage": "generate",
       "status": "success",
-      "seconds": 31.926
+      "seconds": 21.844
     },
     {
       "stage": "verify",
       "status": "success",
-      "seconds": 21.036
+      "seconds": 13.24
     },
     {
       "stage": "dedup",
       "status": "success",
-      "seconds": 4.227
+      "seconds": 4.415
     },
     {
       "stage": "refill",
       "status": "success",
-      "seconds": 9.787
+      "seconds": 0.016
     },
     {
       "stage": "images",
       "status": "success",
-      "seconds": 0.021
+      "seconds": 21.758
     },
     {
       "stage": "guide",
       "status": "success",
-      "seconds": 136.01
+      "seconds": 157.286
     },
     {
       "stage": "export",
       "status": "success",
-      "seconds": 0.152
+      "seconds": 0.028
     }
   ],
   "error": null

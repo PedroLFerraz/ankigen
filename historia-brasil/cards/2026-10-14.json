@@ -1,0 +1,126 @@
+{
+  "pipeline": "historia-brasil",
+  "run_date": "2026-10-14",
+  "cards": [
+    {
+      "deck": "História do Brasil::02 Brasil Colônia",
+      "card_type": "basic",
+      "front": "A criação do governo-geral acabou com as capitanias hereditárias?",
+      "back": "Não. As capitanias continuaram existindo junto com o governo-geral e só foram extintas em 1759.",
+      "topic": "o governo-geral e Tomé de Sousa",
+      "guide_ref": "2.1",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::02 Brasil Colônia",
+      "card_type": "basic",
+      "front": "Quais capitanias hereditárias deram certo, graças principalmente à cana-de-açúcar?",
+      "back": "Pernambuco e São Vicente; a maioria das outras fracassou.",
+      "topic": "as capitanias hereditárias",
+      "guide_ref": "1.4",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::02 Brasil Colônia",
+      "card_type": "basic",
+      "front": "Por que a Coroa portuguesa criou as capitanias hereditárias?",
+      "back": "Para ocupar e defender a terra contra estrangeiros, como os franceses, sem gastar dinheiro próprio.",
+      "topic": "as capitanias hereditárias",
+      "guide_ref": "1.3",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::02 Brasil Colônia",
+      "card_type": "basic",
+      "front": "Por que a Coroa portuguesa criou o governo-geral no Brasil, em 1548?",
+      "back": "Porque a maioria das capitanias hereditárias fracassou, e a Coroa quis centralizar a administração da colônia.",
+      "topic": "o governo-geral e Tomé de Sousa",
+      "guide_ref": "2.2",
+      "picture": null,
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::02 Brasil Colônia",
+      "card_type": "basic",
+      "front": "Em que ano o rei Dom João III criou as capitanias hereditárias no Brasil?",
+      "back": "Em 1534.",
+      "topic": "as capitanias hereditárias",
+      "guide_ref": "1.1",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::02 Brasil Colônia",
+      "card_type": "basic",
+      "front": "É verdade que o donatário era dono da sua capitania?",
+      "back": "Não. Ele administrava e explorava a terra, mas ela continuava pertencendo ao rei de Portugal.",
+      "topic": "as capitanias hereditárias",
+      "guide_ref": "1.5",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::02 Brasil Colônia",
+      "card_type": "basic",
+      "front": "O que eram as capitanias hereditárias?",
+      "back": "Grandes faixas de terra do litoral, entregues pelo rei a nobres portugueses chamados donatários.",
+      "topic": "as capitanias hereditárias",
+      "guide_ref": "1.2",
+      "picture": null,
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::02 Brasil Colônia",
+      "card_type": "basic",
+      "front": "Que religiosos chegaram ao Brasil com Tomé de Sousa em 1549?",
+      "back": "Os primeiros jesuítas, liderados pelo padre Manuel da Nóbrega, para catequizar os indígenas.",
+      "topic": "o governo-geral e Tomé de Sousa",
+      "guide_ref": "2.4",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::02 Brasil Colônia",
+      "card_type": "basic",
+      "front": "Que cidade Tomé de Sousa fundou em 1549 para ser a sede do governo-geral?",
+      "back": "Salvador, na Bahia, a primeira capital do Brasil, até 1763.",
+      "topic": "o governo-geral e Tomé de Sousa",
+      "guide_ref": "2.3",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::02 Brasil Colônia",
+      "card_type": "basic",
+      "front": "Quem foi o primeiro governador-geral do Brasil?",
+      "back": "Tomé de Sousa, que chegou à colônia em 1549.",
+      "topic": "o governo-geral e Tomé de Sousa",
+      "guide_ref": "2.5",
+      "picture": null,
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    }
+  ]
+}

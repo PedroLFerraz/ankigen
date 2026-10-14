@@ -1,5 +1,5 @@
 {
-  "next_day": "2026-10-14",
+  "next_day": "2026-10-15",
   "decks": [
     {
       "deck": "Hist\u00f3ria do Brasil::01 Antes de 1500 e a Chegada dos Portugueses",
@@ -76,28 +76,28 @@
           "kind": "concept",
           "level": 1,
           "day": "2026-10-14",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "o governo-geral e Tom\u00e9 de Sousa",
           "kind": "concept",
           "level": 1,
           "day": "2026-10-14",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "os jesu\u00edtas, a catequese e as miss\u00f5es",
           "kind": "concept",
           "level": 1,
           "day": "2026-10-15",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "o ciclo do a\u00e7\u00facar e o engenho",
           "kind": "concept",
           "level": 1,
           "day": "2026-10-15",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "o tr\u00e1fico de africanos escravizados",
