@@ -1,85 +1,85 @@
 {
   "pipeline": "data-platform",
   "name": "Data Platform",
-  "run_id": "38575191409",
-  "run_url": "https://github.com/PedroLFerraz/ankigen/actions/runs/38575191409",
+  "run_id": "38729264010",
+  "run_url": "https://github.com/PedroLFerraz/ankigen/actions/runs/38729264010",
   "trigger": "schedule",
-  "scheduled_for": "2026-10-14T08:17:00Z",
+  "scheduled_for": "2026-10-15T08:17:00Z",
   "attempt": 1,
   "conclusion": "success",
-  "curriculum_date": "2026-10-24",
-  "started_at": "2026-10-14T13:50:41Z",
-  "finished_at": "2026-10-14T13:59:04Z",
-  "artifact": "cards-data-platform-2026-10-24",
+  "curriculum_date": "2026-10-25",
+  "started_at": "2026-10-15T11:43:01Z",
+  "finished_at": "2026-10-15T11:50:10Z",
+  "artifact": "cards-data-platform-2026-10-25",
   "cards": {
-    "kept": 20,
-    "dropped": 4,
+    "kept": 19,
+    "dropped": 5,
     "by_deck": [
       {
         "deck": "Data Platform::06 Docker",
-        "kept": 20,
+        "kept": 19,
         "generated": 24
       }
     ]
   },
   "guide": {
     "chapters": 4,
-    "sections": 24,
-    "disputed": 0,
+    "sections": 23,
+    "disputed": 1,
     "unchecked": 0,
     "missing": 0,
     "pdf": true
   },
-  "llm_calls": 20,
+  "llm_calls": 22,
   "tokens": {
-    "prompt": 7517,
-    "completion": 5229
+    "prompt": 6759,
+    "completion": 5547
   },
   "stages": [
     {
       "stage": "ingest",
       "status": "success",
-      "seconds": 0.502
+      "seconds": 0.445
     },
     {
       "stage": "target",
       "status": "success",
-      "seconds": 0.265
+      "seconds": 0.21
     },
     {
       "stage": "generate",
       "status": "success",
-      "seconds": 55.453
+      "seconds": 57.063
     },
     {
       "stage": "verify",
       "status": "success",
-      "seconds": 30.061
+      "seconds": 23.325
     },
     {
       "stage": "dedup",
       "status": "success",
-      "seconds": 4.645
+      "seconds": 4.71
     },
     {
       "stage": "refill",
       "status": "success",
-      "seconds": 26.222
+      "seconds": 39.158
     },
     {
       "stage": "images",
       "status": "success",
-      "seconds": 0.446
+      "seconds": 0.014
     },
     {
       "stage": "guide",
       "status": "success",
-      "seconds": 331.026
+      "seconds": 247.158
     },
     {
       "stage": "export",
       "status": "success",
-      "seconds": 0.025
+      "seconds": 0.029
     }
   ],
   "error": null

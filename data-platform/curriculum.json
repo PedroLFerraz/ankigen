@@ -1,5 +1,5 @@
 {
-  "next_day": "2026-10-25",
+  "next_day": "2026-10-26",
   "decks": [
     {
       "deck": "Data Platform::01 Linux",
@@ -899,56 +899,56 @@
           "kind": "command",
           "level": 1,
           "day": "2026-10-25",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "seeing what runs: docker ps, docker ps -a and docker logs",
           "kind": "command",
           "level": 1,
           "day": "2026-10-25",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "getting inside and stopping: docker exec -it, docker stop and docker rm",
           "kind": "command",
           "level": 1,
           "day": "2026-10-25",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "images: docker pull, docker images and docker rmi",
           "kind": "command",
           "level": 1,
           "day": "2026-10-25",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "a first Dockerfile for a Python script: FROM, COPY and CMD",
           "kind": "build",
           "level": 1,
           "day": "2026-10-26",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "installing dependencies: WORKDIR, COPY requirements.txt and RUN pip install",
           "kind": "build",
           "level": 1,
           "day": "2026-10-26",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "building and tagging an image: docker build -t and the build context",
           "kind": "command",
           "level": 1,
           "day": "2026-10-26",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "layers and the build cache, and ordering a Dockerfile for it",
           "kind": "concept",
           "level": 2,
           "day": "2026-10-26",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "a .dockerignore that keeps the build context small",
