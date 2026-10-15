@@ -1,5 +1,5 @@
 {
-  "next_day": "2026-10-15",
+  "next_day": "2026-10-16",
   "decks": [
     {
       "deck": "Hist\u00f3ria do Brasil::01 Antes de 1500 e a Chegada dos Portugueses",
@@ -90,28 +90,28 @@
           "kind": "concept",
           "level": 1,
           "day": "2026-10-15",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "o ciclo do a\u00e7\u00facar e o engenho",
           "kind": "concept",
           "level": 1,
           "day": "2026-10-15",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "o tr\u00e1fico de africanos escravizados",
           "kind": "concept",
           "level": 1,
           "day": "2026-10-16",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "os quilombos e Palmares",
           "kind": "concept",
           "level": 1,
           "day": "2026-10-16",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "a Uni\u00e3o Ib\u00e9rica (1580-1640)",

@@ -1,0 +1,126 @@
+{
+  "pipeline": "historia-brasil",
+  "run_date": "2026-10-15",
+  "cards": [
+    {
+      "deck": "História do Brasil::02 Brasil Colônia",
+      "card_type": "basic",
+      "front": "Por que o açúcar brasileiro entrou em crise no fim do século XVII?",
+      "back": "Os holandeses, expulsos do Nordeste em 1654, passaram a produzir açúcar nas Antilhas e concorrer com o Brasil.",
+      "topic": "o ciclo do açúcar e o engenho",
+      "guide_ref": "2.3",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::02 Brasil Colônia",
+      "card_type": "basic",
+      "front": "O que eram os aldeamentos, também chamados de missões, criados pelos jesuítas?",
+      "back": "Eram aldeias organizadas pelos jesuítas onde os indígenas viviam reunidos, recebiam a catequese e trabalhavam.",
+      "topic": "os jesuítas, a catequese e as missões",
+      "guide_ref": "1.3",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::02 Brasil Colônia",
+      "card_type": "basic",
+      "front": "Que padre jesuíta ajudou Manuel da Nóbrega a fundar o colégio que deu origem a São Paulo, em 1554?",
+      "back": "José de Anchieta.",
+      "topic": "os jesuítas, a catequese e as missões",
+      "guide_ref": "1.5",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::02 Brasil Colônia",
+      "card_type": "basic",
+      "front": "Em que região do Brasil se concentrou a produção de açúcar nos séculos XVI e XVII?",
+      "back": "No litoral do Nordeste, principalmente em Pernambuco e na Bahia.",
+      "topic": "o ciclo do açúcar e o engenho",
+      "guide_ref": "2.1",
+      "picture": null,
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::02 Brasil Colônia",
+      "card_type": "basic",
+      "front": "Os jesuítas eram contra toda forma de escravidão no Brasil Colônia?",
+      "back": "Não. Combatiam a escravização dos indígenas, mas aceitavam a escravidão africana e também tinham escravos africanos.",
+      "topic": "os jesuítas, a catequese e as missões",
+      "guide_ref": "1.4",
+      "picture": null,
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::02 Brasil Colônia",
+      "card_type": "basic",
+      "front": "O que era a catequese feita pelos jesuítas no Brasil Colônia?",
+      "back": "Era o ensino da fé católica aos indígenas para convertê-los ao cristianismo.",
+      "topic": "os jesuítas, a catequese e as missões",
+      "guide_ref": "1.2",
+      "picture": null,
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::02 Brasil Colônia",
+      "card_type": "basic",
+      "front": "O que era um engenho no Brasil Colônia?",
+      "back": "A fazenda que plantava cana e produzia açúcar, com casa-grande, senzala, moenda e capela.",
+      "topic": "o ciclo do açúcar e o engenho",
+      "guide_ref": "2.2",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::02 Brasil Colônia",
+      "card_type": "basic",
+      "front": "Só africanos foram escravizados nos engenhos de açúcar?",
+      "back": "Não. No início, muitos indígenas foram escravizados; depois, os africanos escravizados se tornaram a maioria.",
+      "topic": "o ciclo do açúcar e o engenho",
+      "guide_ref": "2.5",
+      "picture": null,
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::02 Brasil Colônia",
+      "card_type": "basic",
+      "front": "Por que os portugueses escolheram a cana-de-açúcar para ocupar o Brasil, no século XVI?",
+      "back": "Porque o açúcar valia muito na Europa, e Portugal já o produzia em ilhas atlânticas, como a Madeira.",
+      "topic": "o ciclo do açúcar e o engenho",
+      "guide_ref": "2.4",
+      "picture": null,
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::02 Brasil Colônia",
+      "card_type": "basic",
+      "front": "Em que ano os jesuítas foram expulsos do Brasil, e por ordem de quem?",
+      "back": "Em 1759, por ordem do Marquês de Pombal, ministro do rei de Portugal.",
+      "topic": "os jesuítas, a catequese e as missões",
+      "guide_ref": "1.1",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    }
+  ]
+}
