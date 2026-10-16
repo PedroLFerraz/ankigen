@@ -1,0 +1,150 @@
+{
+  "pipeline": "data-platform",
+  "run_date": "2026-10-26",
+  "cards": [
+    {
+      "deck": "Data Platform::06 Docker",
+      "card_type": "cloze",
+      "front": "Dockerfile for a Python app that installs its dependencies before copying in the rest of the code\nFROM python:3.12-slim\n[1] /app\n[2]\n[3] pip install [4] requirements.txt\n[5]\nCMD [\"python\", \"main.py\"]",
+      "back": "[1] WORKDIR; [2] COPY requirements.txt .; [3] RUN; [4] -r; [5] COPY . .",
+      "topic": "installing dependencies: WORKDIR, COPY requirements.txt and RUN pip install",
+      "guide_ref": "2.1",
+      "picture": null,
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    },
+    {
+      "deck": "Data Platform::06 Docker",
+      "card_type": "command",
+      "front": "Build an image from the Dockerfile in the current directory",
+      "back": "`docker build .` The final `.` is required.",
+      "topic": "building and tagging an image: docker build -t and the build context",
+      "guide_ref": "3.3",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "Data Platform::06 Docker",
+      "card_type": "basic",
+      "front": "Why copy `requirements.txt` and run `pip install` before `COPY . .` in a Dockerfile?",
+      "back": "So editing your code keeps the slow install cached; it reruns only when `requirements.txt` changes.",
+      "topic": "layers and the build cache, and ordering a Dockerfile for it",
+      "guide_ref": "4.5",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "Data Platform::06 Docker",
+      "card_type": "command",
+      "front": "Build an image from the current directory using the file Dockerfile.dev instead of Dockerfile",
+      "back": "`docker build -f Dockerfile.dev .` The `.` is the context, not the file",
+      "topic": "building and tagging an image: docker build -t and the build context",
+      "guide_ref": "3.5",
+      "picture": null,
+      "refill": true,
+      "near_dup": true,
+      "unverified": false
+    },
+    {
+      "deck": "Data Platform::06 Docker",
+      "card_type": "command",
+      "front": "Build an image from the current directory and name it myapp",
+      "back": "`docker build -t myapp .` Without a version, Docker adds `latest`.",
+      "topic": "building and tagging an image: docker build -t and the build context",
+      "guide_ref": "3.2",
+      "picture": null,
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    },
+    {
+      "deck": "Data Platform::06 Docker",
+      "card_type": "cloze",
+      "front": "A Dockerfile that packages one Python script into an image and runs it when a container starts\n[1] python:3.12-slim\n[2] /app\n[3] pip install requests\n[4] app.py .\n[5] [\"python\", \"app.py\"]",
+      "back": "[1] FROM; [2] WORKDIR; [3] RUN; [4] COPY; [5] CMD",
+      "topic": "a first Dockerfile for a Python script: FROM, COPY and CMD",
+      "guide_ref": "1.1",
+      "picture": null,
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    },
+    {
+      "deck": "Data Platform::06 Docker",
+      "card_type": "command",
+      "front": "Add the name myapp:1.0 to the existing local myapp image without rebuilding it",
+      "back": "`docker tag myapp myapp:1.0` No copy: both names point to one image.",
+      "topic": "building and tagging an image: docker build -t and the build context",
+      "guide_ref": "3.1",
+      "picture": null,
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    },
+    {
+      "deck": "Data Platform::06 Docker",
+      "card_type": "basic",
+      "front": "If one Dockerfile step misses the cache, what happens to the steps after it?",
+      "back": "Every later step is rebuilt too, even if those lines did not change.",
+      "topic": "layers and the build cache, and ordering a Dockerfile for it",
+      "guide_ref": "4.2",
+      "picture": "drawn",
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "Data Platform::06 Docker",
+      "card_type": "basic",
+      "front": "Does Docker rerun a cached `RUN apt-get update` when newer packages are available?",
+      "back": "No, the cache only compares the command text, so it reuses the old, possibly stale result.",
+      "topic": "layers and the build cache, and ordering a Dockerfile for it",
+      "guide_ref": "4.1",
+      "picture": null,
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    },
+    {
+      "deck": "Data Platform::06 Docker",
+      "card_type": "command",
+      "front": "Build an image using the app directory as the build context",
+      "back": "`docker build app` A folder to send, not the Dockerfile.",
+      "topic": "building and tagging an image: docker build -t and the build context",
+      "guide_ref": "3.4",
+      "picture": null,
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    },
+    {
+      "deck": "Data Platform::06 Docker",
+      "card_type": "basic",
+      "front": "When does `docker build` reuse a cached layer instead of running the instruction again?",
+      "back": "When the instruction and all steps before it are unchanged; for `COPY`, the copied files must also be unchanged.",
+      "topic": "layers and the build cache, and ordering a Dockerfile for it",
+      "guide_ref": "4.4",
+      "picture": null,
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    },
+    {
+      "deck": "Data Platform::06 Docker",
+      "card_type": "basic",
+      "front": "What is a layer in a Docker image?",
+      "back": "A read-only snapshot of the file changes made by one instruction like `RUN`, `COPY` or `ADD`, stacked on earlier layers.",
+      "topic": "layers and the build cache, and ordering a Dockerfile for it",
+      "guide_ref": "4.3",
+      "picture": null,
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    }
+  ]
+}

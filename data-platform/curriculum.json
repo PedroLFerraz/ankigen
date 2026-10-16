@@ -1,5 +1,5 @@
 {
-  "next_day": "2026-10-26",
+  "next_day": "2026-10-27",
   "decks": [
     {
       "deck": "Data Platform::01 Linux",
@@ -927,56 +927,56 @@
           "kind": "build",
           "level": 1,
           "day": "2026-10-26",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "installing dependencies: WORKDIR, COPY requirements.txt and RUN pip install",
           "kind": "build",
           "level": 1,
           "day": "2026-10-26",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "building and tagging an image: docker build -t and the build context",
           "kind": "command",
           "level": 1,
           "day": "2026-10-26",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "layers and the build cache, and ordering a Dockerfile for it",
           "kind": "concept",
           "level": 2,
           "day": "2026-10-26",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "a .dockerignore that keeps the build context small",
           "kind": "build",
           "level": 2,
           "day": "2026-10-27",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "ENTRYPOINT versus CMD",
           "kind": "concept",
           "level": 2,
           "day": "2026-10-27",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "volumes and bind mounts: docker run -v",
           "kind": "command",
           "level": 2,
           "day": "2026-10-27",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "why files written inside a container disappear",
           "kind": "concept",
           "level": 2,
           "day": "2026-10-27",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "a docker-compose.yml with an app and a Postgres database",
