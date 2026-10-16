@@ -1,0 +1,126 @@
+{
+  "pipeline": "historia-brasil",
+  "run_date": "2026-10-16",
+  "cards": [
+    {
+      "deck": "História do Brasil::02 Brasil Colônia",
+      "card_type": "basic",
+      "front": "Qual lugar das Américas recebeu mais africanos escravizados pelo tráfico?",
+      "back": "O Brasil, que recebeu cerca de 40% de todos os africanos trazidos à força para as Américas.",
+      "topic": "o tráfico de africanos escravizados",
+      "guide_ref": "1.5",
+      "picture": null,
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::02 Brasil Colônia",
+      "card_type": "basic",
+      "front": "Os quilombos, como Palmares, reuniam apenas africanos fugidos?",
+      "back": "Não. Também acolhiam indígenas, brancos pobres e outras pessoas perseguidas ou excluídas da sociedade colonial.",
+      "topic": "os quilombos e Palmares",
+      "guide_ref": "2.3",
+      "picture": null,
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::02 Brasil Colônia",
+      "card_type": "basic",
+      "front": "Por que os navios negreiros eram chamados de \"tumbeiros\"?",
+      "back": "Porque muitos africanos morriam na viagem, por fome, doenças e superlotação; o navio virava uma \"tumba\".",
+      "topic": "o tráfico de africanos escravizados",
+      "guide_ref": "1.4",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::02 Brasil Colônia",
+      "card_type": "basic",
+      "front": "Onde ficava o Quilombo dos Palmares?",
+      "back": "Na Serra da Barriga, no atual estado de Alagoas, na época parte da capitania de Pernambuco.",
+      "topic": "os quilombos e Palmares",
+      "guide_ref": "2.2",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::02 Brasil Colônia",
+      "card_type": "basic",
+      "front": "De quais regiões da África vinham principalmente os africanos trazidos ao Brasil?",
+      "back": "Principalmente da região de Angola e do Congo e da Costa da Mina, na África Ocidental.",
+      "topic": "o tráfico de africanos escravizados",
+      "guide_ref": "1.1",
+      "picture": null,
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::02 Brasil Colônia",
+      "card_type": "basic",
+      "front": "Quem comandou a destruição de Palmares, em 1694?",
+      "back": "O bandeirante paulista Domingos Jorge Velho, contratado pelas autoridades coloniais.",
+      "topic": "os quilombos e Palmares",
+      "guide_ref": "2.5",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::02 Brasil Colônia",
+      "card_type": "basic",
+      "front": "O que era o tráfico negreiro no Brasil Colônia?",
+      "back": "Era o comércio de africanos capturados e trazidos à força pelo oceano Atlântico para trabalhar como escravos no Brasil.",
+      "topic": "o tráfico de africanos escravizados",
+      "guide_ref": "1.2",
+      "picture": null,
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::02 Brasil Colônia",
+      "card_type": "basic",
+      "front": "Por que 20 de novembro é o Dia da Consciência Negra?",
+      "back": "Porque é a data da morte de Zumbi, último líder de Palmares, em 1695.",
+      "topic": "os quilombos e Palmares",
+      "guide_ref": "2.4",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::02 Brasil Colônia",
+      "card_type": "basic",
+      "front": "O que eram os quilombos, no Brasil Colônia?",
+      "back": "Comunidades formadas por escravizados fugidos, geralmente em matas e lugares de difícil acesso.",
+      "topic": "os quilombos e Palmares",
+      "guide_ref": "2.1",
+      "picture": null,
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::02 Brasil Colônia",
+      "card_type": "basic",
+      "front": "Os portugueses capturavam pessoalmente a maioria dos africanos escravizados no interior da África?",
+      "back": "Não. Em geral, compravam-nos de comerciantes e chefes africanos no litoral, trocando-os por tabaco, cachaça e tecidos.",
+      "topic": "o tráfico de africanos escravizados",
+      "guide_ref": "1.3",
+      "picture": null,
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    }
+  ]
+}

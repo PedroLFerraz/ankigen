@@ -1,16 +1,16 @@
 {
   "pipeline": "historia-brasil",
   "name": "Hist\u00f3ria do Brasil",
-  "run_id": "38729264010",
-  "run_url": "https://github.com/PedroLFerraz/ankigen/actions/runs/38729264010",
+  "run_id": "38883839910",
+  "run_url": "https://github.com/PedroLFerraz/ankigen/actions/runs/38883839910",
   "trigger": "schedule",
-  "scheduled_for": "2026-10-15T08:23:00Z",
+  "scheduled_for": "2026-10-16T08:23:00Z",
   "attempt": 1,
   "conclusion": "success",
-  "curriculum_date": "2026-10-15",
-  "started_at": "2026-10-15T11:50:20Z",
-  "finished_at": "2026-10-15T11:55:31Z",
-  "artifact": "cards-historia-brasil-2026-10-15",
+  "curriculum_date": "2026-10-16",
+  "started_at": "2026-10-16T10:03:27Z",
+  "finished_at": "2026-10-16T10:07:45Z",
+  "artifact": "cards-historia-brasil-2026-10-16",
   "cards": {
     "kept": 10,
     "dropped": 0,
@@ -32,8 +32,8 @@
   },
   "llm_calls": 8,
   "tokens": {
-    "prompt": 4326,
-    "completion": 2641
+    "prompt": 4422,
+    "completion": 2555
   },
   "stages": [
     {
@@ -44,42 +44,42 @@
     {
       "stage": "target",
       "status": "success",
-      "seconds": 0.191
+      "seconds": 0.186
     },
     {
       "stage": "generate",
       "status": "success",
-      "seconds": 32.695
+      "seconds": 29.484
     },
     {
       "stage": "verify",
       "status": "success",
-      "seconds": 17.147
+      "seconds": 15.076
     },
     {
       "stage": "dedup",
       "status": "success",
-      "seconds": 4.781
+      "seconds": 4.302
     },
     {
       "stage": "refill",
       "status": "success",
-      "seconds": 0.019
+      "seconds": 0.021
     },
     {
       "stage": "images",
       "status": "success",
-      "seconds": 22.802
+      "seconds": 0.012
     },
     {
       "stage": "guide",
       "status": "success",
-      "seconds": 172.288
+      "seconds": 155.156
     },
     {
       "stage": "export",
       "status": "success",
-      "seconds": 0.033
+      "seconds": 0.036
     }
   ],
   "error": null

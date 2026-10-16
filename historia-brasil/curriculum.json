@@ -1,5 +1,5 @@
 {
-  "next_day": "2026-10-16",
+  "next_day": "2026-10-17",
   "decks": [
     {
       "deck": "Hist\u00f3ria do Brasil::01 Antes de 1500 e a Chegada dos Portugueses",
@@ -104,28 +104,28 @@
           "kind": "concept",
           "level": 1,
           "day": "2026-10-16",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "os quilombos e Palmares",
           "kind": "concept",
           "level": 1,
           "day": "2026-10-16",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "a Uni\u00e3o Ib\u00e9rica (1580-1640)",
           "kind": "concept",
           "level": 1,
           "day": "2026-10-17",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "as invas\u00f5es holandesas e Maur\u00edcio de Nassau",
           "kind": "concept",
           "level": 1,
           "day": "2026-10-17",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "os bandeirantes e a expans\u00e3o para o interior",

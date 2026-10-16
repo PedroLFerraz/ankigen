@@ -1,0 +1,86 @@
+{
+  "pipeline": "historia-brasil",
+  "name": "Hist\u00f3ria do Brasil",
+  "run_id": "38883839910",
+  "run_url": "https://github.com/PedroLFerraz/ankigen/actions/runs/38883839910",
+  "trigger": "schedule",
+  "scheduled_for": "2026-10-16T08:23:00Z",
+  "attempt": 1,
+  "conclusion": "success",
+  "curriculum_date": "2026-10-16",
+  "started_at": "2026-10-16T10:03:27Z",
+  "finished_at": "2026-10-16T10:07:45Z",
+  "artifact": "cards-historia-brasil-2026-10-16",
+  "cards": {
+    "kept": 10,
+    "dropped": 0,
+    "by_deck": [
+      {
+        "deck": "Hist\u00f3ria do Brasil::02 Brasil Col\u00f4nia",
+        "kept": 10,
+        "generated": 10
+      }
+    ]
+  },
+  "guide": {
+    "chapters": 2,
+    "sections": 12,
+    "disputed": 1,
+    "unchecked": 0,
+    "missing": 0,
+    "pdf": true
+  },
+  "llm_calls": 8,
+  "tokens": {
+    "prompt": 4422,
+    "completion": 2555
+  },
+  "stages": [
+    {
+      "stage": "ingest",
+      "status": "success",
+      "seconds": 0.499
+    },
+    {
+      "stage": "target",
+      "status": "success",
+      "seconds": 0.186
+    },
+    {
+      "stage": "generate",
+      "status": "success",
+      "seconds": 29.484
+    },
+    {
+      "stage": "verify",
+      "status": "success",
+      "seconds": 15.076
+    },
+    {
+      "stage": "dedup",
+      "status": "success",
+      "seconds": 4.302
+    },
+    {
+      "stage": "refill",
+      "status": "success",
+      "seconds": 0.021
+    },
+    {
+      "stage": "images",
+      "status": "success",
+      "seconds": 0.012
+    },
+    {
+      "stage": "guide",
+      "status": "success",
+      "seconds": 155.156
+    },
+    {
+      "stage": "export",
+      "status": "success",
+      "seconds": 0.036
+    }
+  ],
+  "error": null
+}
