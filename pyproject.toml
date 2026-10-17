@@ -30,6 +30,8 @@ dependencies = [
     "openai>=1.40",
     "pyarrow>=14",
     "pydantic>=2.5",
+    # `ankigen book`: a book's outline, text and figures.
+    "pypdf>=4.0",
     "pydantic-settings>=2.2",
     "python-dotenv>=1.0",
     "pyyaml>=6.0",
