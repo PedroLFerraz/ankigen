@@ -193,8 +193,6 @@ def card_uid(book: str, question: str) -> str:
 def parse(data, book: str, chapter: Chapter, section: Section, figs: dict[str, Figure],
           deck: str, run_date: date) -> list[dict]:
     """The model's cards as the rows export and push read."""
-    from ankigen.images import inline_src
-
     rows = []
     for item in (data or {}).get("cards", []) if isinstance(data, dict) else []:
         if not isinstance(item, dict):
@@ -205,18 +203,45 @@ def parse(data, book: str, chapter: Chapter, section: Section, figs: dict[str, F
             logger.warning("Skipping card: Q=%r A=%r", q[:60], a[:40])
             continue
         fig = figs.get(clean_field(item.get("figure", "")))
-        rows.append({
-            "card_uid": card_uid(book, q), "card_type": "detailed", "deck": deck,
-            "front": q, "back": a, "run_date": run_date,
-            "fields_json": json.dumps({
-                "Question": html_text(q), "Summary": html_text(a),
-                "Explanation": html_text(ctx) + source_line(book, chapter, section, page),
-                "Image": "", "Reference": "",
-            }, ensure_ascii=False),
-            "visual_html": f'<img src="{inline_src(fig.path)}">' if fig else None,
-            "figure": fig.id if fig else "",
-            "request_reason": f"book::{slug(book)}::ch{chapter.number:02}",
-        })
+        rows.append(_row(book, chapter.number, deck, run_date, q, a,
+                         html_text(ctx) + source_line(book, chapter, section, page), fig))
+    return rows
+
+
+def _row(book: str, chapter: int, deck: str, run_date: date, q: str, a: str,
+         explanation: str, fig: Figure | None) -> dict:
+    """One card as the rows export and push read."""
+    from ankigen.images import inline_src
+
+    return {
+        "card_uid": card_uid(book, q), "card_type": "detailed", "deck": deck,
+        "front": q, "back": a, "run_date": run_date,
+        "fields_json": json.dumps({"Question": html_text(q), "Summary": html_text(a),
+                                   "Explanation": explanation, "Image": "", "Reference": ""},
+                                  ensure_ascii=False),
+        "visual_html": f'<img src="{inline_src(fig.path)}">' if fig else None,
+        "figure": fig.id if fig else "",
+        "request_reason": f"book::{slug(book)}::ch{chapter:02}",
+    }
+
+
+def save(cards: list[dict], path: Path) -> None:
+    """A chapter's cards, readable for review and loadable to push as they are."""
+    path.write_text(json.dumps(
+        [{"question": c["front"], "answer": c["back"], "figure": c["figure"],
+          "explanation": json.loads(c["fields_json"])["Explanation"]} for c in cards],
+        ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def load(path: Path, book: str, chapter: int, deck: str, figures_dir: Path,
+         run_date: date) -> list[dict]:
+    """The cards save() wrote, so the ones reviewed are the ones pushed."""
+    rows = []
+    for c in json.loads(path.read_text(encoding="utf-8")):
+        fig_path = figures_dir / f"figure-{c['figure']}.png"
+        fig = Figure(c["figure"], "", "", fig_path) if c["figure"] and fig_path.exists() else None
+        rows.append(_row(book, chapter, deck, run_date, c["question"], c["answer"],
+                         c["explanation"], fig))
     return rows
 
 

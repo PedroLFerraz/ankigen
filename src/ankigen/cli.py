@@ -394,14 +394,17 @@ def book(
         "new to the field; comfortable with Python and SQL", "--level", help="Who the cards are for."),
     language: str = typer.Option("English", "--language", help="The language to write them in."),
     push_cards: bool = typer.Option(False, "--push", help="Also push them to AnkiWeb."),
+    rewrite: bool = typer.Option(
+        False, "--rewrite", help="Write the chapter again, even if its cards exist."),
 ):
     """Cards from one chapter of a book, written from its text, with its figures.
 
     One model call per section, in the book's order. Each card names the page
     it comes from and carries the book's figure when one shows the idea. The
     chapter goes to its own subdeck (Book::01 Chapter title) and to
-    data/books/<book>/chNN.apkg; writing it again updates those notes rather
-    than adding copies. The PDF stays on this machine.
+    data/books/<book>/chNN.apkg and .json. Once written, the chapter's cards
+    are reused as they are, so the ones reviewed are the ones --push sends.
+    The PDF stays on this machine.
     """
     import re
 
@@ -430,18 +433,21 @@ def book(
     name = re.sub(r"^(chapter|appendix)\s+\w+\.\s*", "", ch.title, flags=re.I)
     deck_name = f"{deck or title}::{ch.number:02} {name}"
     work = settings.work_path / "books" / books.slug(title)
-    today = date.today()
-    llm.preflight()
-    cards = books.write_chapter(reader, title, ch, deck_name, work, level, language, today)
-    if not cards:
-        raise RuntimeError("The model returned no usable cards for this chapter.")
-
     stem = work / f"ch{ch.number:02}"
+    saved = Path(f"{stem}.json")
+    today = date.today()
+    if saved.exists() and not rewrite:
+        # The cards already reviewed, not a fresh set nobody has read.
+        cards = books.load(saved, title, ch.number, deck_name, work / "figures", today)
+        typer.echo(f"Using the cards in {saved} (--rewrite for new ones).")
+    else:
+        llm.preflight()
+        cards = books.write_chapter(reader, title, ch, deck_name, work, level, language, today)
+        if not cards:
+            raise RuntimeError("The model returned no usable cards for this chapter.")
+        books.save(cards, saved)
+
     build_package(today, cards).write_to_file(f"{stem}.apkg")
-    Path(f"{stem}.json").write_text(json.dumps(
-        [{"question": c["front"], "answer": c["back"], "figure": c["figure"],
-          "explanation": json.loads(c["fields_json"])["Explanation"]} for c in cards],
-        ensure_ascii=False, indent=2), encoding="utf-8")
     typer.echo(f"\n{len(cards)} card(s) for {deck_name}:\n")
     for c in cards:
         typer.echo(f"  {'[fig ' + c['figure'] + '] ' if c['figure'] else ''}{c['front']}\n      -> {c['back']}")

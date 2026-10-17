@@ -80,3 +80,11 @@ def test_cards_cite_their_page_and_carry_their_figure(tmp_path):
     assert last["visual_html"] is None
     # Stable, so writing the chapter again updates the same notes.
     assert first["card_uid"] == book.card_uid("The Book", "what does a data engineer build?")
+
+    # Saved for review, loaded back to push: the same notes, figure and all.
+    (tmp_path / "figure-1-1.png").write_bytes((tmp_path / "f.png").read_bytes())
+    book.save([first, last], tmp_path / "ch01.json")
+    again = book.load(tmp_path / "ch01.json", "The Book", 1, "The Book::01 One", tmp_path,
+                      date(2026, 10, 17))
+    keys = ("card_uid", "deck", "fields_json", "visual_html", "request_reason")
+    assert [[c[k] for k in keys] for c in again] == [[c[k] for k in keys] for c in (first, last)]
