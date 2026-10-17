@@ -2,7 +2,7 @@
 # Checked against pipelines/schema.json; the AnkiGen app rewrites this file,
 # so comments here are not kept.
 name: Data Platform
-enabled: true
+enabled: false
 schedule:
   # 05:17 in São Paulo: an odd minute, because GitHub's scheduler drops runs
   # on the hour. Each run writes the next curriculum day.

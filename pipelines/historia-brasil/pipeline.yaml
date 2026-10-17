@@ -1,5 +1,5 @@
 name: História do Brasil
-enabled: true
+enabled: false
 schedule:
   cron: "23 5 * * *"
   timezone: America/Sao_Paulo
