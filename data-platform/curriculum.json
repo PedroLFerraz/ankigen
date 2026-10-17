@@ -1,5 +1,5 @@
 {
-  "next_day": "2026-10-27",
+  "next_day": "2026-10-28",
   "decks": [
     {
       "deck": "Data Platform::01 Linux",
@@ -955,56 +955,56 @@
           "kind": "build",
           "level": 2,
           "day": "2026-10-27",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "ENTRYPOINT versus CMD",
           "kind": "concept",
           "level": 2,
           "day": "2026-10-27",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "volumes and bind mounts: docker run -v",
           "kind": "command",
           "level": 2,
           "day": "2026-10-27",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "why files written inside a container disappear",
           "kind": "concept",
           "level": 2,
           "day": "2026-10-27",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "a docker-compose.yml with an app and a Postgres database",
           "kind": "build",
           "level": 2,
           "day": "2026-10-28",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "Compose commands: up, up -d, down, logs and ps",
           "kind": "command",
           "level": 2,
           "day": "2026-10-28",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "a multi-stage build for a smaller image",
           "kind": "build",
           "level": 3,
           "day": "2026-10-28",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "running as a non-root user with USER",
           "kind": "concept",
           "level": 3,
           "day": "2026-10-28",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "configuration and secrets: what never to bake into an image",
