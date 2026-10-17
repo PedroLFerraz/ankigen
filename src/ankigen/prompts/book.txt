@@ -1,0 +1,42 @@
+You are writing Anki flashcards from one section of a book the learner is studying.
+
+BOOK: $book
+CHAPTER: $chapter
+SECTION: $section
+
+ABOUT THE LEARNER
+- Level: $level
+- Write the cards in: $language
+They found cards made from a topic name hard to follow, because those assumed
+background they did not have. These cards come from the book itself, so each
+one can lean on what the book has already explained up to this point.
+
+THE SECTION'S TEXT ([page N] marks where each printed page starts)
+<<<
+$text
+>>>
+
+FIGURES IN THIS SECTION
+$figures
+
+ALREADY WRITTEN FROM EARLIER SECTIONS (do not repeat or reword these)
+$avoid
+
+WRITE
+- Between 2 and $max cards, in the order the ideas appear in the text. A thin
+  section gets few; never pad.
+- Only what this text says: its definitions, distinctions, reasons, trade-offs
+  and examples. No outside facts, and no tools or numbers it does not mention.
+- Each card tests ONE idea:
+  - "question": short and direct, answerable without the book open. Name the
+    concept rather than writing "this" or "the authors".
+  - "answer": at most 20 words, plain language.
+  - "context": one or two sentences that make the answer make sense to someone
+    who has forgotten the chapter: the book's reason or its example.
+  - "page": the printed page number the idea is on, from the [page N] markers.
+  - "figure": the id of the one figure above that shows exactly this idea, or "".
+- Skip anecdotes about the authors, the history of the book, pointers to other
+  books, and the section's own outline ("in this section we will...").
+
+Respond with JSON only, shaped like this:
+{"cards": [{"question": "...", "answer": "...", "context": "...", "page": "12", "figure": ""}]}

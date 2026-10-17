@@ -363,6 +363,13 @@ def push(
         typer.echo("\nRe-run without --dry-run to sync them to AnkiWeb.")
         return
 
+    _sync_and_push(cards, deck_for)
+
+
+def _sync_and_push(cards: list[dict], deck_for=None) -> None:
+    """Sync down, add, sync up: never behind the collection on AnkiWeb."""
+    from ankigen import push as pusher
+
     auth = pusher._auth()
     col, auth = pusher.open_collection(auth)
     try:
@@ -375,6 +382,75 @@ def push(
     finally:
         col.close()
     typer.echo("\nSync Anki on your devices to pull them down.")
+
+
+@app.command("book")
+def book(
+    pdf: Path = typer.Argument(..., exists=True, dir_okay=False, help="The book, as a PDF."),
+    chapter: Optional[int] = typer.Option(
+        None, "--chapter", "-c", help="The chapter to write, 1 for the first. Blank: list them."),
+    deck: Optional[str] = typer.Option(None, "--deck", help="Parent deck. Blank: the book's title."),
+    level: str = typer.Option(
+        "new to the field; comfortable with Python and SQL", "--level", help="Who the cards are for."),
+    language: str = typer.Option("English", "--language", help="The language to write them in."),
+    push_cards: bool = typer.Option(False, "--push", help="Also push them to AnkiWeb."),
+):
+    """Cards from one chapter of a book, written from its text, with its figures.
+
+    One model call per section, in the book's order. Each card names the page
+    it comes from and carries the book's figure when one shows the idea. The
+    chapter goes to its own subdeck (Book::01 Chapter title) and to
+    data/books/<book>/chNN.apkg; writing it again updates those notes rather
+    than adding copies. The PDF stays on this machine.
+    """
+    import re
+
+    from pypdf import PdfReader
+
+    from ankigen import book as books
+    from ankigen import llm
+    from ankigen.export import build_package, tags_for
+
+    reader = PdfReader(str(pdf))
+    title = books.title_of(pdf)
+    chs = books.chapters(reader)
+    if not chs:
+        raise ValueError(f"{pdf.name} has no chapter bookmarks to split it by.")
+    if chapter is None:
+        typer.echo(f"\n{title}: {len(chs)} chapter(s)\n")
+        for c in chs:
+            typer.echo(f"  {c.number:>2}  {c.title:<62} p. {books.label(reader, c.first)}"
+                       f"–{books.label(reader, c.last)}, {len(c.sections)} section(s)")
+        typer.echo("\nWrite one with --chapter N.")
+        return
+    if not 1 <= chapter <= len(chs):
+        raise typer.BadParameter(f"--chapter must be between 1 and {len(chs)}.")
+
+    ch = chs[chapter - 1]
+    name = re.sub(r"^(chapter|appendix)\s+\w+\.\s*", "", ch.title, flags=re.I)
+    deck_name = f"{deck or title}::{ch.number:02} {name}"
+    work = settings.work_path / "books" / books.slug(title)
+    today = date.today()
+    llm.preflight()
+    cards = books.write_chapter(reader, title, ch, deck_name, work, level, language, today)
+    if not cards:
+        raise RuntimeError("The model returned no usable cards for this chapter.")
+
+    stem = work / f"ch{ch.number:02}"
+    build_package(today, cards).write_to_file(f"{stem}.apkg")
+    Path(f"{stem}.json").write_text(json.dumps(
+        [{"question": c["front"], "answer": c["back"], "figure": c["figure"],
+          "explanation": json.loads(c["fields_json"])["Explanation"]} for c in cards],
+        ensure_ascii=False, indent=2), encoding="utf-8")
+    typer.echo(f"\n{len(cards)} card(s) for {deck_name}:\n")
+    for c in cards:
+        typer.echo(f"  {'[fig ' + c['figure'] + '] ' if c['figure'] else ''}{c['front']}\n      -> {c['back']}")
+    typer.echo(f"\nWrote {stem}.apkg")
+
+    if push_cards:
+        for c in cards:
+            c["tags"] = tags_for(c, today)
+        _sync_and_push(cards)
 
 
 @app.command("parts")
