@@ -1,0 +1,126 @@
+{
+  "pipeline": "historia-brasil",
+  "run_date": "2026-10-17",
+  "cards": [
+    {
+      "deck": "História do Brasil::02 Brasil Colônia",
+      "card_type": "basic",
+      "front": "Por que os holandeses invadiram o Nordeste do Brasil durante a União Ibérica?",
+      "back": "Porque a Holanda estava em guerra com a Espanha e queria controlar o comércio do açúcar.",
+      "topic": "a União Ibérica (1580-1640)",
+      "guide_ref": "1.4",
+      "picture": null,
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::02 Brasil Colônia",
+      "card_type": "basic",
+      "front": "Por que a União Ibérica ajudou o Brasil a crescer para o oeste?",
+      "back": "Com um só rei, a linha de Tordesilhas perdeu importância, e os colonos avançaram para o interior.",
+      "topic": "a União Ibérica (1580-1640)",
+      "guide_ref": "1.3",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::02 Brasil Colônia",
+      "card_type": "basic",
+      "front": "O que foi a União Ibérica (1580-1640)?",
+      "back": "Foi o período em que Portugal e Espanha tiveram o mesmo rei, e o Brasil ficou sob esse rei.",
+      "topic": "a União Ibérica (1580-1640)",
+      "guide_ref": "1.2",
+      "picture": null,
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::02 Brasil Colônia",
+      "card_type": "basic",
+      "front": "O que Maurício de Nassau fez em Recife durante seu governo?",
+      "back": "Modernizou a cidade com pontes, palácios e jardins, e trouxe artistas e cientistas europeus, como o pintor Frans Post.",
+      "topic": "as invasões holandesas e Maurício de Nassau",
+      "guide_ref": "2.2",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::02 Brasil Colônia",
+      "card_type": "basic",
+      "front": "Maurício de Nassau era holandês?",
+      "back": "Não. Era um nobre alemão, contratado pela Companhia das Índias Ocidentais para governar o Brasil holandês (1637-1644).",
+      "topic": "as invasões holandesas e Maurício de Nassau",
+      "guide_ref": "2.1",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::02 Brasil Colônia",
+      "card_type": "basic",
+      "front": "Como terminou a União Ibérica em 1640?",
+      "back": "Com a Restauração: Portugal se separou da Espanha e aclamou Dom João IV como rei.",
+      "topic": "a União Ibérica (1580-1640)",
+      "guide_ref": "1.1",
+      "picture": null,
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::02 Brasil Colônia",
+      "card_type": "basic",
+      "front": "Por que os holandeses invadiram o Brasil no século XVII?",
+      "back": "Pela União Ibérica (1580-1640): a Espanha, inimiga da Holanda, dominava Portugal e proibiu os holandeses de comerciar o açúcar brasileiro.",
+      "topic": "as invasões holandesas e Maurício de Nassau",
+      "guide_ref": "2.3",
+      "picture": null,
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::02 Brasil Colônia",
+      "card_type": "basic",
+      "front": "Por que Portugal passou a ser governado pelo rei da Espanha em 1580?",
+      "back": "Porque Dom Sebastião morreu em 1578 sem filhos, e Filipe II da Espanha herdou o trono português.",
+      "topic": "a União Ibérica (1580-1640)",
+      "guide_ref": "1.5",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::02 Brasil Colônia",
+      "card_type": "basic",
+      "front": "Quando e como os holandeses foram expulsos de vez do Brasil?",
+      "back": "Em 1654, após a Insurreição Pernambucana, com vitórias como as Batalhas dos Guararapes (1648-1649).",
+      "topic": "as invasões holandesas e Maurício de Nassau",
+      "guide_ref": "2.4",
+      "picture": null,
+      "refill": false,
+      "near_dup": false,
+      "unverified": false
+    },
+    {
+      "deck": "História do Brasil::02 Brasil Colônia",
+      "card_type": "basic",
+      "front": "Que região do Brasil os holandeses ocuparam a partir de 1630?",
+      "back": "Pernambuco, a maior região produtora de açúcar; tomaram Olinda e Recife.",
+      "topic": "as invasões holandesas e Maurício de Nassau",
+      "guide_ref": "2.5",
+      "picture": null,
+      "refill": false,
+      "near_dup": true,
+      "unverified": false
+    }
+  ]
+}

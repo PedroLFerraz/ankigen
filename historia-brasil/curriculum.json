@@ -1,5 +1,5 @@
 {
-  "next_day": "2026-10-17",
+  "next_day": "2026-10-18",
   "decks": [
     {
       "deck": "Hist\u00f3ria do Brasil::01 Antes de 1500 e a Chegada dos Portugueses",
@@ -118,28 +118,28 @@
           "kind": "concept",
           "level": 1,
           "day": "2026-10-17",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "as invas\u00f5es holandesas e Maur\u00edcio de Nassau",
           "kind": "concept",
           "level": 1,
           "day": "2026-10-17",
-          "status": "next"
+          "status": "done"
         },
         {
           "topic": "os bandeirantes e a expans\u00e3o para o interior",
           "kind": "concept",
           "level": 1,
           "day": "2026-10-18",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "o ciclo do ouro em Minas Gerais",
           "kind": "concept",
           "level": 1,
           "day": "2026-10-18",
-          "status": "upcoming"
+          "status": "next"
         },
         {
           "topic": "o Tratado de Madri (1750) e as novas fronteiras",
