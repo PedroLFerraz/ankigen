@@ -1,5 +1,9 @@
 # The test suite, on every pull request and every push to master, so a change
 # that breaks the pipeline is caught before the 08:17 run finds it.
+#
+# One job per component, each with only the extras its tests need, so a red
+# check names the part that broke. Then e2e: the whole pipeline, in-process
+# and through the installed `ankigen` command.
 name: tests
 
 on:
@@ -8,7 +12,54 @@ on:
     branches: [master]
 
 jobs:
-  pytest:
+  component:
+    name: ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: ingest, warehouse
+            tests: tests/test_ingest.py tests/test_warehouse.py
+          # breakdown and card_kinds read the anki package for some tests.
+          - name: targeting
+            tests: tests/test_targeting.py tests/test_breakdown.py
+            extras: ",push"
+          - name: generate, verify
+            tests: tests/test_generate_verify.py tests/test_card_kinds.py tests/test_claude.py
+            extras: ",gemini,push"
+          - name: dedup, export
+            tests: tests/test_dedup_export.py
+          - name: images
+            tests: tests/test_images.py tests/test_visuals.py
+            apt: graphviz
+          - name: guide
+            tests: tests/test_guide.py
+            extras: ",guide"
+            apt: libpango-1.0-0 libpangoft2-1.0-0
+          - name: push
+            tests: tests/test_push.py
+            extras: ",push"
+          # Every pipeline's files too, including the ones the app commits: a
+          # bad schedule or two pipelines on one deck show up here, not at 05:17.
+          - name: config, pipelines
+            tests: tests/test_config.py tests/test_pipelines.py tests/test_themes.py tests/test_book.py
+            validate: true
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+      - if: matrix.apt
+        run: sudo apt-get install -y --no-install-recommends ${{ matrix.apt }}
+      - run: pip install ".[dev${{ matrix.extras }}]"
+      - if: matrix.validate
+        run: python -m ankigen pipelines validate
+      - run: python -m pytest -q ${{ matrix.tests }}
+
+  e2e:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -17,11 +68,7 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
-      # Graphviz, [push] for the anki package and [guide] for the PDF, so the
-      # diagram, sync and guide tests run rather than skip.
+      # Everything the daily run installs, so every stage runs as it does there.
       - run: sudo apt-get install -y --no-install-recommends graphviz libpango-1.0-0 libpangoft2-1.0-0
       - run: pip install ".[dev,gemini,push,guide]"
-      # Every pipeline's files, including the ones the app commits: a bad
-      # schedule or two pipelines on one deck show up here, not at 05:17.
-      - run: python -m ankigen pipelines validate
-      - run: python -m pytest -q
+      - run: python -m pytest -q tests/test_e2e.py tests/test_pipeline.py
