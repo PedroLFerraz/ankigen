@@ -1,6 +1,6 @@
-# The build context is the repo root (the image installs the package from
-# source), but only pyproject.toml and src/ are copied. Everything else is
-# transfer cost — data/ alone is 100MB of collection snapshots.
+# The build context is the repo root (the images install the package from
+# source), but only pyproject.toml, src/ and pipelines/ are copied. Everything
+# else is transfer cost — data/ alone is 100MB of collection snapshots.
 .git
 .venv
 data
