@@ -62,6 +62,32 @@ Anki can stay open. It holds the collection exclusively, so the snapshot falls
 back to copying the database with its `-wal` sidecar when the backup API cannot
 get a lock.
 
+### In Docker
+
+The [image](Dockerfile) has everything a run uses: the package with every extra,
+Graphviz and Pango, and the Claude Code CLI. It is about 1.2 GB on disk, 453 MB
+to pull. Your Anki profile folder is mounted read-only at `/anki`, and
+everything the run writes goes to `/data`. Keys come from `--env-file` at run
+time and are never in the image.
+
+```bash
+docker build -t ankigen .
+ANKI=~/.local/share/Anki2/"User 1"                  # the folder holding collection.anki2
+docker run --rm -v "$ANKI":/anki:ro -v ./data:/data ankigen plan     # no key needed
+docker run --rm -v "$ANKI":/anki:ro -v ./data:/data --env-file .env \
+  -e EMBEDDING_PROVIDER=fastembed ankigen run
+```
+
+The package and guide land in `./data/out/<date>/`, the same as above. The
+container runs as uid 1000, because Anki makes the collection readable by its
+owner only; if yours is another uid, add `--user "$(id -u):$(id -g)" -e HOME=/tmp`.
+There is no Ollama in the container, so `-e EMBEDDING_PROVIDER=fastembed`
+overrides an `.env` written for one. The repo's pipelines are in the
+image; pick one with `-e ANKIGEN_PIPELINE=historia-brasil`, or bring your own
+profile with `-v ./profile.yaml:/profile.yaml:ro -e ANKIGEN_PROFILE=/profile.yaml`.
+With no local Anki, do what CI does: skip the `/anki` mount, run `ankigen pull`
+first, and pass `-e ANKI_COLLECTION_PATH=/data/anki/collection.anki2`.
+
 ## What each stage does
 
 | Stage | Reads | Writes | Notes |
@@ -229,7 +255,7 @@ something to be on, so Actions is what actually fires daily.
 1. ✅ **Core pipeline**: personalised, verified, deduplicated, illustrated daily cards.
 2. ✅ **Scheduled**: GitHub Actions daily; an Airflow DAG for local orchestration.
 3. **Feedback loop**: the review history is already ingested — measure whether generated cards lapse more than hand-written ones, and whether illustrated cards stick better.
-4. **Docker**: multi-stage image; the collection and profile mounted read-only.
+4. ✅ **Docker**: multi-stage image; the collection and profile mounted read-only.
 5. **AWS free tier**: S3 `raw/`, `curated/` and `gold/` layers via Terraform, and a least-privilege IAM role.
 6. **Kubernetes**: `CronJob` on `kind`, then `KubernetesPodOperator` per stage.
 7. **Android client**: create, schedule and watch pipelines from a phone, with each run's study guide saved to a folder on it. The backend it drives (pipelines, the hourly tick, the status branch) is in place.
