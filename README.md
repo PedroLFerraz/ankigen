@@ -193,11 +193,6 @@ The tests build real SQLite collections in both Anki schemas and replace the LLM
 and embedding provider with deterministic fakes, so they run offline in a few
 seconds.
 
-> **Non-ASCII paths:** an editable install can't be built from a directory whose
-> path contains characters outside the system codepage, because setuptools
-> writes a `.pth` file in that encoding. pytest is configured with
-> `pythonpath = ["src"]`, and `python -m ankigen` works with `PYTHONPATH=src`.
-
 ## Pipelines, and running them daily
 
 The repository can hold several **pipelines**, one folder each under

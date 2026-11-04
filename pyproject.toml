@@ -60,6 +60,3 @@ ankigen = ["prompts/*.txt"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-# An editable install cannot be built from a path containing U+2800, so tests
-# import the package straight from src/.
-pythonpath = ["src"]
