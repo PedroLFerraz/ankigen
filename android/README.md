@@ -54,16 +54,18 @@ GitHub only dispatches workflows that exist on the default branch.
 
 ## Build
 
-On this machine, run `build-apk.bat` in the repository root: it builds the
-debug APK and drops `AnkiGen.apk` beside it, ready to copy to a phone.
+From `android/`:
 
-Elsewhere:
+```bash
+./gradlew assembleDebug
+```
+
+The APK is `app/build/outputs/apk/debug/app-debug.apk`; copy it to the phone.
+To run the unit tests too, as CI does:
 
 ```bash
 ./gradlew testDebugUnitTest assembleDebug
 ```
 
-Needs JDK 17 (Android Studio's `jbr` works) and the Android SDK. On Windows,
-this repository's folder name contains U+2800, which the Gradle wrapper and the
-test JVM cannot put on a classpath. Build from a drive letter instead:
-`subst A: <repo>`, then run Gradle from `A:\android`.
+Needs JDK 17 and the Android SDK. `local.properties` (git-ignored) sets
+`sdk.dir`, for example `sdk.dir=/home/<you>/Android/Sdk`; or set `ANDROID_HOME`.
