@@ -260,8 +260,10 @@ class Warehouse:
         return [dict(zip(cols, row)) for row in cur.fetchall()]
 
     def scalar(self, sql: str, params: Sequence | None = None):
-        row = self.con.execute(sql, params or []).fetchone()
-        return row[0] if row else None
+        # Read the whole result: DuckDB 2.0 runs nothing else on a connection
+        # that still has unread rows.
+        rows = self.con.execute(sql, params or []).fetchall()
+        return rows[0][0] if rows else None
 
     # --- run bookkeeping ---
 
