@@ -1,0 +1,18 @@
+name: TODO to issue
+
+# A new `TODO:` comment landing on master opens an issue; removing it closes
+# the issue again.
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  todo:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@v6
+      - uses: alstr/todo-to-issue-action@v5
