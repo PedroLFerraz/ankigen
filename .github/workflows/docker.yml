@@ -1,0 +1,77 @@
+# The pipeline image (Dockerfile): built and scanned on every pull request
+# that could change it, and on master also pushed to ghcr.io, tagged with the
+# commit and `latest`. The scan fails the check on a CRITICAL vulnerability
+# that has a fix; its table is in the run's summary.
+#
+# trivy-action is pinned to a commit, not a tag: its tags were once moved to
+# malicious commits (March 2026).
+name: docker
+
+on:
+  pull_request:
+    paths: &image
+      - Dockerfile
+      - .dockerignore
+      - pyproject.toml
+      - "src/**"
+      - "pipelines/**"
+      - .github/workflows/docker.yml
+  push:
+    branches: [master]
+    paths: *image
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write       # ghcr.io/pedrolferraz/ankigen
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: docker/setup-buildx-action@v4
+
+      # Loaded into the runner's Docker so Trivy can scan it before anything
+      # is pushed. The layer cache lives in the Actions cache.
+      - uses: docker/build-push-action@v7
+        with:
+          context: .
+          load: true
+          tags: ankigen:scan
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Scan
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: ankigen:scan
+          severity: CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+          output: trivy.txt
+
+      - name: Scan result
+        if: always()
+        run: |
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          cat trivy.txt >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - if: github.event_name == 'push'
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      # Every layer is in the builder already, so this only pushes.
+      - if: github.event_name == 'push'
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/pedrolferraz/ankigen:${{ github.sha }}
+            ghcr.io/pedrolferraz/ankigen:latest
+          cache-from: type=gha

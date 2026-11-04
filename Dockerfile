@@ -57,5 +57,8 @@ ENV DATA_DIR=/data \
     EMBEDDING_PROVIDER=fastembed
 VOLUME /data
 
+# Links the package on ghcr.io to this repository.
+LABEL org.opencontainers.image.source=https://github.com/PedroLFerraz/ankigen
+
 ENTRYPOINT ["ankigen"]
 CMD ["--help"]

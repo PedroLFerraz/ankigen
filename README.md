@@ -11,6 +11,7 @@
 <p align="center">
   <a href="https://github.com/PedroLFerraz/ankigen/actions/workflows/tests.yml"><img src="https://github.com/PedroLFerraz/ankigen/actions/workflows/tests.yml/badge.svg" alt="tests"></a>
   <a href="https://github.com/PedroLFerraz/ankigen/actions/workflows/tick.yml"><img src="https://github.com/PedroLFerraz/ankigen/actions/workflows/tick.yml/badge.svg" alt="tick"></a>
+  <a href="https://github.com/PedroLFerraz/ankigen/actions/workflows/docker.yml"><img src="https://github.com/PedroLFerraz/ankigen/actions/workflows/docker.yml/badge.svg" alt="docker"></a>
   <img src="https://img.shields.io/badge/python-3.10%2B-3776AB" alt="Python 3.10+">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-lightgrey" alt="MIT license"></a>
 </p>
@@ -66,16 +67,18 @@ get a lock.
 
 The [image](Dockerfile) has everything a run uses: the package with every extra,
 Graphviz and Pango, and the Claude Code CLI. It is about 1.2 GB on disk, 453 MB
-to pull. Your Anki profile folder is mounted read-only at `/anki`, and
-everything the run writes goes to `/data`. Keys come from `--env-file` at run
-time and are never in the image.
+to pull. Every push to `master` that changes it publishes it to ghcr.io, tagged
+with the commit SHA and `latest`. Your Anki profile folder is mounted read-only
+at `/anki`, and everything the run writes goes to `/data`. Keys come from
+`--env-file` at run time and are never in the image.
 
 ```bash
-docker build -t ankigen .
+IMAGE=ghcr.io/pedrolferraz/ankigen
+docker pull "$IMAGE"                                # or build it: docker build -t "$IMAGE" .
 ANKI=~/.local/share/Anki2/"User 1"                  # the folder holding collection.anki2
-docker run --rm -v "$ANKI":/anki:ro -v ./data:/data ankigen plan     # no key needed
+docker run --rm -v "$ANKI":/anki:ro -v ./data:/data "$IMAGE" plan     # no key needed
 docker run --rm -v "$ANKI":/anki:ro -v ./data:/data --env-file .env \
-  -e EMBEDDING_PROVIDER=fastembed ankigen run
+  -e EMBEDDING_PROVIDER=fastembed "$IMAGE" run
 ```
 
 The package and guide land in `./data/out/<date>/`, the same as above. The
