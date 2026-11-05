@@ -34,7 +34,7 @@ ready to schedule with Airflow, containerise, and move to S3 and Kubernetes. See
 the [roadmap](#roadmap).
 
 <p align="center">
-  <img src="docs/pipeline.svg" alt="Idempotent stages — ingest, target, generate, verify, dedup, refill, images, export, report — over a DuckDB warehouse partitioned by run_date" width="100%">
+  <img src="docs/pipeline.svg" alt="Idempotent stages — ingest, target, generate, verify, dedup, refill, images, guide, export, report — over a DuckDB warehouse partitioned by run_date" width="100%">
 </p>
 
 ## Quick start
@@ -59,157 +59,32 @@ delete the few that are redundant. Re-importing the same day's package updates
 those notes instead of duplicating them. (Set `inbox:` in the profile to file
 them in a subdeck instead.)
 
-Anki can stay open. It holds the collection exclusively, so the snapshot falls
-back to copying the database with its `-wal` sidecar when the backup API cannot
-get a lock.
+## Documentation
 
-### In Docker
+[docs/README.md](docs/README.md) lists every part of the project, with a
+page for each: the [CLI](docs/components/cli.md), the
+[daily pipeline](docs/components/daily-pipeline.md) and its
+[warehouse](docs/components/warehouse.md),
+[LLM providers](docs/components/llm-providers.md),
+[profiles and pipelines](docs/components/profiles-and-pipelines.md),
+[card types and prompts](docs/components/card-types-and-prompts.md), the
+[study guide](docs/components/study-guide.md),
+[images](docs/components/images.md),
+[AnkiWeb sync](docs/components/ankiweb-sync.md), and around the package,
+[GitHub Actions](docs/components/github-actions.md), the
+[Android app](docs/components/android-app.md),
+[Airflow](docs/components/airflow.md) and
+[Docker](docs/components/docker.md).
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) explains how they fit together.
 
-The [image](Dockerfile) has everything a run uses: the package with every extra,
-Graphviz and Pango, and the Claude Code CLI. It is about 1.2 GB on disk, 453 MB
-to pull. Every push to `master` that changes it publishes it to ghcr.io, tagged
-with the commit SHA and `latest`. Your Anki profile folder is mounted read-only
-at `/anki`, and everything the run writes goes to `/data`. Keys come from
-`--env-file` at run time and are never in the image.
+**Running it daily without leaving a machine on.** An hourly GitHub Actions
+workflow runs each pipeline at its time, syncs your collection down from
+AnkiWeb, writes the cards and syncs them back, so they appear on your phone
+and desktop with nothing to import. Free on a public repo, with a few
+secrets to set up: see [docs/GITHUB_ACTIONS.md](docs/GITHUB_ACTIONS.md).
 
-```bash
-IMAGE=ghcr.io/pedrolferraz/ankigen
-docker pull "$IMAGE"                                # or build it: docker build -t "$IMAGE" .
-ANKI=~/.local/share/Anki2/"User 1"                  # the folder holding collection.anki2
-docker run --rm -v "$ANKI":/anki:ro -v ./data:/data "$IMAGE" plan     # no key needed
-docker run --rm -v "$ANKI":/anki:ro -v ./data:/data --env-file .env \
-  -e EMBEDDING_PROVIDER=fastembed "$IMAGE" run
-```
-
-The package and guide land in `./data/out/<date>/`, the same as above. The
-container runs as uid 1000, because Anki makes the collection readable by its
-owner only; if yours is another uid, add `--user "$(id -u):$(id -g)" -e HOME=/tmp`.
-There is no Ollama in the container, so `-e EMBEDDING_PROVIDER=fastembed`
-overrides an `.env` written for one. The repo's pipelines are in the
-image; pick one with `-e ANKIGEN_PIPELINE=historia-brasil`, or bring your own
-profile with `-v ./profile.yaml:/profile.yaml:ro -e ANKIGEN_PROFILE=/profile.yaml`.
-With no local Anki, do what CI does: skip the `/anki` mount, run `ankigen pull`
-first, and pass `-e ANKI_COLLECTION_PATH=/data/anki/collection.anki2`.
-
-## What each stage does
-
-| Stage | Reads | Writes | Notes |
-|---|---|---|---|
-| **ingest** | your `collection.anki2` | `raw_notes` (daily snapshot), `raw_revlog` (incremental) | Snapshots through SQLite's backup API, so reviews still in the `-wal` file are included. A plain file copy misses them, and there's a test proving it. Handles both schema generations and any note type, from `Front/Back` to `Frente/Verso`. |
-| **target** | `raw_notes`, profile | `requests` (with the rendered prompt) | Deterministic. The same date always produces the same plan, and topics and weak cards rotate day to day; a deck with a `start:` date covers its topics once, in order. No LLM calls, so `plan` is instant. |
-| **generate** | `requests` | `generated_cards` | The only non-deterministic stage. If one request fails, the rest of the run still goes ahead. |
-| **verify** | `generated_cards` | `verified_cards` | A second LLM pass fact-checks each card, ideally on a *different* model (`VERIFY_MODEL`) — a model marking its own homework shares its blind spots. On real runs it catches roughly a third of what the generator writes. If the checker is down, cards pass through tagged `ankigen::unverified` rather than being dropped. A card whose only fault is its drawn table or diagram keeps its place and loses the picture. |
-| **refill** | requests left short by verify and dedup | more `generated_cards` (flagged `refill`), with their `verified_cards` and `dedup_results` | One more request per short batch, for exactly the cards it lost, showing the model each rejected card and why. The new cards go through the same check and dedup; one round only, so a stubborn topic cannot spend the day's free-tier requests. |
-| **dedup** | the above + `raw_notes` + previous runs | `dedup_results` | Compared against your **whole collection**, not just the target deck — a fact you already have in `DS::SQL` is not new because a run asked for it under Data Platform. Embedding similarity catches rephrasings; fuzzy matching runs over the nearest twenty by meaning. Cards just below the duplicate threshold are kept and tagged `ankigen::near-dup` rather than dropped unseen. |
-| **images** | kept cards wanting one | `card_visuals`, `card_images` | Only for cards whose answer is easier to hold as a picture. Mostly **drawn from the card itself**: the model that writes a card can describe a comparison as a table or a flow as a Graphviz diagram in the same request, so the picture shows exactly what the card says, and the fact-checker checks it along with the card. Cards that need a real picture — a screenshot, a photograph — are searched for on the web, then **shown to the model with the card** and kept only if it actually illustrates it: search engines match the words around a picture, never the picture, so a card about S3's flat namespace once arrived with a stock photo of a basketball player. Everything travels inside the note (inline SVG, HTML tables, small inline JPEGs), so no media sync is needed. |
-| **guide** | kept cards | `guide_sections`, `guide_<date>.pdf` | A **study guide** for the day: a chapter per topic that opens with how the thing works, then a section per card with why the answer is what it is, an example, the usual mistakes, and what is related. Written by the writer's model and read by the checker's; a section it disputes stays in, marked with the dispute. Each card carries its section number under the answer (`Guide 2026-10-03 · §2.3`). Needs the `[guide]` extra for the PDF; without it the guide is HTML. |
-| **export** | `card_outcomes` view | `.apkg`, Parquet | Stable note GUIDs and stable deck and note-type IDs. |
-| **report** | `pipeline_runs` + all of the above | `run_report.json` | Per-stage timings, drops with reasons, and token usage. |
-
-Every stage replaces its own `run_date` partition in a single transaction.
-Re-running any stage for any date is therefore safe. Retrying `dedup` or
-`export` never calls the model and never changes which cards exist.
-
-```bash
-ankigen run --date 2026-09-22 --stage dedup --stage export --stage report
-```
-
-## The profile
-
-A pipeline's `profile.yaml` (`pipelines/data-platform/profile.yaml` by
-default) is where personalisation lives:
-
-```yaml
-learner:
-  level: "working data scientist, moving into data platform"
-  goals: ["Interview-ready on core data science: statistics, SQL, ML"]
-style:
-  max_answer_words: 40
-  examples_per_prompt: 4          # few-shot examples drawn from YOUR cards
-  rules: ["When a concept has a common misconception, target it."]
-weak_cards: {min_lapses: 2, max_ease: 2100, max_per_deck: 1}
-global_quota: 15
-decks:
-  - deck: DS::SQL                 # existing deck: extend it in your own voice
-    daily_quota: 3
-    topics: [window functions, NULL semantics]
-    instructions: Use small SQL snippets in backticks.
-  - deck: Data Platform::Airflow  # a subject you don't have yet
-    new_deck: true
-    topics: [idempotent tasks and safe backfills]
-```
-
-A subject can also be a **curriculum**: a `start:` date, levels from 1 (never
-used it) to 4 (interview), and a *kind* per topic that decides what its cards
-look like. Short cards for the basics, and the long "why" cards only where they
-belong. The dates are the curriculum's own days: each run writes the day after
-the last one in your collection, so the schedule does one a day and running it
-again by hand does the next, and everything after it moves up.
-
-```yaml
-  - deck: Data Platform::01 Linux
-    start: 2026-09-28
-    first_day_quota: 100            # a kickoff day, then daily_quota
-    daily_quota: 20
-    levels:
-      1:
-        - command: "moving around: pwd, cd, ls"           # task -> `cd -`, and back
-        - shortcut: "command history: Ctrl+R and !!"      # task -> `Ctrl+R`, and back
-        - concept: "absolute versus relative paths"       # one-sentence answer
-      2:
-        - build: "a first bash script"                    # one file, several gaps
-      4:
-        - scenario: "a full disk with files still open"   # situation, answer, why
-```
-
-| Kind | Note type | The card |
-|---|---|---|
-| `command`, `shortcut` | AnkiGen Command | A task and its command or keys. Two cards: task to command, and command to what it does. |
-| `concept` | AnkiGen Basic | A short question, an answer of one sentence. |
-| `build` | AnkiGen Cloze | One real file or script in a code block, with a gap per part, and a card per gap. |
-| `scenario` | AnkiGen Detailed | A situation, what happens, and why. |
-
-Every generation prompt is built from:
-
-- your learner profile and style rules;
-- a few real cards from that deck as examples, so new cards match your phrasing and length;
-- the existing cards most related to today's topic, as a do-not-duplicate list (unrelated cards are left out to save tokens);
-- for weak cards, the card you keep failing, with an instruction to approach it from a different angle rather than rephrase it.
-
-`ankigen plan --prompts 3` prints exactly what will be sent.
-
-## LLM providers
-
-Any OpenAI-compatible endpoint works. Set `LLM_PROVIDER` to a preset (`groq`,
-`openrouter`, `nvidia`, `sambanova`, `mistral`, `ollama`) or to `gemini`.
-Two setups are worth knowing:
-
-Embeddings are configured separately, because most free chat APIs serve none.
-Left unset they fall back to **fastembed**, which runs an ONNX model in-process:
-no server, no key, no quota, and the only option that works unchanged on a CI
-runner.
-
-| | Generation | Free limits (measured Sept 2026) |
-|---|---|---|
-| **Most headroom** | `groq` | 1000 requests/day |
-| **Best cards** | `gemini` | 20 requests/day **per model** — far tighter than the blog posts claim |
-| **Offline** | `ollama` | unlimited, and noticeably weaker cards |
-
-A run costs about seven generation calls and seven checking calls, which is why
-`VERIFY_MODEL` pointing at a second model matters on Gemini: it doubles the
-allowance *and* gives an independent opinion.
-
-```
-LLM_PROVIDER=gemini
-GOOGLE_API_KEY=...
-VERIFY_MODEL=gemini-3.5-flash   # a different model checks what the first wrote
-```
-
-If embeddings are configured but unreachable, dedup **fails** rather than
-quietly reporting "no duplicates" — falling back silently once replaced four
-runs of good results with that claim. Fuzzy-only matching has to be asked for.
-
-`ankigen providers` shows the resolved configuration and tests the connection.
+**In Docker.** One image has everything a run uses, published to
+`ghcr.io/pedrolferraz/ankigen`: see [Docker](docs/components/docker.md).
 
 ## Development
 
@@ -220,33 +95,7 @@ python -m pytest
 
 The tests build real SQLite collections in both Anki schemas and replace the LLM
 and embedding provider with deterministic fakes, so they run offline in a few
-seconds.
-
-## Pipelines, and running them daily
-
-The repository can hold several **pipelines**, one folder each under
-`pipelines/`: a `profile.yaml` saying what to teach, and a `pipeline.yaml`
-saying when to run it (a cron in its own time zone), what to produce (the
-study guide PDF, a push to AnkiWeb), which models to use and how many calls a
-run may make. Each pipeline writes to decks of its own, keeps its own
-curriculum and warehouse, and tags its notes `ankigen::pipeline::<id>`.
-
-```bash
-ankigen pipelines list               # every pipeline, and when it runs next
-ankigen pipelines validate           # check them all
-ANKIGEN_PIPELINE=german ankigen run  # one run of one pipeline
-```
-
-Without leaving a machine on: an hourly [GitHub Actions workflow](.github/workflows/tick.yml)
-runs each pipeline at its time, on GitHub's runners, one after another. A run
-syncs your collection down from AnkiWeb, writes the cards, and syncs them back,
-so they appear on your phone and desktop with nothing to import; what it did is
-recorded on the `ankigen-status` branch. Free on a public repo, two secrets to
-set up — see [docs/GITHUB_ACTIONS.md](docs/GITHUB_ACTIONS.md).
-
-There is also an [Airflow stack](infra/airflow/) that runs the same stages
-as one task each, which is the orchestration you would use at work; it needs
-something to be on, so Actions is what actually fires daily.
+seconds. Each component's page says which test files cover it.
 
 ## Roadmap
 
