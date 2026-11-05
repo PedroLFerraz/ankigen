@@ -3,12 +3,13 @@ import io as _io
 import json
 import sqlite3
 import zipfile
+from unittest.mock import MagicMock
 
 import pytest
 from conftest import RUN_DATE
 from PIL import Image
 
-from ankigen import export, generate, images, pipeline
+from ankigen import export, generate, images, llm, pipeline
 from ankigen.profile import Profile
 
 
@@ -513,3 +514,28 @@ def test_a_cloze_hint_keeps_its_first_letter():
     assert values["Extra"] == 'remember the port<br><img src="x.jpg">'
     assert export._with_image("cloze", {"Text": "t", "Extra": ""}, "x.jpg")["Extra"] \
         == '<img src="x.jpg">'
+
+
+def test_looking_at_pictures_counts_on_the_images_stage(wh, monkeypatch, cfg, profile):
+    wh.replace_partition("requests", RUN_DATE,
+                         ("run_date", "request_id", "deck", "topic", "card_type", "n", "reason", "focus", "prompt"),
+                         [(RUN_DATE, "r1", "DS::SQL", "t", "basic", 1, "topic", None, "p")])
+    wh.replace_partition("generated_cards", RUN_DATE, generate.GENERATED_COLUMNS, [
+        (RUN_DATE, "keep", "r1", "DS::SQL", "basic", "Kept?", "y", "{}", "index diagram", "m", 0, 0)])
+    wh.replace_partition("verified_cards", RUN_DATE, ("run_date", "card_uid", "passed", "score", "reason"),
+                         [(RUN_DATE, "keep", True, 0.9, "")])
+    wh.replace_partition("dedup_results", RUN_DATE,
+                         ("run_date", "card_uid", "is_dup", "reason", "similarity"),
+                         [(RUN_DATE, "keep", False, None, None)])
+    answer = MagicMock()
+    answer.choices = [MagicMock(message=MagicMock(content='{"shows": "a b-tree", "helps": true}'))]
+    answer.usage = MagicMock(prompt_tokens=900, completion_tokens=9)
+    client = MagicMock()
+    client.chat.completions.create.return_value = answer
+    monkeypatch.setattr(llm, "_get_openai_client", lambda *a: client)
+    monkeypatch.setattr(images, "fetch_many", lambda jobs, media_dir, verifier=None, **k: [
+        (verifier(b"jpeg", j[2], j[1]), images.ImageResult(j[0], j[1], filename="x.jpg"))[1]
+        for j in jobs])
+
+    detail = pipeline.run_stage(pipeline.Context(cfg, profile, wh), "images", RUN_DATE)
+    assert detail["tokens"] == {cfg.resolve_verify()["model"]: {"prompt": 900, "completion": 9}}

@@ -178,6 +178,12 @@ class FakeLLM:
 
     def __call__(self, prompt: str, max_retries: int = 5, cfg: dict | None = None) -> llm.LLMResult:
         self.calls.append(prompt)
+        result = self.answer(prompt)
+        # What the real call path does with every answer, so stages count tokens.
+        llm.record_tokens(result.model, result.prompt_tokens, result.completion_tokens)
+        return result
+
+    def answer(self, prompt: str) -> llm.LLMResult:
         if "reviewing one chapter of a study guide" in prompt:
             if self.fail_guide_check:
                 raise RuntimeError("429 rate limit")
@@ -186,7 +192,7 @@ class FakeLLM:
                 {"index": int(i), "correct": not any(w in s for w in self.bad_words),
                  "issue": "" if not any(w in s for w in self.bad_words) else "wrong flag"}
                 for i, s in sections
-            ]}, "fake-checker")
+            ]}, "fake-checker", prompt_tokens=80, completion_tokens=20)
         if "writing one chapter of a study guide" in prompt:
             if self.fail_guide:
                 raise self.fail_guide
@@ -204,7 +210,7 @@ class FakeLLM:
                 {"index": int(i), "correct": not any(w in q for w in self.bad_words),
                  "answerable": True, "score": 0.9, "issue": "wrong fact"}
                 for i, q in cards
-            ]}, "fake")
+            ]}, "fake-checker", prompt_tokens=60, completion_tokens=30)
 
         n = int(re.search(r"Write exactly (\d+)", prompt).group(1))
         deck = re.search(r"^DECK: (.*)$", prompt, flags=re.M).group(1)

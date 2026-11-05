@@ -214,16 +214,18 @@ DRY_RUN_STAGES = ("ingest", "target")
 
 def run_stage(ctx: Context, name: str, run_date: date) -> dict:
     ctx.wh.start_stage(run_date, name)
-    calls = llm.calls_made()
+    calls, tokens = llm.calls_made(), llm.tokens_used()
     try:
         detail = STAGES[name](ctx, run_date)
     except Exception as e:
         ctx.wh.finish_stage(run_date, name, "failed",
-                            detail={"error": str(e), "llm_calls": llm.calls_made() - calls})
+                            detail={"error": str(e), "llm_calls": llm.calls_made() - calls,
+                                    "tokens": llm.tokens_since(tokens)})
         raise
     # Counted per stage, so the report adds them up however the stages ran:
     # in one process, or one Airflow task each.
     detail["llm_calls"] = llm.calls_made() - calls
+    detail["tokens"] = llm.tokens_since(tokens)
     rows = next((detail[k] for k in ("sections", "cards", "notes", "requests", "checked", "kept") if k in detail), 0)
     ctx.wh.finish_stage(run_date, name, "success", rows_out=rows if isinstance(rows, int) else 0, detail=detail)
     logger.info("stage %-8s ok  %s", name, detail)

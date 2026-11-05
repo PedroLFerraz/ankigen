@@ -85,6 +85,24 @@ def test_json_mode_rejection_falls_back_and_is_remembered(monkeypatch):
     assert "m" in llm._no_json_mode
 
 
+
+def test_an_answer_that_is_not_json_still_counts_its_tokens(monkeypatch):
+    monkeypatch.setattr(llm, "_no_json_mode", set())
+    answers = []
+    for content in ("not json", '{"ok": true}'):
+        resp = MagicMock(error=None)
+        resp.choices = [MagicMock(message=MagicMock(content=content))]
+        resp.usage = MagicMock(prompt_tokens=7, completion_tokens=3)
+        answers.append(resp)
+    client = MagicMock()
+    client.chat.completions.create.side_effect = answers
+    monkeypatch.setattr(llm, "_get_openai_client", lambda *a: client)
+    before = llm.tokens_used()
+    result = llm._call_one_model("p", {"provider": "groq", "base_url": "u", "api_key": "k"},
+                                 "counted", max_retries=2)
+    assert result.data == {"ok": True}
+    assert llm.tokens_since(before) == {"counted": {"prompt": 14, "completion": 6}}
+
 def test_unrelated_errors_are_not_swallowed(monkeypatch):
     monkeypatch.setattr(llm, "_no_json_mode", set())
     client = MagicMock()
