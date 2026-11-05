@@ -7,6 +7,10 @@ the same code run three ways without changes:
     ankigen run                      all stages in one process
     ankigen run --stage verify       one stage (debugging, or one Airflow task)
     Airflow / Kubernetes             one task or pod per stage
+
+A stage never calls another stage: whatever it needs from an earlier one, it
+reads from the warehouse. Each stage's docstring says which tables it reads,
+which it writes, and what a failure part of the way through leaves behind.
 """
 from __future__ import annotations
 
@@ -38,6 +42,9 @@ class AdHoc:
 
 @dataclass
 class Context:
+    """Everything a stage is given besides the date: settings, profile and
+    the open warehouse. Nothing in it is state one stage leaves for another;
+    that goes through the warehouse."""
     settings: Settings
     profile: Profile
     wh: Warehouse
@@ -48,14 +55,19 @@ class Context:
 
     @property
     def raw_dir(self) -> Path:
+        """Collection snapshots, a folder per run_date."""
         return self.settings.work_path / "raw"
 
     @property
     def out_dir(self) -> Path:
+        """What a run makes for people (package, guide, report), a folder per run_date."""
         return self.settings.work_path / "out"
 
 
 def open_context(profile_path: str | None = None, cfg: Settings | None = None) -> Context:
+    """A context for the configured pipeline: its profile (or `profile_path`),
+    its pipeline.yaml when ANKIGEN_PIPELINE names one, and its warehouse.
+    The caller closes `ctx.wh`."""
     cfg = cfg or settings
     profile = load_profile(profile_path or cfg.profile_path())
     spec = pipelines.load(cfg.ankigen_pipeline, cfg).spec if cfg.ankigen_pipeline else None
@@ -66,10 +78,30 @@ def open_context(profile_path: str | None = None, cfg: Settings | None = None) -
 # --------------------------------------------------------------- stages
 
 def stage_ingest(ctx: Context, run_date: date) -> dict:
+    """Snapshot the Anki collection and load it.
+
+    Reads: the live collection, through a snapshot in raw_dir/<run_date>/.
+    Writes: raw_notes (replaces the partition, and drops snapshots older than
+    two weeks); raw_revlog (appends reviews newer than the last loaded, by id).
+
+    The only stage that reads outside the warehouse. A collection that cannot
+    be read fails before anything is written. Reviews are inserted with
+    INSERT OR IGNORE, so a rerun after a failure between the two loads adds
+    nothing twice.
+    """
     return ingest.ingest(ctx.wh, run_date, ctx.settings.anki_collection_path, ctx.raw_dir)
 
 
 def stage_target(ctx: Context, run_date: date) -> dict:
+    """Decide what to generate, and render each request's prompt.
+
+    Reads: raw_notes. Writes: requests (replaces the partition).
+
+    Deterministic and free of model calls. A day with no ingested notes, or a
+    profile that does not match the collection (a deck missing and not marked
+    `new_deck`), fails before writing, leaving the day's earlier requests as
+    they were.
+    """
     notes = ingest.load_notes(ctx.wh, run_date)
     if not notes:
         raise RuntimeError(f"No ingested notes for {run_date}. Run the ingest stage first.")
@@ -93,18 +125,55 @@ def stage_target(ctx: Context, run_date: date) -> dict:
 
 
 def stage_generate(ctx: Context, run_date: date) -> dict:
+    """Ask the writer's model for each request's cards.
+
+    Reads: requests. Writes: generated_cards (replaces the partition, the
+    refill stage's cards included).
+
+    A request that fails is logged and skipped; a quota that runs out skips
+    the rest. The stage fails only when no request produced a card, and it
+    writes the empty partition first, so later stages do not see the last
+    attempt's cards.
+    """
     return generate.run(ctx.wh, run_date, targeting.load_requests(ctx.wh, run_date))
 
 
 def stage_verify(ctx: Context, run_date: date) -> dict:
+    """Fact-check every generated card with the checker's model.
+
+    Reads: generated_cards. Writes: verified_cards (replaces the partition).
+
+    A checker that fails or runs out of quota does not fail the stage: its
+    cards pass, marked unverified, and the report counts them.
+    """
     return verify.run(ctx.wh, run_date, ctx.profile)
 
 
 def stage_dedup(ctx: Context, run_date: date) -> dict:
+    """Drop the cards that passed verify but repeat one already studied.
+
+    Reads: generated_cards and verified_cards, raw_notes, and card_outcomes
+    for cards kept on earlier days; embedding_cache, which it also adds to.
+    Writes: dedup_results (replaces the partition).
+
+    Configured embeddings that fail fail the stage before it writes, so a
+    fuzzy-only pass never overwrites a good result with "no duplicates".
+    """
     return dedup.run(ctx.wh, run_date)
 
 
 def stage_refill(ctx: Context, run_date: date) -> dict:
+    """Ask once more for the cards verify and dedup dropped.
+
+    Reads: card_outcomes and requests, and needs verify and dedup to have run.
+    Writes: rows flagged `refill` in generated_cards, with their own rows in
+    verified_cards and dedup_results. It does not replace whole partitions:
+    it deletes the previous refill's rows and adds new ones.
+
+    A request that fails leaves the day as it was. A rerun clears the refill
+    rows before asking again, so a failure part of the way through is undone
+    on the next attempt.
+    """
     return refill.run(ctx.wh, run_date, ctx.profile)
 
 
@@ -115,6 +184,13 @@ def stage_images(ctx: Context, run_date: date) -> dict:
     A card the model described a picture for gets that picture drawn, and is
     not searched for: the drawing is of exactly what the card says. Search is
     for the cards left over that asked for a real picture.
+
+    Reads: card_outcomes (kept cards in decks that want images). Writes:
+    card_visuals and card_images (replaces both partitions), and the image
+    files in work_path/media.
+
+    One card's failure is recorded on its row (no html, or no filename, and
+    why in `detail`) instead of failing the stage.
     """
     rows = ctx.wh.query(
         """SELECT card_uid, deck, image_query, visual_json, visual_ok, front, back
@@ -180,11 +256,28 @@ def stage_images(ctx: Context, run_date: date) -> dict:
 def stage_guide(ctx: Context, run_date: date) -> dict:
     """A study guide explaining the kept cards in depth. After images, so it
     can show the drawn tables and diagrams; before export, so the notes can
-    carry their section number."""
+    carry their section number.
+
+    Reads: card_outcomes and requests. Writes: guide_sections (replaces the
+    partition), and out_dir/<run_date>/guide_<run_date>.html and .pdf.
+
+    Model failures do not fail the stage: a chapter that could not be written
+    or checked is marked so in the guide, and its rows say why.
+    """
     return guide.run(ctx.wh, run_date, ctx.profile, ctx.out_dir)
 
 
 def stage_export(ctx: Context, run_date: date) -> dict:
+    """Package the kept cards for Anki.
+
+    Reads: card_outcomes, and the images in work_path/media. Writes no table:
+    out_dir/<run_date>/ankigen_<run_date>.apkg and cards.json, and the day's
+    requests, generated_cards, verified_cards and dedup_results as Parquet
+    under work_path/curated.
+
+    The previous package is deleted first, so a rerun that keeps nothing
+    leaves no stale .apkg to import.
+    """
     result = export.run(ctx.wh, run_date, ctx.out_dir, ctx.profile,
                         media_dir=ctx.settings.work_path / "media",
                         pipeline_id=ctx.settings.ankigen_pipeline)
@@ -193,6 +286,12 @@ def stage_export(ctx: Context, run_date: date) -> dict:
 
 
 def stage_report(ctx: Context, run_date: date) -> dict:
+    """Write the run report.
+
+    Reads: pipeline_runs, card_outcomes and card_images. Writes no table:
+    out_dir/<run_date>/run_report.json. Last, so every other stage's status
+    and timing is final.
+    """
     return export.write_report(ctx.wh, run_date, ctx.out_dir)
 
 
@@ -213,6 +312,8 @@ DRY_RUN_STAGES = ("ingest", "target")
 
 
 def run_stage(ctx: Context, name: str, run_date: date) -> dict:
+    """Run one stage and record it in pipeline_runs: "success" with its
+    detail and model calls, or "failed" with the error, which is re-raised."""
     ctx.wh.start_stage(run_date, name)
     calls = llm.calls_made()
     try:
@@ -256,6 +357,8 @@ def default_stages(ctx: Context) -> list[str]:
 
 
 def run(ctx: Context, run_date: date, stages: list[str] | None = None, dry_run: bool = False) -> dict:
+    """Run `stages` (default: `default_stages`) in order, stopping at the
+    first that fails. A dry run is ingest and target only, with no model call."""
     names = list(DRY_RUN_STAGES) if dry_run else (stages or default_stages(ctx))
     unknown = [s for s in names if s not in STAGES]
     if unknown:

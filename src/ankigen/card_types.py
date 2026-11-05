@@ -220,4 +220,5 @@ CARD_TYPES = {
 
 
 def get_card_type(name: str) -> dict | None:
+    """A card type's definition by name, or None for a name with none."""
     return CARD_TYPES.get(name)

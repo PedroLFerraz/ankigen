@@ -1,3 +1,24 @@
+"""Settings: which models write and check the cards, and where everything lives.
+
+Every field of `Settings` is an environment variable of the same name in
+capitals (LLM_PROVIDER, VERIFY_MODEL, ...). A variable set in the environment
+wins over the same one in `.env`, which wins over the default here. `.env` is
+read from BASE_DIR: the repository root when running from a checkout, else the
+working directory, as in a container with the package installed. A missing
+`.env` is fine, and keys it has that are not settings are ignored.
+
+Providers come three ways. The ones in PROVIDERS speak the OpenAI protocol and
+differ only by preset (base URL, model, embedding model); Gemini goes through
+google-genai; Claude through the Claude Code CLI on a subscription login. A
+provider's models are a chain, best first ("a,b,c"), walked as each one runs
+out or stays busy. The writer (LLM_PROVIDER), the checker (VERIFY_*), a
+fallback provider for when the writer's cannot answer at all (FALLBACK_*) and
+the embeddings (EMBEDDING_*) are set separately, and the `resolve_*` methods
+turn them into the plain config dicts llm.py and dedup.py call with.
+
+`settings` is read once, at import. A pipeline's pipeline.yaml reaches it as
+environment variables (see pipelines.env), not through this module.
+"""
 import os
 from pathlib import Path
 
@@ -37,7 +58,7 @@ PROVIDERS: dict[str, dict] = {
     "groq": {
         "label": "Groq",
         # Verified against console.groq.com/docs/models. Groq retires model IDs
-        # fairly often — `python cli.py providers` will surface a 404 as a
+        # fairly often — `ankigen providers` will surface a 404 as a
         # failed connection check.
         "base_url": "https://api.groq.com/openai/v1",
         "model": "openai/gpt-oss-120b",
@@ -93,7 +114,7 @@ PROVIDERS: dict[str, dict] = {
 }
 
 # Reached through google-genai rather than the OpenAI SDK, so it is handled
-# on its own path in agents.py / embeddings.py.
+# on its own path in llm.py / dedup.py.
 NATIVE_PROVIDERS = {"gemini"}
 # Reached through the Claude Code CLI, on a subscription login (see llm.py).
 CLAUDE = "claude"
@@ -113,6 +134,7 @@ DEFAULT_PIPELINE = "data-platform"
 
 
 def provider_names() -> list[str]:
+    """Every value LLM_PROVIDER, VERIFY_PROVIDER and FALLBACK_PROVIDER accept."""
     return sorted(PROVIDERS) + sorted(NATIVE_PROVIDERS) + [CLAUDE]
 
 
@@ -147,6 +169,11 @@ def ensure_free(provider: str, model: str, allow_paid: bool) -> None:
 
 
 class Settings(BaseSettings):
+    """Every setting, read from the environment and `.env` (see the module
+    docstring). An empty model or provider setting means "derive it": from
+    the provider's preset, or from the writer's for the checker and the
+    embeddings."""
+
     # Which provider generates cards. Any key of PROVIDERS, or "gemini".
     llm_provider: str = "ollama"
 
@@ -245,6 +272,7 @@ class Settings(BaseSettings):
 
     @property
     def data_path(self) -> Path:
+        """DATA_DIR, shared by every pipeline; see `work_path` for one pipeline's."""
         return Path(self.data_dir)
 
     @property
@@ -256,6 +284,8 @@ class Settings(BaseSettings):
         return self.data_path
 
     def profile_path(self) -> Path:
+        """ANKIGEN_PROFILE when set, else the pipeline's profile.yaml (the
+        default pipeline's when ANKIGEN_PIPELINE is empty)."""
         if self.ankigen_profile:
             return Path(self.ankigen_profile)
         pipeline = self.ankigen_pipeline or DEFAULT_PIPELINE

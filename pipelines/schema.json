@@ -2,6 +2,7 @@
   "$defs": {
     "Budget": {
       "additionalProperties": false,
+      "description": "How many model calls one run of this pipeline may make.",
       "properties": {
         "max_llm_calls_per_run": {
           "default": 0,
@@ -86,6 +87,7 @@
     },
     "Outputs": {
       "additionalProperties": false,
+      "description": "What a run produces besides the .apkg, which it always writes.",
       "properties": {
         "guide_pdf": {
           "default": true,
@@ -105,6 +107,7 @@
     },
     "Schedule": {
       "additionalProperties": false,
+      "description": "When the tick runs a pipeline: a cron read in the pipeline's own time zone.",
       "properties": {
         "cron": {
           "description": "Five fields, minute hour day month weekday, read in `timezone`. Each run writes the next curriculum day.",
@@ -126,6 +129,7 @@
     }
   },
   "additionalProperties": false,
+  "description": "How one pipeline runs: pipeline.yaml. Unknown keys are refused, so a\ntypo is an error rather than a setting quietly ignored.",
   "properties": {
     "name": {
       "minLength": 1,

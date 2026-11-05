@@ -4,11 +4,21 @@ Tables are partitioned by `run_date`. A stage replaces its own partition in a
 single transaction, so re-running any stage for any date is safe — which is what
 makes Airflow retries and backfills work without special handling.
 
-Layers:
-    raw_*        snapshots and incremental loads from the Anki collection
-    requests     what the targeting stage decided to generate
-    generated_*  / verified_* / dedup_*   one table per downstream stage
-    card_outcomes  view joining them into one row per generated card
+Tables, in the order the stages fill them:
+    raw_notes        ingest: a full snapshot of the collection's notes each day
+    raw_revlog       ingest: review history, loaded incrementally by id (no run_date)
+    requests         target: what to generate, with each request's prompt
+    generated_cards  generate, and refill for the cards it adds
+    verified_cards   verify (and refill): the checker's verdict per card
+    dedup_results    dedup (and refill): whether each card repeats one already studied
+    card_visuals     images: tables and diagrams drawn from the card itself
+    card_images      images: pictures found by search
+    guide_sections   guide: the study guide's openings and per-card sections
+    embedding_cache  dedup: vectors by content hash and model, shared by every day
+    pipeline_runs    run bookkeeping: one row per stage per run_date
+    card_outcomes    view joining the per-card tables into one row per card,
+                     with its `outcome`: kept, dropped_verify, dropped_duplicate
+                     or pending
 """
 from __future__ import annotations
 
@@ -182,6 +192,13 @@ LEFT JOIN (SELECT run_date, card_uid, ref AS guide_ref FROM guide_sections
 
 
 class Warehouse:
+    """One DuckDB file, opened and brought up to the current schema.
+
+    Opening is also the migration: columns added since a database was created
+    are added in place, so an old warehouse (the Actions cache carries one
+    from run to run) keeps working without a separate upgrade step.
+    """
+
     def __init__(self, path: str | Path):
         self.path = Path(path)
         self.path.parent.mkdir(parents=True, exist_ok=True)
@@ -208,6 +225,8 @@ class Warehouse:
         self.con.execute(SCHEMA)
 
     def close(self) -> None:
+        """Close the connection. DuckDB lets one process at a time open the
+        file for writing, so a stage in another process needs this first."""
         self.con.close()
 
     def __enter__(self) -> "Warehouse":
@@ -218,6 +237,8 @@ class Warehouse:
 
     @contextmanager
     def transaction(self) -> Iterator[duckdb.DuckDBPyConnection]:
+        """Everything in the block commits together, or rolls back on any
+        exception, KeyboardInterrupt included, and re-raises it."""
         self.con.execute("BEGIN TRANSACTION")
         try:
             yield self.con
@@ -255,11 +276,13 @@ class Warehouse:
         return len(rows)
 
     def query(self, sql: str, params: Sequence | None = None) -> list[dict]:
+        """Every row of the result, as a dict keyed by column name."""
         cur = self.con.execute(sql, params or [])
         cols = [d[0] for d in cur.description]
         return [dict(zip(cols, row)) for row in cur.fetchall()]
 
     def scalar(self, sql: str, params: Sequence | None = None):
+        """The first column of the first row, or None for an empty result."""
         # Read the whole result: DuckDB 2.0 runs nothing else on a connection
         # that still has unread rows.
         rows = self.con.execute(sql, params or []).fetchall()
@@ -268,6 +291,8 @@ class Warehouse:
     # --- run bookkeeping ---
 
     def start_stage(self, run_date: date, stage: str) -> datetime:
+        """Mark a stage running for `run_date`, replacing any earlier attempt's
+        row, so pipeline_runs shows the latest attempt of each stage only."""
         started = datetime.now()
         self.con.execute(
             "DELETE FROM pipeline_runs WHERE run_date = ? AND stage = ?", [run_date, stage]
@@ -281,6 +306,9 @@ class Warehouse:
     def finish_stage(
         self, run_date: date, stage: str, status: str, rows_out: int = 0, detail: dict | None = None
     ) -> None:
+        """Close the row `start_stage` opened with its status ("success" or
+        "failed"), the rows it wrote and the stage's detail as JSON. The run
+        report is built from these rows, so it is right however the stages ran."""
         self.con.execute(
             """UPDATE pipeline_runs
                SET status = ?, finished_at = ?, rows_out = ?, detail = ?
