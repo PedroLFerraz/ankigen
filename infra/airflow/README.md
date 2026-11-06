@@ -1,6 +1,8 @@
 # Airflow
 
-Runs the eight pipeline stages daily at 06:00 as eight tasks.
+Runs the ten pipeline stages daily at 06:00 as ten tasks. What the stack
+leaves out, and how it fits with the rest, is on the
+[Airflow](../../docs/components/airflow.md) page.
 
 ```bash
 docker compose --env-file ../../.env up -d --build

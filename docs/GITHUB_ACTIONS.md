@@ -22,28 +22,11 @@ them up, and your phone and desktop pull them down like any other change.
 
 ## Pipelines
 
-A pipeline is a folder under `pipelines/`:
-
-| file | what it is |
-|---|---|
-| `profile.yaml` | what to teach: the learner, the decks, the curriculum |
-| `pipeline.yaml` | how to run it: its schedule, outputs, models and budget |
-
-```yaml
-# pipelines/data-platform/pipeline.yaml
-name: Data Platform
-enabled: true
-schedule: {cron: "17 5 * * *", timezone: America/Sao_Paulo}   # one run = one curriculum day
-outputs:  {guide_pdf: true, push_to_ankiweb: true}
-models:   {writer: claude, checker: claude, fallback: gemini}  # and each one's model chain
-budget:   {max_llm_calls_per_run: 0}                           # 0: no cap
-```
-
-`ankigen pipelines list` shows them and when each runs next; `ankigen
-pipelines validate` checks them all, and runs on every push. Each pipeline
-needs decks of its own: two writing to one deck would move each other's
-curriculum along, and validation refuses it. Every note a pipeline makes is
-tagged `ankigen::pipeline::<id>`.
+A pipeline is a folder under `pipelines/`: a `profile.yaml` saying what to
+teach and a `pipeline.yaml` saying when to run it, what to produce, which
+models to use and how many calls a run may make. Both files, and the
+`ankigen pipelines` commands, are described in
+[Profiles and pipelines](components/profiles-and-pipelines.md).
 
 **How the schedule works.** GitHub's own schedule is one cron per workflow
 file, so a workflow, **tick**, runs every hour at :23. It reads each pipeline's
@@ -60,10 +43,9 @@ run), `cards/` (each day's cards), `scheduler.json` (the last scheduled time
 and how it went) and `curriculum.json` (every topic, and which are done or
 next). This is what the app reads.
 
-**Shared allowances.** Every pipeline uses the same Claude subscription and the
-same Gemini free tier. `budget.max_llm_calls_per_run` caps one run's share;
-when it is spent, each stage stops asking and keeps what it has, as it does
-when a quota runs out.
+**Shared allowances.** Every pipeline uses the same Claude subscription and
+the same Gemini free tier; `budget.max_llm_calls_per_run` caps one run's share
+([Profiles and pipelines](components/profiles-and-pipelines.md#the-pipeline-file)).
 
 ## Setup
 
@@ -158,55 +140,28 @@ alone.
 
 **A study guide for a day that has none.** *run pipeline* with **stages** set
 to `guide,export,report` and that day's **run_date**. The guide is written
-again from that day's kept cards. Notes already in your collection keep what
-they have; only cards pushed for the first time get the `Guide … · §` line.
+again from that day's kept cards; see the
+[Study guide](components/study-guide.md) for what reaches notes already in
+your collection.
 
 ## The study guide
 
-Each run of a pipeline with `guide_pdf: true` also writes `guide_<day>.pdf`: a
-chapter per topic, opening with how the thing works, then a section per card
-with why its answer is what it is, an example, the usual mistakes and what to
-look at next. Every card says where its section is (`Guide 2026-10-03 · §2.3`,
-under the answer). It is in the run's **cards-<pipeline>-<day>** artifact, next
-to the `.apkg` and `cards.json`: open the run in the GitHub app, scroll to
-*Artifacts*, download, and open the PDF from the zip. Artifacts are kept for 90
-days.
-
-The checker reads the guide too. A section it disagrees with stays in, marked
-with what it disputes; if the day's allowance runs out, the remaining chapters
-say so and the cards go out regardless.
-
-## Pictures
-
-Most pictures are drawn from the card itself: when an answer is a comparison
-or a flow, the model that writes the card also describes a table or a
-Graphviz diagram, the checker verifies it with the card, and it is drawn into
-the note as HTML or SVG in the card's own colours. Cards that need a real
-picture (a screenshot, a photograph) are searched for on the web, and the
-result is shown to a vision model with the card before it is used.
+A pipeline with `guide_pdf: true` also writes `guide_<day>.pdf`
+([Study guide](components/study-guide.md)). It is in the run's
+**cards-<pipeline>-<day>** artifact, next to the `.apkg` and `cards.json`:
+open the run in the GitHub app, scroll to *Artifacts*, download, and open the
+PDF from the zip. Artifacts are kept for 90 days.
 
 ## What to know
 
-**Pictures travel inside the notes.** The runner never syncs media: for its
-working copy that would mean downloading your whole media folder, and media
-sync runs in the background, where closing the collection cancelled it — the
-first pushed pictures arrived as broken-image icons for exactly that reason.
-Drawn pictures are a few KB of SVG or HTML, and a searched picture is
-re-encoded small (640px JPEG) and stored as a `data:` URI. A push replaces a
-picture only with a newer one, and never takes a working picture off a note.
+**Pictures travel inside the notes**, because the runner never syncs media,
+and **the sync refuses to guess** when AnkiWeb reports the copies have
+diverged: both are explained on [AnkiWeb sync](components/ankiweb-sync.md).
+If a run stops on a diverged sync, sync from Anki on your own machine, then
+re-run; if it persists, clear the `anki-collection-` cache.
 
-**The model chain has backups.** Free tiers meter each model separately, so the
-run walks down the fallback's chain (`fallback_models` in `pipeline.yaml`) as
-models run out or stay busy, then tries `gemini-3-flash-preview` and Gemma 4,
-which have daily allowances of their own. A busy model is tried once and
-skipped for ten minutes: on the free tier even a 503 seems to count against the
-day.
-
-**The sync refuses to guess.** If AnkiWeb reports that the runner's copy and
-yours have diverged beyond a normal merge, the job stops. Resolving that means
-declaring one side the winner, and choosing the runner's could discard review
-history. Sync from Anki on your own machine, then re-run; if it persists, clear
-the `anki-collection-` cache so the next run starts from a fresh download.
+**The model chain has backups**: the run walks down each pipeline's chains as
+models run out or stay busy ([LLM providers](components/llm-providers.md)).
 
 **One run at a time.** Runs share a concurrency group, because they share the
 collection. GitHub keeps only one run waiting in a group and cancels an older
@@ -228,8 +183,8 @@ costs about ninety seconds of re-embedding and the memory of which cards were
 already made.
 
 **Gemini's free tier is 20 chat requests per day, per model**, which is why both
-model settings are chains. A run costs roughly ten calls plus one per image
-checked, and two per chapter of the study guide.
+model settings are chains; what a run costs is on
+[LLM providers](components/llm-providers.md).
 
 **Snapshots are kept for 14 days.** Each run stores a full snapshot of your
 notes, and only that day's is ever read, so ingest drops the ones older than
