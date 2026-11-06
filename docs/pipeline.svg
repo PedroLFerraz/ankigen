@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 560" width="1180" height="560"
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 580" width="1400" height="580"
      font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
-  <title>The AnkiGen pipeline: eight idempotent stages over a DuckDB warehouse</title>
+  <title>The AnkiGen pipeline: ten idempotent stages over a DuckDB warehouse, then a push to AnkiWeb</title>
   <style>
     .bg    { fill: #ffffff; }
     .card  { fill: #f8fafc; stroke: #cbd5e1; }
@@ -39,92 +39,114 @@
     </marker>
   </defs>
 
-  <rect class="bg" width="1180" height="560"/>
+  <rect class="bg" width="1400" height="580"/>
 
-  <text class="title" x="46" y="44">AnkiGen — a daily card pipeline</text>
-  <text class="lede"  x="46" y="68">Eight stages, each idempotent and keyed by run_date. They talk to each other only through the warehouse, so any stage can be re-run or backfilled on its own.</text>
+  <text class="title" x="40" y="44">AnkiGen — a daily card pipeline</text>
+  <text class="lede"  x="40" y="68">Ten stages, each idempotent and keyed by run_date. They talk to each other only through the warehouse, so any stage can be re-run or backfilled on its own.</text>
+  <text class="lede"  x="40" y="86">Then, for a pipeline that pushes, the kept cards go into your Anki over AnkiWeb, and your devices sync them down as usual.</text>
 
   <!-- input -->
-  <rect class="card" x="46" y="104" width="262" height="46" rx="7"/>
-  <text class="name" x="62" y="126">Anki collection</text>
-  <text class="sub"  x="62" y="142">read through a snapshot — never modified</text>
-  <path class="flow" d="M108 150 L108 246" marker-end="url(#a)"/>
+  <rect class="card" x="40" y="108" width="360" height="46" rx="7"/>
+  <text class="name" x="56" y="130">Anki collection</text>
+  <text class="sub"  x="56" y="146">read through a snapshot, never modified · in CI, pulled from AnkiWeb</text>
+  <path class="flow" d="M95 154 L95 250" marker-end="url(#a)"/>
 
   <!-- external services -->
-  <rect class="ext" x="320" y="178" width="262" height="34" rx="7"/>
-  <text class="exttxt" x="451" y="199" text-anchor="middle">LLM provider — one model writes, a second one checks</text>
-  <path class="tick" d="M382 212 L382 246"/>
-  <path class="tick" d="M519 212 L519 246"/>
+  <rect class="ext" x="282" y="168" width="715" height="32" rx="7"/>
+  <text class="exttxt" x="639" y="188" text-anchor="middle">LLM provider — one model writes, a second one checks (Claude, Gemini, or any OpenAI-compatible provider)</text>
+  <path class="tick" d="M337 200 L337 252 M458 200 L458 252 M700 200 L700 252 M942 200 L942 252"/>
 
-  <rect class="ext" x="594" y="178" width="125" height="34" rx="7"/>
-  <text class="exttxt" x="656" y="199" text-anchor="middle">embeddings</text>
-  <path class="tick" d="M656 212 L656 246"/>
+  <rect class="ext" x="524" y="212" width="110" height="28" rx="7"/>
+  <text class="exttxt" x="579" y="230" text-anchor="middle">embeddings</text>
+  <path class="tick" d="M579 240 L579 252"/>
 
-  <rect class="ext" x="731" y="178" width="125" height="34" rx="7"/>
-  <text class="exttxt" x="793" y="199" text-anchor="middle">image search</text>
-  <path class="tick" d="M793 212 L793 246"/>
+  <rect class="ext" x="766" y="212" width="110" height="28" rx="7"/>
+  <text class="exttxt" x="821" y="230" text-anchor="middle">image search</text>
+  <path class="tick" d="M821 240 L821 252"/>
+
+  <rect class="ext" x="1250" y="168" width="110" height="58" rx="7"/>
+  <text class="name" x="1305" y="192" text-anchor="middle">AnkiWeb</text>
+  <text class="exttxt" x="1305" y="210" text-anchor="middle">your devices sync</text>
+  <path class="flow" d="M1305 252 L1305 228" marker-end="url(#a)"/>
 
   <!-- stages -->
   <g>
-    <rect class="card" x="46"   y="246" width="125" height="62" rx="7"/>
-    <text class="name" x="108"  y="274" text-anchor="middle">ingest</text>
-    <text class="sub"  x="108"  y="292" text-anchor="middle">snapshot + load</text>
+    <rect class="card" x="40"   y="252" width="110" height="62" rx="7"/>
+    <text class="name" x="95"   y="280" text-anchor="middle">ingest</text>
+    <text class="sub"  x="95"   y="298" text-anchor="middle">snapshot + load</text>
 
-    <rect class="card" x="183"  y="246" width="125" height="62" rx="7"/>
-    <text class="name" x="245"  y="274" text-anchor="middle">target</text>
-    <text class="sub"  x="245"  y="292" text-anchor="middle">what to write</text>
+    <rect class="card" x="161"  y="252" width="110" height="62" rx="7"/>
+    <text class="name" x="216"  y="280" text-anchor="middle">target</text>
+    <text class="sub"  x="216"  y="298" text-anchor="middle">what to write</text>
 
-    <rect class="card" x="320"  y="246" width="125" height="62" rx="7"/>
-    <text class="name" x="382"  y="274" text-anchor="middle">generate</text>
-    <text class="sub"  x="382"  y="292" text-anchor="middle">cards in your voice</text>
+    <rect class="card" x="282"  y="252" width="110" height="62" rx="7"/>
+    <text class="name" x="337"  y="280" text-anchor="middle">generate</text>
+    <text class="sub"  x="337"  y="298" text-anchor="middle">write the cards</text>
 
-    <rect class="card" x="457"  y="246" width="125" height="62" rx="7"/>
-    <text class="name" x="519"  y="274" text-anchor="middle">verify</text>
-    <text class="sub"  x="519"  y="292" text-anchor="middle">fact-check</text>
+    <rect class="card" x="403"  y="252" width="110" height="62" rx="7"/>
+    <text class="name" x="458"  y="280" text-anchor="middle">verify</text>
+    <text class="sub"  x="458"  y="298" text-anchor="middle">fact-check</text>
 
-    <rect class="card" x="594"  y="246" width="125" height="62" rx="7"/>
-    <text class="name" x="656"  y="274" text-anchor="middle">dedup</text>
-    <text class="sub"  x="656"  y="292" text-anchor="middle">whole collection</text>
+    <rect class="card" x="524"  y="252" width="110" height="62" rx="7"/>
+    <text class="name" x="579"  y="280" text-anchor="middle">dedup</text>
+    <text class="sub"  x="579"  y="298" text-anchor="middle">whole collection</text>
 
-    <rect class="card" x="731"  y="246" width="125" height="62" rx="7"/>
-    <text class="name" x="793"  y="274" text-anchor="middle">images</text>
-    <text class="sub"  x="793"  y="292" text-anchor="middle">when one helps</text>
+    <rect class="card" x="645"  y="252" width="110" height="62" rx="7"/>
+    <text class="name" x="700"  y="280" text-anchor="middle">refill</text>
+    <text class="sub"  x="700"  y="298" text-anchor="middle">replace the drops</text>
 
-    <rect class="card" x="868"  y="246" width="125" height="62" rx="7"/>
-    <text class="name" x="930"  y="274" text-anchor="middle">export</text>
-    <text class="sub"  x="930"  y="292" text-anchor="middle">.apkg + media</text>
+    <rect class="card" x="766"  y="252" width="110" height="62" rx="7"/>
+    <text class="name" x="821"  y="280" text-anchor="middle">images</text>
+    <text class="sub"  x="821"  y="298" text-anchor="middle">draw, or search</text>
 
-    <rect class="card" x="1005" y="246" width="125" height="62" rx="7"/>
-    <text class="name" x="1067" y="274" text-anchor="middle">report</text>
-    <text class="sub"  x="1067" y="292" text-anchor="middle">what happened</text>
+    <rect class="card" x="887"  y="252" width="110" height="62" rx="7"/>
+    <text class="name" x="942"  y="280" text-anchor="middle">guide</text>
+    <text class="sub"  x="942"  y="298" text-anchor="middle">study guide</text>
+
+    <rect class="card" x="1008" y="252" width="110" height="62" rx="7"/>
+    <text class="name" x="1063" y="280" text-anchor="middle">export</text>
+    <text class="sub"  x="1063" y="298" text-anchor="middle">.apkg + Parquet</text>
+
+    <rect class="card" x="1129" y="252" width="110" height="62" rx="7"/>
+    <text class="name" x="1184" y="280" text-anchor="middle">report</text>
+    <text class="sub"  x="1184" y="298" text-anchor="middle">what happened</text>
+
+    <rect class="out" x="1250" y="252" width="110" height="62" rx="7"/>
+    <text class="name outtxt" x="1305" y="280" text-anchor="middle">push</text>
+    <text class="sub outtxt"  x="1305" y="298" text-anchor="middle">into your Anki</text>
   </g>
 
   <!-- flow between stages -->
   <g class="flow" marker-end="url(#a)">
-    <path d="M171 277 L181 277"/>
-    <path d="M308 277 L318 277"/>
-    <path d="M445 277 L455 277"/>
-    <path d="M582 277 L592 277"/>
-    <path d="M719 277 L729 277"/>
-    <path d="M856 277 L866 277"/>
-    <path d="M993 277 L1003 277"/>
+    <path d="M150 283 L159 283"/>
+    <path d="M271 283 L280 283"/>
+    <path d="M392 283 L401 283"/>
+    <path d="M513 283 L522 283"/>
+    <path d="M634 283 L643 283"/>
+    <path d="M755 283 L764 283"/>
+    <path d="M876 283 L885 283"/>
+    <path d="M997 283 L1006 283"/>
+    <path d="M1118 283 L1127 283"/>
+    <path d="M1239 283 L1248 283"/>
   </g>
 
   <!-- warehouse -->
-  <path class="tick" d="M108 308 L108 356 M245 308 L245 356 M382 308 L382 356 M519 308 L519 356
-                        M656 308 L656 356 M793 308 L793 356 M930 308 L930 356 M1067 308 L1067 356"/>
-  <rect class="wh" x="46" y="356" width="1084" height="72" rx="8"/>
-  <text class="name whtxt" x="588" y="384" text-anchor="middle">DuckDB warehouse — one partition per run_date</text>
-  <text class="sub whtxt"  x="588" y="406" text-anchor="middle">raw_notes · raw_revlog · requests · generated_cards · verified_cards · dedup_results · card_images · embedding_cache</text>
-  <text class="sub whtxt"  x="588" y="420" text-anchor="middle">re-running a date replaces its partition, which is what makes retries and backfills safe</text>
+  <path class="tick" d="M95 314 L95 362 M216 314 L216 362 M337 314 L337 362 M458 314 L458 362
+                        M579 314 L579 362 M700 314 L700 362 M821 314 L821 362 M942 314 L942 362
+                        M1063 314 L1063 362 M1184 314 L1184 362 M1305 314 L1305 362"/>
+  <rect class="wh" x="40" y="362" width="1320" height="76" rx="8"/>
+  <text class="name whtxt" x="700" y="390" text-anchor="middle">DuckDB warehouse — one partition per run_date</text>
+  <text class="sub whtxt"  x="700" y="410" text-anchor="middle">raw_notes · raw_revlog · requests · generated_cards · verified_cards · dedup_results · card_visuals · card_images · guide_sections · embedding_cache · pipeline_runs · card_outcomes (view)</text>
+  <text class="sub whtxt"  x="700" y="426" text-anchor="middle">re-running a date replaces its partition, which is what makes retries and backfills safe</text>
 
   <!-- outputs -->
-  <path class="flow" d="M930 428 L930 466" marker-end="url(#a)"/>
-  <rect class="out" x="731" y="466" width="399" height="58" rx="7"/>
-  <text class="name outtxt" x="930" y="490" text-anchor="middle">data/out/&lt;date&gt;/</text>
-  <text class="sub outtxt"  x="930" y="508" text-anchor="middle">ankigen_&lt;date&gt;.apkg · run_report.json · curated Parquet</text>
+  <path class="flow" d="M1123 438 L1123 476" marker-end="url(#a)"/>
+  <rect class="out" x="1008" y="478" width="231" height="70" rx="7"/>
+  <text class="name outtxt" x="1123" y="501" text-anchor="middle">out/&lt;date&gt;/</text>
+  <text class="sub outtxt"  x="1123" y="519" text-anchor="middle">ankigen_&lt;date&gt;.apkg · guide .html + .pdf</text>
+  <text class="sub outtxt"  x="1123" y="535" text-anchor="middle">run_report.json · curated Parquet</text>
 
-  <rect class="ext" x="46" y="466" width="399" height="58" rx="7"/>
-  <text class="exttxt" x="62" y="488">Runs daily on GitHub Actions, or locally, or as an Airflow DAG —</text>
-  <text class="exttxt" x="62" y="506">one task per stage, nothing passed between them but the warehouse.</text>
+  <rect class="ext" x="40" y="478" width="950" height="70" rx="7"/>
+  <text class="exttxt" x="56" y="504">Runs on GitHub Actions, where an hourly tick starts each pipeline on its own cron; or locally; or as an Airflow DAG with one task per stage.</text>
+  <text class="exttxt" x="56" y="522">Nothing passes between the stages but the warehouse.</text>
 </svg>
