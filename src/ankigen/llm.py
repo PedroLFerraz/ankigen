@@ -92,6 +92,36 @@ def _spend() -> None:
         _calls += 1
 
 
+# Tokens this process has used, per model: [prompt, completion]. Counted where
+# each answer arrives, so a stage's share is whatever it adds while it runs
+# (run_stage), however its calls are made: verify's batches, refill's own
+# checking, pictures looked at on the images stage's threads.
+_tokens: dict[str, list[int]] = {}
+
+
+def tokens_used() -> dict[str, dict[str, int]]:
+    with _calls_lock:
+        return {m: {"prompt": p, "completion": c} for m, (p, c) in _tokens.items()}
+
+
+def tokens_since(before: dict[str, dict[str, int]]) -> dict[str, dict[str, int]]:
+    """What each model has used since `before` (a tokens_used()), those that used any."""
+    used = {}
+    for model, now in tokens_used().items():
+        then = before.get(model, {"prompt": 0, "completion": 0})
+        delta = {k: now[k] - then[k] for k in ("prompt", "completion")}
+        if delta["prompt"] or delta["completion"]:
+            used[model] = delta
+    return used
+
+
+def record_tokens(model: str, prompt: int, completion: int) -> None:
+    with _calls_lock:
+        counts = _tokens.setdefault(model, [0, 0])
+        counts[0] += prompt or 0
+        counts[1] += completion or 0
+
+
 class ProviderUnavailable(RuntimeError):
     """The provider cannot answer this run at all: a usage limit, no login,
     no CLI. Not retried, and not tried on the next model either, since every
@@ -265,6 +295,12 @@ def _usage(response) -> tuple[int, int]:
     return (getattr(u, "prompt_tokens", 0) or 0, getattr(u, "completion_tokens", 0) or 0)
 
 
+def _gemini_usage(response) -> tuple[int, int]:
+    meta = getattr(response, "usage_metadata", None)
+    return (getattr(meta, "prompt_token_count", 0) or 0,
+            getattr(meta, "candidates_token_count", 0) or 0)
+
+
 def _chat_json(client, model: str, prompt: str) -> tuple[str, int, int]:
     """Request JSON, degrading to text extraction where JSON mode is unsupported."""
     messages = [{"role": "user", "content": prompt}]
@@ -331,8 +367,11 @@ def _call_one_model(prompt: str, cfg: dict, model: str, max_retries: int) -> LLM
     ensure_free(cfg["provider"], model, settings.allow_paid_models)
     for attempt in range(max_retries):
         try:
+            # Tokens are recorded before the answer is parsed: one that turns
+            # out not to be JSON was paid for all the same.
             if cfg["provider"] == "claude":
                 text, p_tok, c_tok = _claude_json(model, prompt)
+                record_tokens(model, p_tok, c_tok)
                 return LLMResult(json.loads(text), model, p_tok, c_tok)
             if cfg["provider"] == "gemini":
                 from google.genai import types
@@ -355,15 +394,13 @@ def _call_one_model(prompt: str, cfg: dict, model: str, max_retries: int) -> LLM
                     _no_json_mode.add(model)
                     json_mode = False
                     response = client.models.generate_content(model=model, contents=prompt)
-                meta = getattr(response, "usage_metadata", None)
+                p_tok, c_tok = _gemini_usage(response)
+                record_tokens(model, p_tok, c_tok)
                 text = response.text if json_mode else extract_json(response.text)
-                return LLMResult(
-                    json.loads(text), model,
-                    getattr(meta, "prompt_token_count", 0) or 0,
-                    getattr(meta, "candidates_token_count", 0) or 0,
-                )
+                return LLMResult(json.loads(text), model, p_tok, c_tok)
             client = _get_openai_client(cfg["base_url"], cfg["api_key"])
             text, p_tok, c_tok = _chat_json(client, model, prompt)
+            record_tokens(model, p_tok, c_tok)
             return LLMResult(json.loads(text), model, p_tok, c_tok)
         except json.JSONDecodeError as e:
             logger.warning("JSON parse failed (attempt %d/%d): %s", attempt + 1, max_retries, e)
@@ -523,6 +560,7 @@ def check_image(image: bytes, card: str, query: str, cfg: dict | None = None) ->
                     contents=[types.Part.from_bytes(data=image, mime_type="image/jpeg"), prompt],
                     config=types.GenerateContentConfig(response_mime_type="application/json"),
                 )
+                record_tokens(model, *_gemini_usage(response))
                 return _verdict(json.loads(response.text))
             except Exception as e:
                 if _is_daily_quota(str(e)):
@@ -544,6 +582,7 @@ def check_image(image: bytes, card: str, query: str, cfg: dict | None = None) ->
             {"type": "image_url", "image_url": {"url": data_uri}},
         ]}],
     )
+    record_tokens(chain[0], *_usage(response))
     return _verdict(json.loads(extract_json(response.choices[0].message.content or "")))
 
 

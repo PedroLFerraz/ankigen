@@ -265,3 +265,32 @@ def test_command_key_is_the_command_as_typed():
     assert dedup.command_key("<code>du -sh *</code> | <code>sort -h</code>") == "du -sh * | sort -h"
     assert dedup.command_key("`q` (in less)") == "q (in less)"
     assert dedup.command_key("<code>N</code>") != dedup.command_key("<code>n</code>")
+
+
+# ---------------------------------------------------------------- report
+
+def test_the_report_adds_up_every_stages_tokens(wh):
+    used = {
+        "generate": {"writer": {"prompt": 100, "completion": 50}},
+        "verify": {"checker": {"prompt": 60, "completion": 30}},
+        "dedup": {},
+        "refill": {"writer": {"prompt": 10, "completion": 5},
+                   "checker": {"prompt": 6, "completion": 3}},
+        "images": {"looker": {"prompt": 900, "completion": 9}},
+        "guide": {"writer": {"prompt": 200, "completion": 400},
+                  "checker": {"prompt": 80, "completion": 20}},
+    }
+    for stage, tokens in used.items():
+        wh.start_stage(RUN_DATE, stage)
+        wh.finish_stage(RUN_DATE, stage, "success", detail={"tokens": tokens})
+    tokens = export.build_report(wh, RUN_DATE)["tokens"]
+    assert tokens["by_stage"] == {
+        "generate": {"prompt": 100, "completion": 50}, "verify": {"prompt": 60, "completion": 30},
+        "refill": {"prompt": 16, "completion": 8}, "images": {"prompt": 900, "completion": 9},
+        "guide": {"prompt": 280, "completion": 420},
+    }
+    assert tokens["by_model"] == {"writer": {"prompt": 310, "completion": 455},
+                                  "checker": {"prompt": 146, "completion": 53},
+                                  "looker": {"prompt": 900, "completion": 9}}
+    assert tokens["total"] == {"prompt": 1356, "completion": 517}
+    assert (tokens["prompt"], tokens["completion"]) == (1356, 517)

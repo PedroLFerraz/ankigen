@@ -245,7 +245,6 @@ def build_report(wh, run_date: date) -> dict:
     details = {}
     for st in stages:
         details[st["stage"]] = json.loads(st.pop("detail") or "{}")
-    generated = details.get("generate", {})
     return {
         "run_date": str(run_date),
         "outcomes": {r["outcome"]: r["n"] for r in outcomes},
@@ -254,13 +253,40 @@ def build_report(wh, run_date: date) -> dict:
         "images": wh.query(
             """SELECT COUNT(*) FILTER (WHERE filename IS NOT NULL) AS found, COUNT(*) AS wanted
                FROM card_images WHERE run_date = ?""", [run_date])[0],
-        "tokens": {
-            "prompt": generated.get("prompt_tokens", 0),
-            "completion": generated.get("completion_tokens", 0),
-        },
+        "tokens": token_usage(details),
         "stages": stages,
         "stage_details": details,
     }
+
+
+def token_usage(details: dict) -> dict:
+    """The run's tokens, from what each stage recorded per model (run_stage).
+
+    `prompt` and `completion` are the totals, as they were when only the
+    generate stage was counted, so whatever read them still does. A stage
+    that called no model is not in `by_stage`; refill's checking of its own
+    cards counts as refill, not verify.
+    """
+    by_stage: dict[str, dict] = {}
+    by_model: dict[str, dict] = {}
+    for stage, detail in details.items():
+        for model, used in (detail.get("tokens") or {}).items():
+            for into in (by_stage.setdefault(stage, {"prompt": 0, "completion": 0}),
+                         by_model.setdefault(model, {"prompt": 0, "completion": 0})):
+                into["prompt"] += used.get("prompt", 0)
+                into["completion"] += used.get("completion", 0)
+    total = {k: sum(s[k] for s in by_stage.values()) for k in ("prompt", "completion")}
+    return {**total, "total": total, "by_stage": by_stage, "by_model": by_model}
+
+
+def _token_line(tokens: dict) -> str | None:
+    total = tokens["total"]
+    if not (total["prompt"] or total["completion"]):
+        return None
+    stages = ", ".join(f"{stage} {used['prompt'] + used['completion']:,}"
+                       for stage, used in tokens["by_stage"].items())
+    return (f"**Tokens:** {total['prompt'] + total['completion']:,} "
+            f"({total['prompt']:,} in, {total['completion']:,} out): {stages}.")
 
 
 def markdown_summary(wh, run_date: date, artifact: str | None = None) -> str:
@@ -325,6 +351,10 @@ def markdown_summary(wh, run_date: date, artifact: str | None = None) -> str:
     models = sorted({c["model"] for c in cards if c["model"]})
     if models:
         lines.append(f"Written by {', '.join(f'`{m}`' for m in models)}.")
+    details = {r["stage"]: json.loads(r["detail"] or "{}") for r in wh.query(
+        "SELECT stage, detail FROM pipeline_runs WHERE run_date = ?", [run_date])}
+    if (tokens := _token_line(token_usage(details))):
+        lines += ["", tokens]
     return "\n".join(lines) + "\n"
 
 

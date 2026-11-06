@@ -260,7 +260,10 @@ def report(run_date: Optional[str] = DateOpt):
     for s in rep["stages"]:
         typer.echo(f"  {s['stage']:<9} {s['status']:<8} {s['rows_out'] or 0:>5} rows  {s['seconds'] or 0:>6.1f}s")
     typer.echo(f"\nOutcomes: {rep['outcomes']}")
-    typer.echo(f"Tokens:   {rep['tokens']}")
+    tokens = rep["tokens"]
+    typer.echo(f"Tokens:   {tokens['prompt']:,} in, {tokens['completion']:,} out")
+    for stage, used in tokens.get("by_stage", {}).items():
+        typer.echo(f"  {stage:<9} {used['prompt']:>9,} in  {used['completion']:>9,} out")
     for r in rep["by_deck"]:
         typer.echo(f"  {r['deck']:<40} kept {r['kept']}/{r['generated']}")
     if rep["dropped"]:

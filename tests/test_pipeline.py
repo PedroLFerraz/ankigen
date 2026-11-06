@@ -6,7 +6,7 @@ import pytest
 import yaml
 from conftest import RUN_DATE
 
-from ankigen import pipeline
+from ankigen import export, pipeline
 
 SNAPSHOT_TABLES = ("requests", "generated_cards", "verified_cards", "dedup_results")
 
@@ -39,6 +39,20 @@ def test_full_run(ctx, cfg, fake_llm):
     assert report["apkg"].endswith(f"ankigen_{RUN_DATE}.apkg")
     assert (cfg.data_path / "curated" / "generated_cards" / f"run_date={RUN_DATE}" / "part-0.parquet").exists()
 
+
+
+def test_every_stage_that_asks_a_model_counts_its_tokens(ctx, fake_llm):
+    pipeline.run(ctx, RUN_DATE)
+    tokens = export.build_report(ctx.wh, RUN_DATE)["tokens"]
+    assert {"generate", "verify", "guide"} <= set(tokens["by_stage"])
+    assert tokens["by_stage"]["verify"]["prompt"] > 0          # once only generate was counted
+    assert set(tokens["by_model"]) == {"fake", "fake-checker"}
+    for split in ("by_stage", "by_model"):
+        assert tokens["total"] == {k: sum(t[k] for t in tokens[split].values())
+                                   for k in ("prompt", "completion")}
+    assert (tokens["prompt"], tokens["completion"]) == tuple(tokens["total"].values())
+    total = tokens["total"]["prompt"] + tokens["total"]["completion"]
+    assert f"**Tokens:** {total:,} (" in export.markdown_summary(ctx.wh, RUN_DATE)
 
 def test_rerunning_a_date_is_idempotent(ctx):
     pipeline.run(ctx, RUN_DATE)
