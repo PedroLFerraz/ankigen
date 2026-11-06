@@ -51,6 +51,9 @@ CARD_PARTS = (("why", "Why"), ("example", "Example"),
 
 @dataclass
 class Chapter:
+    """One request's part of the guide: its opening (`primer`) and its kept
+    cards, each carrying its section's markdown, status and issue. `status`
+    goes missing -> unchecked -> checked or disputed as the models answer."""
     number: int
     request_id: str
     deck: str
@@ -64,10 +67,12 @@ class Chapter:
 
 
 def pdf_path(out_root: str | Path, run_date: date) -> Path:
+    """Where the day's guide goes as a PDF, when WeasyPrint is installed."""
     return Path(out_root) / str(run_date) / f"guide_{run_date}.pdf"
 
 
 def html_path(out_root: str | Path, run_date: date) -> Path:
+    """Where the day's guide goes as HTML, which is written even without a PDF."""
     return Path(out_root) / str(run_date) / f"guide_{run_date}.html"
 
 
@@ -130,6 +135,7 @@ def _listed(i: int, card: dict) -> str:
 
 
 def write_prompt(chapter: Chapter, profile: Profile) -> str:
+    """The writer's prompt for one chapter: its opening and a section per card."""
     target = next((d for d in profile.decks if d.deck == chapter.deck), None)
     instructions = target.instructions.strip() if target else ""
     return _prompt(
@@ -145,6 +151,8 @@ def write_prompt(chapter: Chapter, profile: Profile) -> str:
 
 
 def check_prompt(chapter: Chapter, profile: Profile) -> str:
+    """The checker's prompt for what the writer wrote, sections numbered as
+    their cards are, so verdicts match back by index."""
     sections = "\n\n".join(
         f"{i}. Card: {c['front']} -> {c['back']}\n{c['markdown']}"
         for i, c in enumerate(chapter.cards, start=1) if c["markdown"])
@@ -273,6 +281,8 @@ def write(chapters: list[Chapter], profile: Profile) -> dict:
 
 
 def section_rows(run_date: date, chapters: list[Chapter]) -> list[tuple]:
+    """SECTION_COLUMNS rows: a "primer" row per chapter, with no card_uid,
+    then a "card" row per card."""
     rows = []
     for ch in chapters:
         rows.append((run_date, None, ch.request_id, str(ch.number), "primer", ch.primer,
@@ -373,6 +383,9 @@ th, td { border: 1px solid #cdd3de; padding: 2pt 6pt; text-align: left; }
 
 
 def render_html(run_date: date, chapters: list[Chapter]) -> str:
+    """The whole guide as one HTML page: cover and contents, then a part per
+    deck. The same page is what WeasyPrint turns into the PDF, so the CSS
+    carries the print layout too."""
     decks: list[str] = []
     for ch in chapters:
         if ch.deck not in decks:
@@ -428,6 +441,8 @@ def write_pdf(page: str, path: Path) -> bool:
 # ------------------------------------------------------------ the stage
 
 def run(wh, run_date: date, profile: Profile, out_root: str | Path) -> dict:
+    """Outline, write and check the day's guide, replace its guide_sections
+    partition, and render it under out_root/<run_date>/."""
     out_dir = Path(out_root) / str(run_date)
     out_dir.mkdir(parents=True, exist_ok=True)
     page_path, pdf = html_path(out_root, run_date), pdf_path(out_root, run_date)

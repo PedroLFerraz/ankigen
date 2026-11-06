@@ -31,11 +31,14 @@ CLOZE_RE = re.compile(r"\{\{c\d+::(.*?)(?:::[^}]*)?\}\}", re.DOTALL)
 
 
 class CollectionLocked(RuntimeError):
-    pass
+    """Neither the backup nor the file copy produced a usable snapshot,
+    usually because Anki desktop has the collection open."""
 
 
 @dataclass(frozen=True)
 class Note:
+    """One note as the pipeline sees it: plain-text front and back, and the
+    review stats of its cards rolled up (most lapses, lowest ease)."""
     note_id: int
     deck: str
     notetype: str
@@ -52,10 +55,13 @@ class Note:
 
     @property
     def content_hash(self) -> str:
+        """See the module-level `content_hash`."""
         return content_hash(self.front, self.back)
 
 
 def content_hash(front: str, back: str) -> str:
+    """A note's identity by content: dedup caches embeddings under it, so an
+    edited note is embedded again and an unchanged one never is."""
     return hashlib.sha1(f"{front}{FIELD_SEP}{back}".encode("utf-8")).hexdigest()
 
 
@@ -70,6 +76,7 @@ def strip_html(text: str) -> str:
 
 
 def strip_cloze(text: str) -> str:
+    """Cloze text with every deletion shown and its hint dropped."""
     return CLOZE_RE.sub(r"\1", text)
 
 
@@ -269,6 +276,9 @@ def _front_back(raw_fields: list[str]) -> tuple[str, str, bool]:
 
 
 def read_notes(collection: str | Path) -> list[Note]:
+    """Every note in a snapshot that has a card and some text, in either
+    collection schema (the modern one with a `notetypes` table, or the
+    older JSON in `col`)."""
     con = sqlite3.connect(f"{Path(collection).resolve().as_uri()}?mode=ro", uri=True)
     try:
         modern = _is_modern(con)
@@ -391,6 +401,8 @@ def next_run_date(collection: str | Path, raw_dir: str | Path, today: date,
 
 
 def read_revlog(collection: str | Path, after_id: int = 0) -> list[tuple]:
+    """Reviews with an id above `after_id`, oldest first. Review ids are
+    timestamps, so this is everything since the last load."""
     con = sqlite3.connect(f"{Path(collection).resolve().as_uri()}?mode=ro", uri=True)
     try:
         return con.execute(
@@ -457,6 +469,7 @@ def ingest(wh, run_date: date, collection: str | Path, raw_dir: str | Path) -> d
 
 
 def load_notes(wh, run_date: date) -> list[Note]:
+    """The notes ingested for `run_date`, read back from raw_notes."""
     rows = wh.query(
         """SELECT note_id, deck, notetype, front, back, tags, is_cloze, lapses, ease,
                   reps, interval_days, queue, modified_at

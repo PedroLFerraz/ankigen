@@ -4,9 +4,9 @@ Cards are checked in batches per request, so a run costs one extra call per
 request rather than per card.
 
 If the checker itself fails (rate limit, outage) cards pass through marked
-`unverified` instead of being dropped: they land in the Anki inbox for human
-triage anyway, and a flaky checker shouldn't zero out a day's run. The run
-report and the note tags make the difference visible.
+`unverified` instead of being dropped: they reach the deck tagged
+`ankigen::unverified` for human triage, and a flaky checker shouldn't zero out
+a day's run. The run report and the note tags make the difference visible.
 """
 from __future__ import annotations
 
@@ -27,6 +27,8 @@ UNVERIFIED = "unverified"
 
 
 def build_prompt(deck: str, level: str, cards: list[dict]) -> str:
+    """The checker's prompt for one batch, cards numbered from 1 so its
+    verdicts can be matched back by index."""
     template = Template(resources.files("ankigen.prompts").joinpath("verify.txt").read_text(encoding="utf-8"))
     listing = "\n".join(_listed(i, c) for i, c in enumerate(cards, start=1))
     return template.substitute(level=level, deck=deck, cards=listing)
@@ -104,6 +106,7 @@ CARD_QUERY = ("SELECT card_uid, request_id, deck, front, back, visual_json, fiel
 
 
 def run(wh, run_date: date, profile: Profile) -> dict:
+    """Check every card generated for the day, and replace its verified_cards partition."""
     cards = wh.query(CARD_QUERY.format(extra=""), [run_date])
     rows, checker_errors = check(run_date, cards, profile)
     wh.replace_partition("verified_cards", run_date, VERIFIED_COLUMNS, rows)
@@ -160,6 +163,7 @@ def check(run_date: date, cards: list[dict], profile: Profile) -> tuple[list[tup
 
 
 def summarize(rows: list[tuple], checker_errors: int) -> dict:
+    """The stage's detail for pipeline_runs, counted from VERIFIED_COLUMNS rows."""
     dropped = [r for r in rows if not r[2]]
     return {
         "checked": len(rows),

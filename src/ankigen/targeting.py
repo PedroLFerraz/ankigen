@@ -34,6 +34,12 @@ _STOPWORDS = frozenset(
 
 @dataclass
 class GenerationRequest:
+    """One prompt's worth of cards: a deck, why it is being asked for, and
+    the prompt itself once `render_prompt` has filled it in.
+
+    `request_id` hashes what the request is (date, deck, reason, topic or
+    focus card), so the same plan gives the same ids on a rerun.
+    """
     request_id: str
     deck: str
     card_type: str
@@ -141,6 +147,8 @@ def nearest(query: str, notes: list[Note], k: int) -> list[str]:
 
 
 def is_weak(note: Note, profile: Profile) -> bool:
+    """A card the learner keeps failing: enough lapses, or an ease at or below
+    the profile's limit. Ease 0 is a card never reviewed, not a weak one."""
     rule = profile.weak_cards
     return note.lapses >= rule.min_lapses or (0 < note.ease <= rule.max_ease)
 
@@ -165,6 +173,12 @@ def _bullets(items: list[str], empty: str) -> str:
 
 
 def render_prompt(req: GenerationRequest, profile: Profile, target: DeckTarget) -> str:
+    """The full prompt for one request, from prompts/generate.txt.
+
+    The task depends on why the request exists (a weak card, a gap, a topic),
+    and the answer shape on the card's kind: a kind from the deck's `levels`
+    brings its own contract and rules, anything else the note type's format.
+    """
     learner, style = profile.learner, profile.style
     wants_images = profile.wants_images(target.deck)
 
@@ -294,6 +308,13 @@ def ad_hoc_request(profile: Profile, notes: list[Note], run_date: date, deck: st
 # ------------------------------------------------------------ targeting
 
 def build_requests(profile: Profile, notes: list[Note], run_date: date) -> list[GenerationRequest]:
+    """The day's plan: for each deck in the profile's order, weak cards first,
+    then the day's topics, else one request for what the deck is missing.
+
+    Each deck takes at most its quota for the day, and all of them together
+    at most the profile's daily budget; decks after the budget runs out get
+    nothing that day.
+    """
     requests: list[GenerationRequest] = []
     budget = profile.budget_on(run_date)
     all_targeted = [n for n in notes if any(in_deck(n.deck, t.deck) for t in profile.decks)]
@@ -385,6 +406,7 @@ REQUEST_COLUMNS = ("run_date", "request_id", "deck", "topic", "card_type", "n", 
 
 
 def save_requests(wh, run_date: date, requests: list[GenerationRequest]) -> int:
+    """Replace the day's requests partition with these."""
     return wh.replace_partition("requests", run_date, REQUEST_COLUMNS, [
         (run_date, r.request_id, r.deck, r.topic, r.card_type, r.n, r.reason, r.focus, r.prompt,
          r.kind, r.level, r.ad_hoc)
@@ -393,6 +415,7 @@ def save_requests(wh, run_date: date, requests: list[GenerationRequest]) -> int:
 
 
 def load_requests(wh, run_date: date) -> list[dict]:
+    """The day's requests as rows, in a stable order for the generate stage."""
     return wh.query(
         "SELECT * FROM requests WHERE run_date = ? ORDER BY deck, request_id", [run_date]
     )

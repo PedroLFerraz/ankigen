@@ -55,6 +55,7 @@ FIRST_RUN_WINDOW = timedelta(hours=2)
 # ------------------------------------------------------------ the spec
 
 class Schedule(BaseModel):
+    """When the tick runs a pipeline: a cron read in the pipeline's own time zone."""
     model_config = ConfigDict(extra="forbid")
 
     cron: str = Field(description="Five fields, minute hour day month weekday, read in "
@@ -84,6 +85,7 @@ class Schedule(BaseModel):
 
 
 class Outputs(BaseModel):
+    """What a run produces besides the .apkg, which it always writes."""
     model_config = ConfigDict(extra="forbid")
 
     guide_pdf: bool = Field(True, description="Write the day's study guide as a PDF.")
@@ -127,12 +129,15 @@ class Models(BaseModel):
 
 
 class Budget(BaseModel):
+    """How many model calls one run of this pipeline may make."""
     model_config = ConfigDict(extra="forbid")
 
     max_llm_calls_per_run: int = Field(0, ge=0, description="0: no cap.")
 
 
 class PipelineSpec(BaseModel):
+    """How one pipeline runs: pipeline.yaml. Unknown keys are refused, so a
+    typo is an error rather than a setting quietly ignored."""
     model_config = ConfigDict(extra="forbid", title="AnkiGen pipeline")
 
     name: str = Field(min_length=1)
@@ -145,15 +150,19 @@ class PipelineSpec(BaseModel):
 
 @dataclass(frozen=True)
 class Pipeline:
+    """A pipeline folder, with its pipeline.yaml already validated. The
+    profile is loaded only when asked for."""
     id: str
     dir: Path
     spec: PipelineSpec
 
     @property
     def profile_path(self) -> Path:
+        """pipelines/<id>/profile.yaml."""
         return self.dir / PROFILE_FILE
 
     def profile(self) -> Profile:
+        """The pipeline's profile.yaml, loaded and validated on each call."""
         return load_profile(self.profile_path)
 
 
@@ -167,10 +176,13 @@ def model_var(provider: str) -> str:
 
 
 def root(cfg=None) -> Path:
+    """The folder that holds every pipeline (ANKIGEN_PIPELINES_DIR)."""
     return Path((cfg or config.settings).ankigen_pipelines_dir)
 
 
 def load(pipeline_id: str, cfg=None) -> Pipeline:
+    """One pipeline by id. A missing one raises FileNotFoundError naming the
+    ones that exist; an invalid pipeline.yaml raises ValidationError."""
     folder = root(cfg) / pipeline_id
     path = folder / SPEC_FILE
     if not ID.match(pipeline_id) or not path.exists():
@@ -182,6 +194,8 @@ def load(pipeline_id: str, cfg=None) -> Pipeline:
 
 
 def all(cfg=None) -> list[Pipeline]:  # noqa: A001 - pipelines.all() reads well
+    """Every pipeline, by id. One that does not load raises; `due_all` and
+    `problems` are the ones that carry on past it."""
     found = []
     for path in sorted(root(cfg).glob(f"*/{SPEC_FILE}")):
         found.append(load(path.parent.name, cfg))
@@ -219,6 +233,7 @@ def env(p: Pipeline) -> dict[str, str]:
 
 
 def artifact_name(pipeline_id: str, run_date: date | str) -> str:
+    """The name the workflow uploads a run's output under, and the app downloads it by."""
     return f"cards-{pipeline_id}-{run_date}" if pipeline_id else f"cards-{run_date}"
 
 
@@ -226,11 +241,14 @@ def artifact_name(pipeline_id: str, run_date: date | str) -> str:
 
 @dataclass(frozen=True)
 class Due:
+    """A pipeline the tick should run, for which scheduled time, and which
+    try at that time this is (see MAX_ATTEMPTS)."""
     pipeline: str
     scheduled_for: datetime     # UTC
     attempt: int
 
     def as_json(self) -> dict:
+        """The form `due --json` prints for the tick's workflow."""
         return {"pipeline": self.pipeline, "scheduled_for": _iso(self.scheduled_for),
                 "attempt": self.attempt}
 
@@ -260,6 +278,7 @@ def last_fire(schedule: Schedule, now: datetime) -> datetime:
 
 
 def next_fire(schedule: Schedule, now: datetime) -> datetime:
+    """The next time the cron fires after `now`, in UTC."""
     local = now.astimezone(ZoneInfo(schedule.timezone))
     return next(CronSim(schedule.cron, local)).astimezone(timezone.utc)
 
@@ -287,6 +306,8 @@ def due(p: Pipeline, state: dict | None, now: datetime) -> Due | None:
 
 
 def read_state(status_dir: Path | None, pipeline_id: str) -> dict | None:
+    """What the pipeline's last scheduled run recorded (scheduler.json), or
+    None when there is no status checkout or it has never run on schedule."""
     if not status_dir:
         return None
     path = Path(status_dir) / pipeline_id / "scheduler.json"
@@ -524,6 +545,7 @@ def _record(args) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
+    """`ankigen pipelines` and `python -m ankigen.pipelines`. Returns the exit code."""
     parser = argparse.ArgumentParser(
         prog="ankigen pipelines",
         description="The pipelines in pipelines/: list, check, schedule and record them.")
