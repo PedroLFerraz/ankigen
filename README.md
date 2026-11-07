@@ -86,6 +86,14 @@ secrets to set up: see [docs/GITHUB_ACTIONS.md](docs/GITHUB_ACTIONS.md).
 **In Docker.** One image has everything a run uses, published to
 `ghcr.io/pedrolferraz/ankigen`: see [Docker](docs/components/docker.md).
 
+**What a run costs.** `ankigen report` and `run_report.json` show the model
+cost of a run, per stage, per model and per kept card. It is the run's tokens
+times the USD per million tokens in `src/ankigen/prices.yaml` (with the date
+the prices were checked); free tiers, local models and the Claude subscription
+are priced at 0. A model missing from the table is listed under `unpriced`,
+not counted as free. It leaves out compute, storage and network, and a free
+tier is only free inside its allowance.
+
 ## Development
 
 ```bash

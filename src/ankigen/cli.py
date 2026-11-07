@@ -264,6 +264,15 @@ def report(run_date: Optional[str] = DateOpt):
     typer.echo(f"Tokens:   {tokens['prompt']:,} in, {tokens['completion']:,} out")
     for stage, used in tokens.get("by_stage", {}).items():
         typer.echo(f"  {stage:<9} {used['prompt']:>9,} in  {used['completion']:>9,} out")
+    cost = rep.get("cost")
+    if cost:
+        per_card = cost["per_kept_card_usd"]
+        typer.echo(f"Cost:     ${cost['llm_usd']:.4f}"
+                   + (f", ${per_card:.4f} per kept card" if per_card is not None else ""))
+        for stage, usd in cost["by_stage"].items():
+            typer.echo(f"  {stage:<9} ${usd:>9.4f}")
+        if cost["unpriced"]:
+            typer.echo(f"  not counted, no price: {', '.join(cost['unpriced'])}")
     for r in rep["by_deck"]:
         typer.echo(f"  {r['deck']:<40} kept {r['kept']}/{r['generated']}")
     if rep["dropped"]:

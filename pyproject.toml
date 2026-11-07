@@ -56,7 +56,7 @@ ankigen = "ankigen.cli:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-ankigen = ["prompts/*.txt"]
+ankigen = ["prompts/*.txt", "prices.yaml"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

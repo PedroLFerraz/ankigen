@@ -21,6 +21,7 @@ import genanki
 from ankigen.card_types import CARD_TYPES
 from ankigen.dedup import NEAR_DUP
 from ankigen.ingest import AD_HOC_TAG
+from ankigen.prices import cost_usd
 from ankigen.verify import UNVERIFIED
 
 logger = logging.getLogger(__name__)
@@ -245,6 +246,10 @@ def build_report(wh, run_date: date) -> dict:
     details = {}
     for st in stages:
         details[st["stage"]] = json.loads(st.pop("detail") or "{}")
+    tokens = token_usage(details)
+    kept = sum(r["n"] for r in outcomes if r["outcome"] == "kept")
+    cost = cost_usd(details)
+    cost["per_kept_card_usd"] = round(cost["llm_usd"] / kept, 6) if kept else None
     return {
         "run_date": str(run_date),
         "outcomes": {r["outcome"]: r["n"] for r in outcomes},
@@ -253,7 +258,8 @@ def build_report(wh, run_date: date) -> dict:
         "images": wh.query(
             """SELECT COUNT(*) FILTER (WHERE filename IS NOT NULL) AS found, COUNT(*) AS wanted
                FROM card_images WHERE run_date = ?""", [run_date])[0],
-        "tokens": token_usage(details),
+        "tokens": tokens,
+        "cost": cost,
         "stages": stages,
         "stage_details": details,
     }
@@ -277,6 +283,17 @@ def token_usage(details: dict) -> dict:
                 into["completion"] += used.get("completion", 0)
     total = {k: sum(s[k] for s in by_stage.values()) for k in ("prompt", "completion")}
     return {**total, "total": total, "by_stage": by_stage, "by_model": by_model}
+
+
+def _cost_line(cost: dict) -> str | None:
+    if not (cost["by_model"] or cost["unpriced"]):
+        return None
+    line = f"**Cost:** ${cost['llm_usd']:.4f}"
+    if cost["per_kept_card_usd"] is not None:
+        line += f" (${cost['per_kept_card_usd']:.4f} per kept card)"
+    if cost["unpriced"]:
+        line += f", not counting {', '.join(cost['unpriced'])} (no price)"
+    return line + "."
 
 
 def _token_line(tokens: dict) -> str | None:
@@ -355,6 +372,10 @@ def markdown_summary(wh, run_date: date, artifact: str | None = None) -> str:
         "SELECT stage, detail FROM pipeline_runs WHERE run_date = ?", [run_date])}
     if (tokens := _token_line(token_usage(details))):
         lines += ["", tokens]
+        cost = cost_usd(details)
+        cost["per_kept_card_usd"] = round(cost["llm_usd"] / len(kept), 6) if kept else None
+        if (line := _cost_line(cost)):
+            lines.append(line)
     return "\n".join(lines) + "\n"
 
 
