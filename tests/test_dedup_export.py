@@ -8,6 +8,7 @@ from conftest import RUN_DATE
 
 from ankigen import dedup, export, generate
 from ankigen.ingest import ingest
+from ankigen.prices import cost_usd
 
 
 def _seed(wh, cards, passed=True, request_reason="topic"):
@@ -294,3 +295,22 @@ def test_the_report_adds_up_every_stages_tokens(wh):
                                   "looker": {"prompt": 900, "completion": 9}}
     assert tokens["total"] == {"prompt": 1356, "completion": 517}
     assert (tokens["prompt"], tokens["completion"]) == (1356, 517)
+
+
+def test_the_report_prices_tokens_and_lists_a_model_with_no_price_as_unpriced(wh):
+    used = {"generate": {"writer": {"prompt": 1_000_000, "completion": 500_000},
+                         "mystery": {"prompt": 400, "completion": 100}},
+            "verify": {"writer": {"prompt": 1_000_000, "completion": 0},
+                       "x/free-one:free": {"prompt": 50, "completion": 50}}}
+    for stage, tokens in used.items():
+        wh.start_stage(RUN_DATE, stage)
+        wh.finish_stage(RUN_DATE, stage, "success", detail={"tokens": tokens})
+    prices = {"checked": "2026-01-01", "models": {"writer": {"input": 2.0, "output": 4.0}}}
+    cost = cost_usd({s: {"tokens": t} for s, t in used.items()}, prices)
+    assert cost["unpriced"] == ["mystery"]                 # not counted as free
+    assert cost["by_model"] == {"writer": 6.0, "x/free-one:free": 0.0}
+    assert cost["by_stage"] == {"generate": 4.0, "verify": 2.0}
+    assert cost["llm_usd"] == 6.0 and cost["prices_checked"] == "2026-01-01"
+    report_cost = export.build_report(wh, RUN_DATE)["cost"]
+    assert report_cost["unpriced"] == ["mystery", "writer"]   # not in the shipped table
+    assert report_cost["per_kept_card_usd"] is None           # no kept cards in this run

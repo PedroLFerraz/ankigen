@@ -38,7 +38,7 @@ The stages, in order (`STAGES` in `src/ankigen/pipeline.py`):
 | **images** | kept cards wanting one | `card_visuals`, `card_images` | Draws the tables and diagrams the writer described, and searches the web for the rest. See [Images](images.md). |
 | **guide** | kept cards | `guide_sections`, `guide_<date>.pdf` | The day's study guide. Skipped when the pipeline sets `guide_pdf: false`. See [Study guide](study-guide.md). |
 | **export** | `card_outcomes` view | `.apkg`, `cards.json`, Parquet | Stable note GUIDs and stable deck and note-type IDs. |
-| **report** | `pipeline_runs` + all of the above | `run_report.json` | Per-stage timings, drops with reasons, and token usage. |
+| **report** | `pipeline_runs` + all of the above | `run_report.json` | Per-stage timings, drops with reasons, token usage and its estimated cost. |
 
 Every stage replaces its own `run_date` partition in a single transaction.
 Re-running any stage for any date is therefore safe. Retrying `dedup` or

@@ -1,0 +1,23 @@
+# USD per million tokens, by model id as the run report names it (the model
+# the call went to, whichever provider served it). `checked` is the date the
+# price was last compared with the provider's page.
+#
+# A model that is not here is reported as `unpriced`, never as free. Say 0 to
+# mean free: a free tier, a local model, or the Claude subscription.
+# OpenRouter ids ending in `:free` need no entry.
+checked: 2026-11-07
+models:
+  # Through the Claude Code CLI on a subscription: no per-token charge.
+  claude-opus-5-5: {input: 0, output: 0}
+  claude-sonnet-5: {input: 0, output: 0}
+  # Free tiers.
+  gemini-3.8-flash: {input: 0, output: 0}
+  gemini-3.7-flash: {input: 0, output: 0}
+  gemini-3.6-flash: {input: 0, output: 0}
+  gemini-3.5-flash: {input: 0, output: 0}
+  openai/gpt-oss-120b: {input: 0, output: 0}
+  meta/llama-3.3-70b-instruct: {input: 0, output: 0}
+  Meta-Llama-3.3-70B-Instruct: {input: 0, output: 0}
+  mistral-small-latest: {input: 0, output: 0}
+  # Local.
+  phi4-mini: {input: 0, output: 0}
