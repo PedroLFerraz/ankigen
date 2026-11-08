@@ -34,7 +34,7 @@ Settings come from the environment and `.env`; a pipeline's `pipeline.yaml`
 
 | Role | Settings | Providers |
 |---|---|---|
-| writer | `LLM_PROVIDER`, `LLM_API_KEY`, `LLM_BASE_URL`, `LLM_MODEL`; `GEMINI_MODEL` or `CLAUDE_MODEL` for those two | `ollama`, `groq`, `nvidia`, `openrouter`, `sambanova`, `mistral` (any OpenAI-compatible endpoint), `gemini` (google-genai), `claude` (the Claude Code CLI) |
+| writer | `LLM_PROVIDER`, `LLM_API_KEY`, `LLM_BASE_URL`, `LLM_MODEL`; `GEMINI_MODEL` or `CLAUDE_MODEL` for those two | `ollama`, `groq`, `nvidia`, `openrouter`, `sambanova`, `mistral` (any OpenAI-compatible endpoint), `gemini` (google-genai), `bedrock` (boto3, Converse API; region in `BEDROCK_REGION`, model chain in `LLM_MODEL`), `claude` (the Claude Code CLI) |
 | checker | `VERIFY_PROVIDER`, `VERIFY_MODEL` | the same; empty means the writer checks its own cards |
 | fallback | `FALLBACK_PROVIDER`, `FALLBACK_VERIFY_MODEL` | where every request goes once the writer cannot answer at all |
 | embeddings | `EMBEDDING_PROVIDER`, `EMBEDDING_MODEL_NAME`, `EMBEDDING_API_KEY`, `EMBEDDING_BASE_URL`, `SEMANTIC_THRESHOLD` | `fastembed` (in-process), `ollama`, `nvidia`, `openrouter`, `mistral`, `gemini` |
@@ -73,6 +73,13 @@ system prompt, and every Anthropic API key is removed from its environment,
 so a call can only ever run on the subscription. Once Claude says its usage
 limit is reached (or there is no login, or no CLI), the rest of the run goes
 to `FALLBACK_PROVIDER`.
+
+**Bedrock** (`pip install 'ankigen[bedrock]'`) calls the Converse API and
+takes its credentials from the default AWS chain: a task role on Fargate, a
+profile locally, never a key in `.env`. Throttling and timeouts are retried
+and move down the model chain; a missing permission or model access ends the
+provider for the run, so the fallback takes over. The role needs
+`bedrock:InvokeModel` on the configured model.
 
 **Embeddings** are configured separately, because most free chat APIs serve
 none. Left unset they come from the chat provider when it has them, and
