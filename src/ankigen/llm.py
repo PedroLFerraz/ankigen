@@ -1,4 +1,4 @@
-"""LLM client: any OpenAI-compatible provider, plus Gemini's native SDK.
+"""LLM client: any OpenAI-compatible provider, plus Gemini's native SDK and Bedrock.
 
 Ported from the v1 `core/agents.py`, reshaped so every call reports the model
 and token usage — the run report needs both.
@@ -22,6 +22,8 @@ from ankigen.config import ensure_free, settings
 logger = logging.getLogger(__name__)
 
 _gemini_client = None
+# Keyed by region, so switching regions mid-process is safe.
+_bedrock_clients: dict[str, object] = {}
 # Keyed by (base_url, api_key) so switching providers mid-process is safe.
 _openai_clients: dict[tuple[str, str], object] = {}
 # Models observed to reject response_format; skip JSON mode for them thereafter.
@@ -183,6 +185,62 @@ def _claude_json(model: str, prompt: str) -> tuple[str, int, int]:
     return extract_json(out.get("result", "")), read, usage.get("output_tokens", 0)
 
 
+# Bedrock error codes (botocore ClientError) by what they mean for the run.
+# Throttling and a busy or slow model are worth another try or the next model;
+# missing permission, an unknown model or no model access will not change
+# within the run, and the next model behind the same role fares no better.
+_BEDROCK_BUSY = {"ThrottlingException": "rate limit", "TooManyRequestsException": "rate limit",
+                 "ServiceQuotaExceededException": "rate limit",
+                 "ModelTimeoutException": "timeout",
+                 "ServiceUnavailableException": "temporarily unavailable",
+                 "ModelNotReadyException": "temporarily unavailable",
+                 "InternalServerException": "500 internal"}
+_BEDROCK_DENIED = {"AccessDeniedException", "UnrecognizedClientException",
+                   "ExpiredTokenException", "InvalidSignatureException",
+                   "ResourceNotFoundException"}
+
+
+def _get_bedrock_client():
+    region = settings.bedrock_region
+    if region not in _bedrock_clients:
+        try:
+            import boto3
+        except ImportError as e:      # pragma: no cover - env-specific
+            raise RuntimeError(
+                "LLM_PROVIDER=bedrock needs the boto3 package, which is an "
+                "optional dependency: pip install 'ankigen[bedrock]' (or "
+                "pip install boto3)."
+            ) from e
+        _bedrock_clients[region] = boto3.client("bedrock-runtime", region_name=region or None)
+    return _bedrock_clients[region]
+
+
+def _bedrock_converse(model: str, content: list[dict]) -> tuple[str, int, int]:
+    """One Converse call: the reply's text and the tokens it cost."""
+    try:
+        response = _get_bedrock_client().converse(
+            modelId=model, messages=[{"role": "user", "content": content}])
+    except Exception as e:
+        code = (getattr(e, "response", None) or {}).get("Error", {}).get("Code", "")
+        if code in _BEDROCK_BUSY:
+            raise TransientProviderError(f"bedrock ({model}) {_BEDROCK_BUSY[code]}: {e}") from e
+        if code in _BEDROCK_DENIED or type(e).__name__ in ("NoCredentialsError",
+                                                            "PartialCredentialsError"):
+            raise ProviderUnavailable(f"bedrock ({model}): {str(e)[:300]}") from e
+        raise
+    blocks = response["output"]["message"]["content"]
+    text = "".join(b["text"] for b in blocks if "text" in b)
+    usage = response.get("usage") or {}
+    return text, usage.get("inputTokens", 0), usage.get("outputTokens", 0)
+
+
+def _bedrock_json(model: str, prompt: str) -> tuple[str, int, int]:
+    """One JSON answer from a model on Bedrock. Converse has no JSON mode, so
+    the object is pulled out of the text, as for a model that rejects one."""
+    text, p_tok, c_tok = _bedrock_converse(model, [{"text": prompt}])
+    return extract_json(text), p_tok, c_tok
+
+
 def _is_retryable(message: str) -> bool:
     msg = message.lower()
     return any(token in msg for token in _RETRYABLE)
@@ -252,6 +310,15 @@ def check_connection() -> str | None:
 
     if provider == "gemini":
         return None if _get_gemini_client() else "No GOOGLE_API_KEY configured."
+
+    if provider == "bedrock":
+        try:
+            import boto3
+            if boto3.Session().get_credentials() is None:
+                return "No AWS credentials found (task role, profile or AWS_* variables)."
+            return None
+        except Exception as e:
+            return f"Cannot set up Bedrock: {e}"
 
     if cfg["needs_key"] and not cfg["api_key"]:
         return f"No API key for '{provider}'. Set LLM_API_KEY in .env."
@@ -358,6 +425,8 @@ def _preflight_one(label: str, cfg: dict) -> None:
         if not settings.google_api_key:
             raise RuntimeError(f"{label} is gemini but GOOGLE_API_KEY is empty.")
         _get_gemini_client()                      # raises if google-genai is missing
+    elif provider == "bedrock":
+        _get_bedrock_client()                     # raises if boto3 is missing
     elif cfg.get("needs_key") and not cfg.get("api_key"):
         raise RuntimeError(f"{label} is {provider} but LLM_API_KEY is empty.")
 
@@ -371,6 +440,10 @@ def _call_one_model(prompt: str, cfg: dict, model: str, max_retries: int) -> LLM
             # out not to be JSON was paid for all the same.
             if cfg["provider"] == "claude":
                 text, p_tok, c_tok = _claude_json(model, prompt)
+                record_tokens(model, p_tok, c_tok)
+                return LLMResult(json.loads(text), model, p_tok, c_tok)
+            if cfg["provider"] == "bedrock":
+                text, p_tok, c_tok = _bedrock_json(model, prompt)
                 record_tokens(model, p_tok, c_tok)
                 return LLMResult(json.loads(text), model, p_tok, c_tok)
             if cfg["provider"] == "gemini":
@@ -571,6 +644,12 @@ def check_image(image: bytes, card: str, query: str, cfg: dict | None = None) ->
                     raise
                 last = e
         raise last
+
+    if cfg["provider"] == "bedrock":
+        text, p_tok, c_tok = _bedrock_converse(chain[0], [
+            {"text": prompt}, {"image": {"format": "jpeg", "source": {"bytes": image}}}])
+        record_tokens(chain[0], p_tok, c_tok)
+        return _verdict(json.loads(extract_json(text)))
 
     # OpenAI protocol: images ride along as a data URI.
     client = _get_openai_client(cfg["base_url"], cfg["api_key"])

@@ -9,7 +9,8 @@ working directory, as in a container with the package installed. A missing
 
 Providers come three ways. The ones in PROVIDERS speak the OpenAI protocol and
 differ only by preset (base URL, model, embedding model); Gemini goes through
-google-genai; Claude through the Claude Code CLI on a subscription login. A
+google-genai; Claude through the Claude Code CLI on a subscription login;
+Bedrock through boto3's Converse API, on the AWS credential chain. A
 provider's models are a chain, best first ("a,b,c"), walked as each one runs
 out or stays busy. The writer (LLM_PROVIDER), the checker (VERIFY_*), a
 fallback provider for when the writer's cannot answer at all (FALLBACK_*) and
@@ -118,6 +119,9 @@ PROVIDERS: dict[str, dict] = {
 NATIVE_PROVIDERS = {"gemini"}
 # Reached through the Claude Code CLI, on a subscription login (see llm.py).
 CLAUDE = "claude"
+# Reached through boto3's Converse API, on the default AWS credential chain
+# (a task role on Fargate, a profile locally): no key in .env.
+BEDROCK = "bedrock"
 
 # Embeddings computed in-process from an ONNX model: no server, no key, no
 # quota, and nothing to be "not running". That is what makes the pipeline
@@ -135,7 +139,7 @@ DEFAULT_PIPELINE = "data-platform"
 
 def provider_names() -> list[str]:
     """Every value LLM_PROVIDER, VERIFY_PROVIDER and FALLBACK_PROVIDER accept."""
-    return sorted(PROVIDERS) + sorted(NATIVE_PROVIDERS) + [CLAUDE]
+    return sorted(PROVIDERS) + sorted(NATIVE_PROVIDERS) + [BEDROCK, CLAUDE]
 
 
 class PaidModelBlocked(RuntimeError):
@@ -220,6 +224,11 @@ class Settings(BaseSettings):
     # it runs on in CI, and a local `claude` login works as it is. Best first.
     claude_model: str = "claude-opus-5-5,claude-sonnet-5"
 
+    # Bedrock. The model chain is LLM_MODEL (or VERIFY_MODEL for the checker),
+    # as for the OpenAI-compatible providers. Empty region: boto3's own
+    # (AWS_REGION, AWS_DEFAULT_REGION, the profile).
+    bedrock_region: str = ""
+
     # Where every request goes once the provider above cannot answer at all:
     # the subscription's usage limit reached, no login, the CLI missing. Set
     # to "gemini", a day with no Claude left carries on on the free tier.
@@ -303,6 +312,18 @@ class Settings(BaseSettings):
                 "provider": name,
                 "base_url": None,
                 "api_key": "",
+                "model": chain[0] if chain else "",
+                "models": chain,
+                "needs_key": False,
+            }, verify=False)
+
+        if name == BEDROCK:
+            chain = model_chain(self.llm_model)
+            return self._with_fallback({
+                "provider": name,
+                "base_url": None,
+                "api_key": "",
+                "region": self.bedrock_region,
                 "model": chain[0] if chain else "",
                 "models": chain,
                 "needs_key": False,

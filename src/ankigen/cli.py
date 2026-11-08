@@ -704,6 +704,8 @@ def providers():
         typer.echo(f"  {name:<11} {key}, {emb}. {p['notes']}")
     for name in sorted(NATIVE_PROVIDERS):
         typer.echo(f"  {name:<11} needs GOOGLE_API_KEY, embeddings.")
+    typer.echo(f"  {'bedrock':<11} AWS credentials (default chain), no embeddings. "
+               "Region: BEDROCK_REGION; model: LLM_MODEL.")
 
     llm_cfg, emb_cfg = settings.resolve_llm(), settings.resolve_embedding()
     typer.echo(f"\nGeneration: {llm_cfg['provider']} / {llm_cfg['model']}")
