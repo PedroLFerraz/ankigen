@@ -1,0 +1,13 @@
+# DATA_DIR: the warehouse, the working copy of the collection and every day's
+# output (out/<date>/). It outlives the Job pods, so a run sees what the
+# previous ones wrote.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ankigen-data
+  namespace: ankigen
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 5Gi

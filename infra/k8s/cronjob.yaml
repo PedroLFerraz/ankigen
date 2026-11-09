@@ -1,0 +1,67 @@
+# `ankigen run` every day at 06:00 UTC. The Secret (ankigen-env, made from .env
+# by `make deploy`) and the ConfigMap (ankigen-profile, made from the pipeline's
+# profile.yaml) are not in this folder: no secret value is ever committed.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: ankigen
+  namespace: ankigen
+spec:
+  schedule: "0 6 * * *"
+  # The pipeline must not run twice at once (the warehouse is a single DuckDB
+  # file), the same guarantee run-pipeline.yml's concurrency group gives.
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 0   # `generate` spends model quota; a retry writes different cards
+      template:
+        spec:
+          restartPolicy: Never
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000     # the image's `ankigen` user
+            runAsGroup: 1000
+            fsGroup: 1000       # so the volume is writable by that user
+          initContainers:
+            # A pod has no Anki on the machine: bring the working copy of the
+            # collection up to date from AnkiWeb first, as CI does.
+            - name: pull
+              image: ankigen:local
+              imagePullPolicy: IfNotPresent
+              args: ["pull"]
+              envFrom: &env
+                - secretRef:
+                    name: ankigen-env
+              env: &vars
+                - {name: DATA_DIR, value: /data}
+                - {name: ANKI_COLLECTION_PATH, value: /data/anki/collection.anki2}
+                - {name: ANKIGEN_PROFILE, value: /profile/profile.yaml}
+              securityContext: &sec
+                allowPrivilegeEscalation: false
+                capabilities: {drop: [ALL]}
+              volumeMounts:
+                - {name: data, mountPath: /data}
+                - {name: profile, mountPath: /profile, readOnly: true}
+          containers:
+            - name: run
+              image: ankigen:local
+              imagePullPolicy: IfNotPresent
+              args: ["run"]
+              envFrom: *env
+              env: *vars
+              securityContext: *sec
+              resources:
+                requests: {cpu: 500m, memory: 1Gi}
+                limits: {cpu: "2", memory: 3Gi}
+              volumeMounts:
+                - {name: data, mountPath: /data}
+                - {name: profile, mountPath: /profile, readOnly: true}
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: ankigen-data
+            - name: profile
+              configMap:
+                name: ankigen-profile

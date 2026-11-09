@@ -104,7 +104,7 @@ seconds. Each component's page says which test files cover it.
 3. **Feedback loop**: the review history is already ingested — measure whether generated cards lapse more than hand-written ones, and whether illustrated cards stick better.
 4. ✅ **Docker**: multi-stage image; the collection and profile mounted read-only.
 5. **AWS free tier**: S3 `raw/`, `curated/` and `gold/` layers via Terraform, and a least-privilege IAM role.
-6. **Kubernetes**: `CronJob` on `kind`, then `KubernetesPodOperator` per stage.
+6. **Kubernetes**: ✅ `CronJob` on `kind` ([infra/k8s](infra/k8s/README.md)), then `KubernetesPodOperator` per stage.
 7. **Android client**: create, schedule and watch pipelines from a phone, with each run's study guide saved to a folder on it. The backend it drives (pipelines, the hourly tick, the status branch) is in place.
 8. Later: PDF ingestion as a second source.
 
