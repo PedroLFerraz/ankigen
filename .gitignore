@@ -35,7 +35,11 @@ web/dist/
 .idea/
 .DS_Store
 *.apkg
-.claude/
+# Machine-local Claude Code files. The skills and agents are shared.
+.claude/settings.local.json
+.claude/worktrees/
+.claude/scheduled_tasks.lock
+.claude/hooks/
 
 # Android build output
 android/build/
