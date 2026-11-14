@@ -1,4 +1,4 @@
-"""LLM client: any OpenAI-compatible provider, plus Gemini's native SDK.
+"""LLM client: Claude through its CLI, and any OpenAI-compatible provider.
 
 Ported from the v1 `core/agents.py`, reshaped so every call reports the model
 and token usage — the run report needs both.
@@ -21,7 +21,6 @@ from ankigen.config import ensure_free, settings
 
 logger = logging.getLogger(__name__)
 
-_gemini_client = None
 # Keyed by (base_url, api_key) so switching providers mid-process is safe.
 _openai_clients: dict[tuple[str, str], object] = {}
 # Models observed to reject response_format; skip JSON mode for them thereafter.
@@ -32,7 +31,7 @@ class TransientProviderError(RuntimeError):
     """A provider hiccup worth retrying (overloaded, rate limited, 5xx)."""
 
 
-# A 500 belongs here too: Gemma answered one long prompt with "500 INTERNAL.
+# A 500 belongs here too: a model answered one long prompt with "500 INTERNAL.
 # Internal error encountered.", and read as a real error that ended the whole
 # chain instead of moving on to the next model.
 _RETRYABLE = ("429", "rate limit", "overload", "temporarily", "timeout",
@@ -56,9 +55,8 @@ _spent: set[str] = set()
 _busy_until: dict[str, float] = {}
 BUSY_COOLDOWN = 600
 # While another model is left to try, a busy one gets this many attempts
-# rather than the full budget. One, because a 503 is not free: gemini-3.8-flash
-# answered nothing but 503s one morning and was still "out of quota for today"
-# by eleven, so every retry of a busy model spends its daily allowance.
+# rather than the full budget. One, because a 503 is not free: on a metered free
+# tier every retry of a busy model spends its daily allowance.
 FALLTHROUGH_ATTEMPTS = 1
 
 
@@ -140,6 +138,7 @@ _down: dict[str, str] = {}
 CLAUDE_SYSTEM = ("You write and check flashcards for a learning pipeline. Follow the "
                  "user's instructions exactly and reply with JSON only, no prose.")
 CLAUDE_TIMEOUT = 600
+CLAUDE_IMAGE_FILE = "picture.jpg"
 # Credentials that would make the CLI bill an API account instead of using the
 # subscription login. Removed from its environment, so that a stray key on a
 # machine or in CI can never turn a free call into a paid one.
@@ -151,22 +150,36 @@ _LIMIT = re.compile(r"usage limit|hit your limit|limit reached|out of (?:extra )
                     r"oauth token|authentication", re.IGNORECASE)
 
 
-def _claude_json(model: str, prompt: str) -> tuple[str, int, int]:
-    """One answer from Claude through the Claude Code CLI, on the subscription."""
+def _claude_json(model: str, prompt: str, image: bytes | None = None) -> tuple[str, int, int]:
+    """One answer from Claude through the Claude Code CLI, on the subscription.
+
+    A picture goes in a temporary directory of its own, which is the CLI's
+    working directory, with `Read` as the only tool: the CLI takes text on
+    stdin, and its Read tool is how it looks at an image file.
+    """
     cli = shutil.which("claude")
     if not cli:
         raise ProviderUnavailable("the Claude Code CLI is not installed")
     env = {k: v for k, v in os.environ.items() if k not in _API_CREDENTIALS}
-    try:
-        proc = subprocess.run(
-            [cli, "-p", "--output-format", "json", "--model", model, "--tools", "",
-             "--system-prompt", CLAUDE_SYSTEM, "--setting-sources", "",
-             "--strict-mcp-config", "--no-session-persistence"],
-            input=prompt, capture_output=True, text=True, encoding="utf-8",
-            env=env, cwd=tempfile.gettempdir(), timeout=CLAUDE_TIMEOUT,
-        )
-    except subprocess.TimeoutExpired as e:
-        raise TransientProviderError(f"claude timeout after {CLAUDE_TIMEOUT}s") from e
+    tools = ["--tools", ""]
+    with tempfile.TemporaryDirectory(prefix="ankigen-claude-") as workdir:
+        if image is not None:
+            with open(os.path.join(workdir, CLAUDE_IMAGE_FILE), "wb") as f:
+                f.write(image)
+            prompt = (f"First read the picture in the file {CLAUDE_IMAGE_FILE} "
+                      f"with the Read tool.\n\n{prompt}")
+            tools = ["--tools", "Read", "--allowedTools", "Read"]
+        try:
+            proc = subprocess.run(
+                [cli, "-p", "--output-format", "json", "--model", model, *tools,
+                 "--system-prompt", CLAUDE_SYSTEM, "--setting-sources", "",
+                 "--strict-mcp-config", "--no-session-persistence"],
+                input=prompt, capture_output=True, text=True, encoding="utf-8",
+                env=env, cwd=workdir if image is not None else tempfile.gettempdir(),
+                timeout=CLAUDE_TIMEOUT,
+            )
+        except subprocess.TimeoutExpired as e:
+            raise TransientProviderError(f"claude timeout after {CLAUDE_TIMEOUT}s") from e
     try:
         out = json.loads(proc.stdout or "{}")
     except json.JSONDecodeError:
@@ -219,23 +232,6 @@ class LLMResult:
     completion_tokens: int = 0
 
 
-def _get_gemini_client():
-    global _gemini_client
-    if not settings.google_api_key:
-        return None
-    if _gemini_client is None:
-        try:
-            from google import genai
-        except ImportError as e:      # pragma: no cover - env-specific
-            raise RuntimeError(
-                "LLM_PROVIDER=gemini needs the google-genai package, which is an "
-                "optional dependency: pip install 'ankigen[gemini]' (or "
-                "pip install google-genai)."
-            ) from e
-        _gemini_client = genai.Client(api_key=settings.google_api_key)
-    return _gemini_client
-
-
 def _get_openai_client(base_url: str, api_key: str):
     cache_key = (base_url, api_key)
     if cache_key not in _openai_clients:
@@ -249,9 +245,6 @@ def check_connection() -> str | None:
     """Error message if the configured provider is unreachable, else None."""
     cfg = settings.resolve_llm()
     provider = cfg["provider"]
-
-    if provider == "gemini":
-        return None if _get_gemini_client() else "No GOOGLE_API_KEY configured."
 
     if cfg["needs_key"] and not cfg["api_key"]:
         return f"No API key for '{provider}'. Set LLM_API_KEY in .env."
@@ -293,12 +286,6 @@ def _looks_like_json_mode_rejection(err: Exception) -> bool:
 def _usage(response) -> tuple[int, int]:
     u = getattr(response, "usage", None)
     return (getattr(u, "prompt_tokens", 0) or 0, getattr(u, "completion_tokens", 0) or 0)
-
-
-def _gemini_usage(response) -> tuple[int, int]:
-    meta = getattr(response, "usage_metadata", None)
-    return (getattr(meta, "prompt_token_count", 0) or 0,
-            getattr(meta, "candidates_token_count", 0) or 0)
 
 
 def _chat_json(client, model: str, prompt: str) -> tuple[str, int, int]:
@@ -354,11 +341,7 @@ def _preflight_one(label: str, cfg: dict) -> None:
                            fallback["provider"])
             _down[provider] = "the Claude Code CLI is not installed"
         return
-    if provider == "gemini":
-        if not settings.google_api_key:
-            raise RuntimeError(f"{label} is gemini but GOOGLE_API_KEY is empty.")
-        _get_gemini_client()                      # raises if google-genai is missing
-    elif cfg.get("needs_key") and not cfg.get("api_key"):
+    if cfg.get("needs_key") and not cfg.get("api_key"):
         raise RuntimeError(f"{label} is {provider} but LLM_API_KEY is empty.")
 
 
@@ -372,31 +355,6 @@ def _call_one_model(prompt: str, cfg: dict, model: str, max_retries: int) -> LLM
             if cfg["provider"] == "claude":
                 text, p_tok, c_tok = _claude_json(model, prompt)
                 record_tokens(model, p_tok, c_tok)
-                return LLMResult(json.loads(text), model, p_tok, c_tok)
-            if cfg["provider"] == "gemini":
-                from google.genai import types
-                client = _get_gemini_client()
-                if not client:
-                    raise RuntimeError("No GOOGLE_API_KEY configured")
-                json_mode = model not in _no_json_mode
-                try:
-                    response = client.models.generate_content(
-                        model=model, contents=prompt,
-                        config=types.GenerateContentConfig(response_mime_type="application/json")
-                        if json_mode else None,
-                    )
-                except Exception as e:
-                    # Some models on the same API (Gemma, at times) refuse JSON
-                    # mode with a 400, which would otherwise end the whole chain.
-                    if not (json_mode and _looks_like_json_mode_rejection(e)):
-                        raise
-                    logger.info("%s rejects JSON mode; parsing JSON out of plain text.", model)
-                    _no_json_mode.add(model)
-                    json_mode = False
-                    response = client.models.generate_content(model=model, contents=prompt)
-                p_tok, c_tok = _gemini_usage(response)
-                record_tokens(model, p_tok, c_tok)
-                text = response.text if json_mode else extract_json(response.text)
                 return LLMResult(json.loads(text), model, p_tok, c_tok)
             client = _get_openai_client(cfg["base_url"], cfg["api_key"])
             text, p_tok, c_tok = _chat_json(client, model, prompt)
@@ -432,7 +390,7 @@ def call_json(prompt: str, max_retries: int = 5, cfg: dict | None = None) -> LLM
     The fallback takes over when the provider fails outright, whatever the
     reason, and keeps every later request for the rest of the run: a Claude
     subscription that has reached its usage limit stays there for hours, and
-    the answer to that is the free tier, never a purchase.
+    the answer to that is the fallback provider, if one is set.
     """
     _spend()
     cfg = cfg or settings.resolve_llm()
@@ -531,37 +489,28 @@ def check_image(image: bytes, card: str, query: str, cfg: dict | None = None) ->
     """
     _spend()
     cfg = cfg or settings.resolve_llm()
-    if cfg["provider"] == "claude":
-        # The CLI takes text on stdin; a picture would need its file tools,
-        # which are switched off. Its fallback looks at pictures natively.
-        if not cfg.get("fallback"):
-            raise RuntimeError("Pictures are checked by FALLBACK_PROVIDER when the "
-                               "checker is claude, and none is set.")
-        cfg = cfg["fallback"]
     prompt = IMAGE_CHECK_PROMPT.format(card=card[:400], query=query)
+    fallback = cfg.get("fallback")
+    if fallback and cfg["provider"] in _down:
+        cfg = fallback
     chain = [m for m in (cfg.get("models") or [cfg["model"]]) if m and m not in _spent]
     if not chain:
         raise QuotaExhausted("no model left to check images with")
     now = time.monotonic()
     chain.sort(key=lambda m: _busy_until.get(m, 0) > now)
 
-    if cfg["provider"] == "gemini":
-        from google.genai import types
-        client = _get_gemini_client()
-        if not client:
-            # Without this the failure surfaced as "'NoneType' object has no
-            # attribute 'models'", which sends you looking in the wrong place.
-            raise RuntimeError("No GOOGLE_API_KEY configured, so images cannot be checked.")
+    if cfg["provider"] == "claude":
         last: Exception | None = None
         for model in chain:
             try:
-                response = client.models.generate_content(
-                    model=model,
-                    contents=[types.Part.from_bytes(data=image, mime_type="image/jpeg"), prompt],
-                    config=types.GenerateContentConfig(response_mime_type="application/json"),
-                )
-                record_tokens(model, *_gemini_usage(response))
-                return _verdict(json.loads(response.text))
+                text, p_tok, c_tok = _claude_json(model, prompt, image=image)
+                record_tokens(model, p_tok, c_tok)
+                return _verdict(json.loads(text))
+            except ProviderUnavailable as e:
+                if not fallback:
+                    raise
+                _down[cfg["provider"]] = str(e)
+                return check_image(image, card, query, cfg=fallback)
             except Exception as e:
                 if _is_daily_quota(str(e)):
                     _spent.add(model)

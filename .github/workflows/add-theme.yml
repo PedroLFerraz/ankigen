@@ -45,15 +45,20 @@ jobs:
           python-version: "3.12"
           cache: pip
 
-      - run: pip install ".[gemini]"
+      - run: pip install .
+
+      # Claude writes the topics, on the Claude subscription behind
+      # CLAUDE_CODE_OAUTH_TOKEN (`claude setup-token`), as in run-pipeline.yml.
+      - name: Install Claude Code
+        run: npm install -g @anthropic-ai/claude-code
 
       # Inputs arrive through the environment, never pasted into the script,
       # so a deck name with quotes in it is only ever a deck name.
       - name: Plan the deck
         env:
-          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
-          LLM_PROVIDER: gemini
-          GEMINI_MODEL: ${{ vars.GEMINI_MODEL || 'gemini-3.8-flash,gemini-3.7-flash,gemini-3.6-flash,gemini-3.5-flash' }}
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          LLM_PROVIDER: claude
+          CLAUDE_MODEL: ${{ vars.CLAUDE_MODEL || 'claude-opus-5-5,claude-sonnet-5' }}
           ANKIGEN_PIPELINE: ${{ inputs.pipeline }}
           DECK: ${{ inputs.deck }}
           ABOUT: ${{ inputs.about }}

@@ -47,7 +47,7 @@ glibc it was built against:
 
 1. `node:22-bookworm-slim`: `npm install -g @anthropic-ai/claude-code`. Only
    the native `claude` binary is copied out; the runtime has no Node.
-2. `python:3.12-slim-bookworm`: the package with `[gemini,push,guide]` into a
+2. `python:3.12-slim-bookworm`: the package with `[push,guide]` into a
    venv, which the runtime copies whole, with no pip or build tools.
 3. `python:3.12-slim-bookworm` runtime: Graphviz, Pango and CA certificates,
    the venv, the `claude` binary and `pipelines/`, running as user

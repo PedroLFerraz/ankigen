@@ -62,7 +62,7 @@ with the package ([Daily pipeline](daily-pipeline.md)).
   with the warehouse in `data/` itself rather than under
   `data/pipelines/<id>/`.
 - The image installs the package without extras or system packages: no
-  `[push]`, so no AnkiWeb push; no `[gemini]` and no Claude CLI, so only the
+  `[push]`, so no AnkiWeb push; no Claude CLI, so only the
   OpenAI-compatible providers work; no Graphviz, so diagrams fall back to a
   web search; and no `[guide]`, so the guide is HTML only.
 - `LLM_API_KEY` is required even for a provider that needs none.

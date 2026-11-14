@@ -67,7 +67,7 @@ def test_the_data_platform_pipeline_keeps_the_old_schedule():
     ({"schedule": {"cron": "17 5 * *"}}, "five fields"),
     ({"schedule": {"cron": "17 5 * * *", "timezone": "Mars/Olympus"}}, "unknown time zone"),
     ({"models": {"writer": "gpt5"}}, "not a provider"),
-    ({"models": {"writer": "gemini", "fallback": "gemini"}}, "another provider"),
+    ({"models": {"writer": "groq", "fallback": "groq"}}, "another provider"),
     ({"models": {"writer": "groq", "fallback": "openrouter"}}, "LLM_MODEL"),
     ({"budget": {"max_llm_calls_per_run": -1}}, "greater than or equal"),
     ({"surprise": True}, "Extra inputs"),
@@ -93,29 +93,27 @@ def test_an_enabled_pipeline_needs_decks(repo):
 
 def test_env_puts_each_models_chain_where_its_provider_reads_it(repo):
     repo("german", spec={**SPEC, "models": {
-        "writer": "gemini", "writer_models": ["gemini-3.6-flash"],
+        "writer": "claude", "writer_models": ["claude-sonnet-5"],
         "checker": "groq", "checker_models": ["openai/gpt-oss-120b"],
-        "fallback": "claude", "fallback_models": ["claude-sonnet-5"],
-        "fallback_checker_models": []},
+        "fallback": "openrouter"},
         "budget": {"max_llm_calls_per_run": 40},
         "outputs": {"push_to_ankiweb": False}})
     env = pipelines.env(pipelines.load("german", repo.cfg))
     assert env == {
         "ANKIGEN_PIPELINE": "german", "ANKIGEN_PUSH": "false",
-        "LLM_PROVIDER": "gemini", "GEMINI_MODEL": "gemini-3.6-flash",
+        "LLM_PROVIDER": "claude", "CLAUDE_MODEL": "claude-sonnet-5",
         "VERIFY_PROVIDER": "groq", "VERIFY_MODEL": "openai/gpt-oss-120b",
-        "FALLBACK_PROVIDER": "claude", "CLAUDE_MODEL": "claude-sonnet-5",
+        "FALLBACK_PROVIDER": "openrouter",
         "MAX_LLM_CALLS": "40",
     }
 
 
 def test_a_run_with_env_applied_resolves_to_the_pipelines_models(repo):
-    repo("german", spec={**SPEC, "models": {"writer": "gemini", "writer_models": ["g-1"],
-                                            "checker": "gemini", "checker_models": ["g-lite"],
+    repo("german", spec={**SPEC, "models": {"writer": "claude", "writer_models": ["g-1"],
+                                            "checker": "claude", "checker_models": ["g-lite"],
                                             "fallback": ""}})
     env = {k.lower(): v for k, v in pipelines.env(pipelines.load("german", repo.cfg)).items()}
-    s = Settings(_env_file=None, google_api_key="k", gemini_fallback_models="",
-                 verify_fallback_models="", **env)
+    s = Settings(_env_file=None, **env)
     assert s.resolve_llm()["models"] == ["g-1"]
     assert s.resolve_verify()["models"] == ["g-lite"]
 

@@ -90,15 +90,13 @@ def _legacy(path: Path) -> Path:
 def _provider_independent_of_your_env(monkeypatch):
     """Pin the provider so tests never read the developer's .env.
 
-    They did, and it bit: switching .env to Gemini sent the retry tests down
-    the native-SDK branch, past their mocked OpenAI client, and into live
-    calls against Google's API — which then failed on a retired model name.
+    They did, and it bit: switching .env to another provider sent the retry
+    tests past their mocked OpenAI client and into live calls.
     """
     from ankigen.config import settings
 
     monkeypatch.setattr(settings, "llm_provider", "openrouter", raising=False)
     monkeypatch.setattr(settings, "llm_api_key", "test-key-not-real", raising=False)
-    monkeypatch.setattr(settings, "google_api_key", "", raising=False)
     monkeypatch.setattr(settings, "fallback_provider", "", raising=False)
     monkeypatch.setattr("ankigen.llm._down", {})
 

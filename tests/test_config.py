@@ -64,16 +64,16 @@ def test_checker_defaults_to_the_generating_model():
 def test_checker_can_be_a_different_model_or_provider():
     """A model marking its own homework shares its own blind spots, and free
     tiers meter per model, so an independent checker is free in both senses."""
-    same_provider = _s(llm_provider="gemini", google_api_key="k",
-                       gemini_model="gemini-3.6-flash", verify_model="gemini-3.5-flash")
-    assert same_provider.resolve_verify()["model"] == "gemini-3.5-flash"
-    assert same_provider.resolve_llm()["model"] == "gemini-3.6-flash"
+    same_provider = _s(llm_provider="claude", claude_model="claude-opus-5-5",
+                       verify_model="claude-sonnet-5")
+    assert same_provider.resolve_verify()["model"] == "claude-sonnet-5"
+    assert same_provider.resolve_llm()["model"] == "claude-opus-5-5"
 
-    split = _s(llm_provider="groq", llm_api_key="k", google_api_key="g",
-               verify_provider="gemini", verify_model="gemini-3.6-flash")
+    split = _s(llm_provider="groq", llm_api_key="k",
+               verify_provider="claude", verify_model="claude-sonnet-5")
     assert split.resolve_llm()["provider"] == "groq"
     assert (split.resolve_verify()["provider"], split.resolve_verify()["model"]) \
-        == ("gemini", "gemini-3.6-flash")
+        == ("claude", "claude-sonnet-5")
 
 
 def test_threshold_comes_from_the_embedding_model():
@@ -112,31 +112,10 @@ def test_hosted_probe_sends_bearer_token(use):
     assert get.call_args[1]["headers"] == {"Authorization": "Bearer secret"}
 
 
-# ---------------------------------------------------------------- backup models
+# ---------------------------------------------------------------- fallback
 
-def test_backup_models_follow_whatever_chain_is_set():
-    """A repository variable set the chain to four flash models, and the
-    backups written into the workflow's default never ran."""
-    cfg = _s(llm_provider="gemini", google_api_key="k",
-             gemini_model="gemini-3.8-flash,gemini-3.5-flash").resolve_llm()
-    assert cfg["models"] == ["gemini-3.8-flash", "gemini-3.5-flash",
-                             "gemini-3-flash-preview", "gemma-4-31b-it"]
-
-
-def test_a_backup_already_in_the_chain_is_not_tried_twice():
-    cfg = _s(llm_provider="gemini", google_api_key="k",
-             gemini_model="gemma-4-31b-it,gemini-3.5-flash").resolve_llm()
-    assert cfg["models"] == ["gemma-4-31b-it", "gemini-3.5-flash", "gemini-3-flash-preview"]
-
-
-def test_backups_can_be_turned_off():
-    cfg = _s(llm_provider="gemini", google_api_key="k", gemini_model="gemini-3.5-flash",
-             gemini_fallback_models="").resolve_llm()
-    assert cfg["models"] == ["gemini-3.5-flash"]
-
-
-def test_the_checker_has_its_own_backup_not_the_writer_s():
-    cfg = _s(llm_provider="gemini", google_api_key="k", gemini_model="gemini-3.5-flash",
-             verify_model="gemini-3.5-flash-lite").resolve_verify()
-    assert cfg["models"] == ["gemini-3.5-flash-lite", "gemma-4-26b-a4b-it"]
-    assert "gemma-4-31b-it" not in cfg["models"]
+def test_claude_has_no_fallback_unless_one_is_set():
+    cfg = _s(llm_provider="claude")
+    assert "fallback" not in cfg.resolve_llm() and "fallback" not in cfg.resolve_verify()
+    backed = _s(llm_provider="claude", fallback_provider="groq", llm_api_key="k")
+    assert backed.resolve_llm()["fallback"]["provider"] == "groq"

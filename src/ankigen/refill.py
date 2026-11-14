@@ -123,8 +123,8 @@ def run(wh, run_date: date, profile: Profile, use_embeddings: bool = True) -> di
         return detail
 
     new = wh.query(verify.CARD_QUERY.format(extra="AND refill"), [run_date])
-    checked, checker_errors = verify.check(run_date, new, profile)
+    checked = verify.check(run_date, new, profile)
     wh.insert("verified_cards", verify.VERIFIED_COLUMNS, checked)
-    detail["passed"] = verify.summarize(checked, checker_errors)["passed"]
+    detail["passed"] = verify.summarize(checked)["passed"]
     detail["kept"] = dedup.run(wh, run_date, use_embeddings=use_embeddings, refill=True)["kept"]
     return detail

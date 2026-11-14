@@ -45,7 +45,7 @@ tick (hourly) ─▶ pipelines due? ─▶ run-pipeline ─▶ AnkiWeb ─▶ yo
 | your collection | synced down from AnkiWeb, cached between runs (`anki-collection-`) |
 | embeddings | `fastembed`, in-process: there is no Ollama on a runner |
 | past runs | the pipeline's warehouse, restored from the Actions cache |
-| keys | the repository's secrets: `CLAUDE_CODE_OAUTH_TOKEN`, `GOOGLE_API_KEY`, `ANKIWEB_KEY`, and `LLM_API_KEY` for an OpenAI-compatible writer |
+| keys | the repository's secrets: `CLAUDE_CODE_OAUTH_TOKEN`, `ANKIWEB_KEY`, and `LLM_API_KEY` for an OpenAI-compatible writer |
 
 What a run leaves behind:
 
@@ -64,7 +64,7 @@ release.
 
 The [CLI](cli.md), the [pipelines](profiles-and-pipelines.md) and
 [AnkiWeb sync](ankiweb-sync.md). `run-pipeline` installs the package with
-`[gemini,push,guide]`, Graphviz and Pango, and the Claude Code CLI, the same
+`[push,guide]`, Graphviz and Pango, and the Claude Code CLI, the same
 set as the [Docker](docker.md) image. `tick` installs only pydantic and
 cronsim.
 
@@ -83,7 +83,7 @@ locally what the tick and a run would use.
 [GITHUB_ACTIONS.md](../GITHUB_ACTIONS.md#what-to-know) lists them: the
 best-effort schedule (why the tick runs at :23), scheduled workflows stopping
 after 60 days without activity, one run at a time and what GitHub cancels,
-cache eviction, the Gemini free tier, and how long snapshots are kept.
+cache eviction, and how long snapshots are kept.
 
 Deploying to AWS through OIDC instead of running on GitHub's machines is
 planned in [#60](https://github.com/PedroLFerraz/ankigen/issues/60).

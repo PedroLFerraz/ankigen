@@ -102,16 +102,16 @@ name: Data Platform
 enabled: true
 schedule: {cron: "17 5 * * *", timezone: America/Sao_Paulo}   # one run = one curriculum day
 outputs:  {guide_pdf: true, push_to_ankiweb: true}
-models:   {writer: claude, checker: claude, fallback: gemini}  # and each one's model chain
+models:   {writer: claude, checker: claude}                    # and each one's model chain
 budget:   {max_llm_calls_per_run: 0}                           # 0: no cap
 ```
 
 `models:` takes a chain per role (`writer_models`, `checker_models`,
-`fallback_models`, `fallback_checker_models`), which `pipelines env` turns
+and an optional OpenAI-compatible `fallback` provider), which `pipelines env` turns
 into the settings on the [LLM providers](llm-providers.md) page.
 `budget.max_llm_calls_per_run` caps one run's share of the subscription and
-free tiers every pipeline shares; when it is spent, each stage stops asking
-and keeps what it has, as it does when a quota runs out.
+free tiers every pipeline shares; when it is spent, the run fails
+before anything is pushed, as it does when a quota runs out.
 
 ## Reads / writes
 

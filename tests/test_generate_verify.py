@@ -193,18 +193,19 @@ def test_generate_tops_up_when_model_returns_too_few(monkeypatch):
     assert "What is an inner join?" in prompts[1]              # told what it already wrote
 
 
-def test_one_failing_request_does_not_sink_the_run(wh, monkeypatch):
+def test_one_failing_request_fails_the_run_and_writes_nothing(wh, monkeypatch):
+    """A day that ran short is not a finished one: Claude's usage limit used to
+    leave whatever was written before it, and the run counted as done."""
     def call(prompt):
         if "boom" in prompt:
-            raise RuntimeError("provider down")
+            raise llm.ProviderUnavailable("claude: usage limit reached")
         return llm.LLMResult({"cards": [{"question": "What is X?", "answer": "Y."}]}, "m", 5, 5)
 
     monkeypatch.setattr(llm, "call_json", call)
     bad = {**_request(n=1, rid="bad"), "prompt": "boom"}
-    result = generate.run(wh, RUN_DATE, [bad, _request(n=1, rid="ok")])
-    assert result["cards"] == 1
-    assert result["failed_requests"][0]["request_id"] == "bad"
-    assert result["prompt_tokens"] == 5
+    with pytest.raises(generate.GenerationFailed, match="usage limit"):
+        generate.run(wh, RUN_DATE, [_request(n=1, rid="ok"), bad, _request(n=1, rid="later")])
+    assert wh.scalar("SELECT COUNT(*) FROM generated_cards WHERE run_date = ?", [RUN_DATE]) == 0
 
 
 def test_losing_every_request_fails_the_run(wh, monkeypatch):
@@ -216,7 +217,6 @@ def test_losing_every_request_fails_the_run(wh, monkeypatch):
     monkeypatch.setattr(llm, "call_json", call)
     with pytest.raises(generate.GenerationFailed, match="429"):
         generate.run(wh, RUN_DATE, [_request(rid="a"), _request(rid="b")])
-    # The partition is still replaced first, so a retry starts from a clean slate.
     assert wh.scalar("SELECT COUNT(*) FROM generated_cards WHERE run_date = ?", [RUN_DATE]) == 0
 
 
@@ -296,9 +296,8 @@ def test_verify_asks_the_configured_checker_model(wh, monkeypatch):
     reviewing itself."""
     from ankigen.config import settings
 
-    monkeypatch.setattr(settings, "verify_provider", "gemini", raising=False)
-    monkeypatch.setattr(settings, "verify_model", "gemini-3.6-flash", raising=False)
-    monkeypatch.setattr(settings, "google_api_key", "k", raising=False)
+    monkeypatch.setattr(settings, "verify_provider", "claude", raising=False)
+    monkeypatch.setattr(settings, "verify_model", "claude-sonnet-5", raising=False)
 
     seen = {}
 
@@ -309,14 +308,26 @@ def test_verify_asks_the_configured_checker_model(wh, monkeypatch):
     _seed_generated(wh)
     monkeypatch.setattr(llm, "call_json", spy)
     verify.run(wh, RUN_DATE, Profile.model_validate({"decks": [{"deck": "DS::SQL"}]}))
-    assert (seen["provider"], seen["model"]) == ("gemini", "gemini-3.6-flash")
+    assert (seen["provider"], seen["model"]) == ("claude", "claude-sonnet-5")
 
 
-def test_checker_outage_passes_cards_as_unverified(wh, monkeypatch):
+def test_a_checker_error_fails_the_stage_instead_of_passing_cards(wh, monkeypatch):
     _seed_generated(wh)
     monkeypatch.setattr(llm, "call_json", FakeLLM(fail_verify=True))
-    result = verify.run(wh, RUN_DATE, Profile.model_validate({"decks": [{"deck": "DS::SQL"}]}))
-    assert result["passed"] == 2 and result["unverified"] == 2 and result["checker_errors"] == 1
+    with pytest.raises(RuntimeError, match="429"):
+        verify.run(wh, RUN_DATE, Profile.model_validate({"decks": [{"deck": "DS::SQL"}]}))
+    assert wh.scalar("SELECT COUNT(*) FROM verified_cards WHERE run_date = ?", [RUN_DATE]) == 0
+
+
+def test_the_checker_running_out_of_quota_fails_the_stage_too(wh, monkeypatch):
+    _seed_generated(wh)
+
+    def call(prompt, max_retries=5, cfg=None):
+        raise llm.QuotaExhausted("claude: usage limit reached")
+
+    monkeypatch.setattr(llm, "call_json", call)
+    with pytest.raises(llm.QuotaExhausted):
+        verify.run(wh, RUN_DATE, Profile.model_validate({"decks": [{"deck": "DS::SQL"}]}))
 
 
 def test_verify_disabled(wh, monkeypatch):
@@ -328,26 +339,12 @@ def test_verify_disabled(wh, monkeypatch):
 
 # ---------------------------------------------------------------- preflight
 
-def test_preflight_catches_a_missing_provider_package(monkeypatch):
-    """CI installed the package without its [gemini] extra, and the run only
-    found out after ingest, once per request."""
-    from ankigen.config import settings
-
-    monkeypatch.setattr(settings, "llm_provider", "gemini", raising=False)
-    monkeypatch.setattr(settings, "google_api_key", "k", raising=False)
-    monkeypatch.setattr(llm, "_gemini_client", None, raising=False)
-    monkeypatch.setitem(__import__("sys").modules, "google.genai", None)
-
-    with pytest.raises(RuntimeError, match="google-genai"):
-        llm.preflight()
-
-
 def test_preflight_catches_a_missing_key(monkeypatch):
     from ankigen.config import settings
 
-    monkeypatch.setattr(settings, "llm_provider", "gemini", raising=False)
-    monkeypatch.setattr(settings, "google_api_key", "", raising=False)
-    with pytest.raises(RuntimeError, match="GOOGLE_API_KEY"):
+    monkeypatch.setattr(settings, "llm_provider", "groq", raising=False)
+    monkeypatch.setattr(settings, "llm_api_key", "", raising=False)
+    with pytest.raises(RuntimeError, match="LLM_API_KEY"):
         llm.preflight()
 
 
@@ -357,7 +354,7 @@ def test_preflight_passes_for_a_working_config():
 
 # ---------------------------------------------------------------- daily quota
 
-GEMINI_DAILY_429 = (
+DAILY_429 = (
     "429 RESOURCE_EXHAUSTED. Quota exceeded for metric: "
     "generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20. "
     "quotaId: GenerateRequestsPerDayPerProjectPerModel-FreeTier. Please retry in 47.6s."
@@ -365,7 +362,7 @@ GEMINI_DAILY_429 = (
 
 
 def test_a_daily_cap_is_told_apart_from_a_per_minute_one():
-    assert llm._is_daily_quota(GEMINI_DAILY_429)
+    assert llm._is_daily_quota(DAILY_429)
     assert llm._is_daily_quota("Rate limit exceeded: free-models-per-day")
     assert not llm._is_daily_quota("429 Rate limit reached. Please try again in 7.5s.")
     assert not llm._is_daily_quota("503 Service temporarily overloaded")
@@ -379,7 +376,7 @@ def test_daily_quota_is_not_retried(monkeypatch):
     monkeypatch.setattr(llm, "_get_openai_client", lambda *a: None)
 
     def chat(client, model, prompt):
-        raise Exception(GEMINI_DAILY_429)
+        raise Exception(DAILY_429)
 
     monkeypatch.setattr(llm, "_chat_json", chat)
     with pytest.raises(llm.QuotaExhausted):
@@ -392,7 +389,7 @@ def test_quota_exhaustion_stops_the_remaining_requests(wh, monkeypatch):
 
     def call(prompt, max_retries=5, cfg=None):
         calls.append(prompt)
-        raise llm.QuotaExhausted(GEMINI_DAILY_429)
+        raise llm.QuotaExhausted(DAILY_429)
 
     monkeypatch.setattr(llm, "call_json", call)
     reqs = [_request(rid=f"r{i}") for i in range(7)]
@@ -409,7 +406,7 @@ def chain(monkeypatch):
     monkeypatch.setattr(llm, "_spent", set())
     monkeypatch.setattr(llm, "_busy_until", {})
     monkeypatch.setattr(llm.time, "sleep", lambda s: None)
-    return {"provider": "gemini", "base_url": None, "api_key": "k",
+    return {"provider": "groq", "base_url": "http://x", "api_key": "k",
             "model": "best", "models": ["best", "middling", "worst"], "needs_key": True}
 
 
@@ -437,7 +434,7 @@ def test_the_best_model_is_used_while_it_answers(chain, monkeypatch):
 
 
 def test_an_exhausted_model_falls_through_to_the_next(chain, monkeypatch):
-    seen = _answers(monkeypatch, {"best": llm.QuotaExhausted(GEMINI_DAILY_429)})
+    seen = _answers(monkeypatch, {"best": llm.QuotaExhausted(DAILY_429)})
     assert llm.call_json("p", cfg=chain).data == {"ok": "middling"}
     assert seen == ["best", "middling"]
 
@@ -451,7 +448,7 @@ def test_an_overloaded_model_falls_through_too(chain, monkeypatch):
 
 
 def test_a_spent_model_is_not_asked_again(chain, monkeypatch):
-    seen = _answers(monkeypatch, {"best": llm.QuotaExhausted(GEMINI_DAILY_429)})
+    seen = _answers(monkeypatch, {"best": llm.QuotaExhausted(DAILY_429)})
     llm.call_json("p", cfg=chain)
     llm.call_json("p", cfg=chain)
     assert seen == ["best", "middling", "middling"]      # not asked twice
@@ -505,7 +502,7 @@ def test_a_real_error_is_not_papered_over_by_the_chain(chain, monkeypatch):
 
 
 def test_running_out_everywhere_says_so(chain, monkeypatch):
-    _answers(monkeypatch, {m: llm.QuotaExhausted(GEMINI_DAILY_429) for m in chain["models"]})
+    _answers(monkeypatch, {m: llm.QuotaExhausted(DAILY_429) for m in chain["models"]})
     with pytest.raises(llm.QuotaExhausted, match="every configured model"):
         llm.call_json("p", cfg=chain)
 
@@ -527,31 +524,11 @@ def test_a_bare_list_of_verdicts_is_read_like_the_wrapped_one(wh, monkeypatch):
         {"index": 2, "correct": False, "answerable": True, "score": 0.9, "issue": "wrong"},
     ], "m"))
     result = verify.run(wh, RUN_DATE, Profile.model_validate({"decks": [{"deck": "DS::SQL"}]}))
-    assert result["passed"] == 1 and result["dropped"] == 1 and result["unverified"] == 0
-
-
-def test_a_gemini_model_that_refuses_json_mode_is_asked_again_without_it(monkeypatch):
-    """Gemma on the same API has refused JSON mode with a 400; without this
-    the refusal ended the whole chain as a "real error"."""
-    calls = []
-
-    class _Models:
-        def generate_content(self, model, contents, config=None):
-            calls.append(config is not None)
-            if config is not None:
-                raise RuntimeError("400 INVALID_ARGUMENT: JSON mode is not enabled for models/gemma")
-            return type("R", (), {"text": 'Sure! ```json\n{"cards": []}\n```', "usage_metadata": None})()
-
-    monkeypatch.setattr(llm, "_get_gemini_client", lambda: type("C", (), {"models": _Models()})())
-    monkeypatch.setattr(llm, "_no_json_mode", set())
-    result = llm._call_one_model("p", {"provider": "gemini"}, "gemma-4-31b-it", 2)
-    assert result.data == {"cards": []} and calls == [True, False]
-    llm._call_one_model("p", {"provider": "gemini"}, "gemma-4-31b-it", 2)
-    assert calls == [True, False, False]          # remembered: not asked in JSON mode again
+    assert result["passed"] == 1 and result["dropped"] == 1
 
 
 def test_a_server_error_falls_through_to_the_next_model(chain, monkeypatch):
-    """Gemma once answered "500 INTERNAL", which ended the chain as if it were
+    """A model once answered "500 INTERNAL", which ended the chain as if it were
     a bad request."""
     seen = _answers(monkeypatch, {"best": RuntimeError(
         "500 INTERNAL. {'error': {'code': 500, 'message': 'Internal error encountered.'}}")})

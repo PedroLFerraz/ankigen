@@ -53,7 +53,7 @@
 
   <!-- external services -->
   <rect class="ext" x="282" y="168" width="715" height="32" rx="7"/>
-  <text class="exttxt" x="639" y="188" text-anchor="middle">LLM provider — one model writes, a second one checks (Claude, Gemini, or any OpenAI-compatible provider)</text>
+  <text class="exttxt" x="639" y="188" text-anchor="middle">LLM provider — one model writes, a second one checks (Claude, or any OpenAI-compatible provider)</text>
   <path class="tick" d="M337 200 L337 252 M458 200 L458 252 M700 200 L700 252 M942 200 L942 252"/>
 
   <rect class="ext" x="524" y="212" width="110" height="28" rx="7"/>

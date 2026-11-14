@@ -73,8 +73,7 @@ on:
 jobs:
   run:
     runs-on: ubuntu-latest
-    # A kickoff day writes 100 cards; if Claude runs out and Gemini is busy,
-    # walking the fallback chain can take minutes per request.
+    # A kickoff day writes 100 cards, one request after another.
     timeout-minutes: 60
     # One run at a time touches AnkiWeb and the caches, whichever pipeline it
     # is. GitHub keeps only one waiting run per group and cancels an older
@@ -97,7 +96,6 @@ jobs:
 
       - name: Check the pipeline and the setup
         env:
-          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
           ANKIWEB_KEY: ${{ secrets.ANKIWEB_KEY }}
         run: |
           echo "STARTED_AT=$(date -u +%FT%TZ)" >> "$GITHUB_ENV"
@@ -106,7 +104,6 @@ jobs:
             exit 1
           fi
           missing=""
-          [ -z "$GOOGLE_API_KEY" ] && missing="$missing GOOGLE_API_KEY"
           [ -z "$ANKIWEB_KEY" ] && missing="$missing ANKIWEB_KEY"
           if [ -n "$missing" ]; then
             echo "::error::Missing repository secrets:$missing"
@@ -124,18 +121,14 @@ jobs:
       # Pango is what WeasyPrint lays the study guide's PDF out with.
       - run: sudo apt-get install -y --no-install-recommends graphviz libpango-1.0-0 libpangoft2-1.0-0
 
-      # [gemini] pulls google-genai, which is an extra because it is the one
-      # provider that does not speak the OpenAI protocol. Without it the run
-      # gets all the way to the first request before failing.
       # [guide] for the study guide's PDF.
-      - run: pip install ".[gemini,push,guide]"
+      - run: pip install ".[push,guide]"
 
       # Claude writes and checks the cards, on the Claude subscription behind
       # CLAUDE_CODE_OAUTH_TOKEN (`claude setup-token`). If this install fails,
-      # or the token is missing or out of usage, the run carries on on its
-      # fallback (Gemini, unless the pipeline says otherwise).
+      # or the token is missing or out of usage, the run fails before the push
+      # step, and the next tick writes the whole day again.
       - name: Install Claude Code
-        continue-on-error: true
         run: npm install -g @anthropic-ai/claude-code
 
       # The pipeline's own settings: its models, budget and outputs, from
@@ -186,7 +179,6 @@ jobs:
         env:
           ANKIWEB_KEY: ${{ secrets.ANKIWEB_KEY }}
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
           # For a pipeline that writes with an OpenAI-compatible provider.
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
           # The manual inputs arrive through the environment, never pasted into

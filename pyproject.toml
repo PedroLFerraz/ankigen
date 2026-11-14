@@ -40,7 +40,6 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-gemini = ["google-genai>=0.3"]
 # Pushing cards into Anki over AnkiWeb sync. An extra because it is a large
 # download with a Rust backend, and the pipeline works without it.
 push = ["anki>=25.0"]

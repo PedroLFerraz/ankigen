@@ -8,8 +8,8 @@ working directory, as in a container with the package installed. A missing
 `.env` is fine, and keys it has that are not settings are ignored.
 
 Providers come three ways. The ones in PROVIDERS speak the OpenAI protocol and
-differ only by preset (base URL, model, embedding model); Gemini goes through
-google-genai; Claude through the Claude Code CLI on a subscription login. A
+differ only by preset (base URL, model, embedding model); Claude goes through
+the Claude Code CLI on a subscription login. A
 provider's models are a chain, best first ("a,b,c"), walked as each one runs
 out or stays busy. The writer (LLM_PROVIDER), the checker (VERIFY_*), a
 fallback provider for when the writer's cannot answer at all (FALLBACK_*) and
@@ -113,9 +113,6 @@ PROVIDERS: dict[str, dict] = {
     },
 }
 
-# Reached through google-genai rather than the OpenAI SDK, so it is handled
-# on its own path in llm.py / dedup.py.
-NATIVE_PROVIDERS = {"gemini"}
 # Reached through the Claude Code CLI, on a subscription login (see llm.py).
 CLAUDE = "claude"
 
@@ -135,7 +132,7 @@ DEFAULT_PIPELINE = "data-platform"
 
 def provider_names() -> list[str]:
     """Every value LLM_PROVIDER, VERIFY_PROVIDER and FALLBACK_PROVIDER accept."""
-    return sorted(PROVIDERS) + sorted(NATIVE_PROVIDERS) + [CLAUDE]
+    return sorted(PROVIDERS) + [CLAUDE]
 
 
 class PaidModelBlocked(RuntimeError):
@@ -174,7 +171,7 @@ class Settings(BaseSettings):
     the provider's preset, or from the writer's for the checker and the
     embeddings."""
 
-    # Which provider generates cards. Any key of PROVIDERS, or "gemini".
+    # Which provider generates cards. Any key of PROVIDERS, or "claude".
     llm_provider: str = "ollama"
 
     # Per-call overrides. Empty means "take it from the preset".
@@ -195,26 +192,6 @@ class Settings(BaseSettings):
     embedding_base_url: str = ""
     embedding_model_name: str = ""
 
-    # Gemini
-    google_api_key: str = ""
-    # A preference order, not one model. Google meters roughly twenty requests
-    # a day per model, and the newest are the busiest — 3.8 answered none of
-    # seven requests one morning while 3.6 answered in 1.5s. Best first, and
-    # the run walks down the list as models run out or stay busy. Google also
-    # retires ids without warning (2.5-flash now 404s for new keys); the
-    # current list is at models.list(), and `ankigen providers` surfaces it.
-    gemini_model: str = "gemini-3.8-flash,gemini-3.7-flash,gemini-3.6-flash,gemini-3.5-flash"
-    # Always tried after the chain above, whatever it is set to: models with
-    # daily allowances of their own, for the days the flash models are all
-    # busy or spent — which on the first day of manual runs was by 11:00 UTC.
-    # Kept apart from GEMINI_MODEL so that setting a preference order (a CI
-    # variable does) cannot quietly remove the safety net. Empty turns it off.
-    gemini_fallback_models: str = "gemini-3-flash-preview,gemma-4-31b-it"
-    # The checker's, and deliberately not the writer's: a card should not be
-    # checked by the model that wrote it.
-    verify_fallback_models: str = "gemma-4-26b-a4b-it"
-    embedding_model: str = "gemini-embedding-001"
-
     # Claude, through the Claude Code CLI on a Claude subscription (Pro, Max),
     # never an API key: `claude setup-token` makes the CLAUDE_CODE_OAUTH_TOKEN
     # it runs on in CI, and a local `claude` login works as it is. Best first.
@@ -222,7 +199,8 @@ class Settings(BaseSettings):
 
     # Where every request goes once the provider above cannot answer at all:
     # the subscription's usage limit reached, no login, the CLI missing. Set
-    # to "gemini", a day with no Claude left carries on on the free tier.
+    # to an OpenAI-compatible provider, a day with no Claude left carries on
+    # there. Empty (the default) makes such a day fail instead.
     fallback_provider: str = ""
     # The checker's chain on that provider, since VERIFY_MODEL names the main
     # provider's checker. Empty means the fallback's own writing chain.
@@ -308,18 +286,6 @@ class Settings(BaseSettings):
                 "needs_key": False,
             }, verify=False)
 
-        if name in NATIVE_PROVIDERS:
-            chain = model_chain(self.gemini_model)
-            chain += [m for m in model_chain(self.gemini_fallback_models) if m not in chain]
-            return {
-                "provider": name,
-                "base_url": None,
-                "api_key": self.google_api_key,
-                "model": chain[0] if chain else "",
-                "models": chain,
-                "needs_key": True,
-            }
-
         preset = PROVIDERS.get(name, PROVIDERS["ollama"])
 
         # Ollama keeps honouring its dedicated settings so old .env files work.
@@ -357,9 +323,7 @@ class Settings(BaseSettings):
         overridden = self.model_copy(update={
             "llm_provider": self.verify_provider or self.llm_provider,
             "llm_model": "" if self.verify_provider else self.verify_model,
-            "gemini_model": self.verify_model or self.gemini_model,
             "claude_model": self.verify_model or self.claude_model,
-            "gemini_fallback_models": self.verify_fallback_models,
             "fallback_provider": "",        # the checker's own is attached below
         })
         cfg = overridden.resolve_llm()
@@ -389,9 +353,7 @@ class Settings(BaseSettings):
 
         if not name:
             chat = (self.llm_provider or "ollama").strip().lower()
-            if chat in NATIVE_PROVIDERS:
-                name = chat
-            elif PROVIDERS.get(chat, {}).get("embedding_model"):
+            if PROVIDERS.get(chat, {}).get("embedding_model"):
                 name = chat
             else:
                 # Not Ollama: the fallback should be something that cannot be
@@ -406,15 +368,6 @@ class Settings(BaseSettings):
                 "api_key": "",
                 "model": self.embedding_model_name or FASTEMBED_MODEL,
                 "threshold": self.semantic_threshold or FASTEMBED_THRESHOLD,
-            }
-
-        if name in NATIVE_PROVIDERS:
-            return {
-                "provider": name,
-                "base_url": None,
-                "api_key": self.google_api_key,
-                "model": self.embedding_model_name or self.embedding_model,
-                "threshold": self.semantic_threshold or DEFAULT_SEMANTIC_THRESHOLD,
             }
 
         preset = PROVIDERS.get(name)
