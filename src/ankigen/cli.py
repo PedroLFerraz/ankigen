@@ -12,7 +12,7 @@ from typing import Optional
 import typer
 
 from ankigen import pipeline
-from ankigen.config import NATIVE_PROVIDERS, PROVIDERS, settings
+from ankigen.config import PROVIDERS, settings
 from ankigen.profile import KINDS
 
 app = typer.Typer(
@@ -37,14 +37,8 @@ def _setup(verbose: bool = typer.Option(False, "--verbose", "-v", help="Debug lo
         format="%(asctime)s %(levelname)-7s %(name)s: %(message)s",
         datefmt="%H:%M:%S",
     )
-    for noisy in ("httpx", "openai", "urllib3", "primp", "google_genai"):
+    for noisy in ("httpx", "openai", "urllib3", "primp"):
         logging.getLogger(noisy).setLevel(logging.WARNING)
-
-    # google-genai narrates its automatic function calling on the *root*
-    # logger, two lines per request, which buries the pipeline's own output.
-    logging.getLogger().addFilter(
-        lambda record: not str(record.getMessage()).startswith("AFC ")
-    )
 
 
 def _date(value: Optional[str]) -> date:
@@ -702,8 +696,7 @@ def providers():
         emb = "embeddings" if p["embedding_model"] else "no embeddings"
         key = "needs key" if p["needs_key"] else "no key"
         typer.echo(f"  {name:<11} {key}, {emb}. {p['notes']}")
-    for name in sorted(NATIVE_PROVIDERS):
-        typer.echo(f"  {name:<11} needs GOOGLE_API_KEY, embeddings.")
+    typer.echo(f"  {'claude':<11} Claude Code CLI on a subscription login, no embeddings.")
 
     llm_cfg, emb_cfg = settings.resolve_llm(), settings.resolve_embedding()
     typer.echo(f"\nGeneration: {llm_cfg['provider']} / {llm_cfg['model']}")

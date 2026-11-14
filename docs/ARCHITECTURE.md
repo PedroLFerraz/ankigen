@@ -28,7 +28,7 @@ them with their next sync and there is nothing to import.
 
 The LLM and embedding boxes are whichever provider the pipeline names. The
 writer and the checker are configured apart: Claude through the Claude Code
-CLI, Gemini, or any OpenAI-compatible provider. Embeddings come from Ollama,
+CLI, or any OpenAI-compatible provider. Embeddings come from Ollama,
 OpenRouter, or fastembed in-process, which is what the CI runner uses.
 
 ---
@@ -53,7 +53,7 @@ lowest up:
 | Level | Computer analogy | What it is in AnkiGen | Files | Tools |
 |---|---|---|---|---|
 | **L0 Storage** | Memory and disk | Your Anki collection (read only), the AnkiWeb working copy, the warehouse database, and the files a run produces | `data/` | SQLite, DuckDB file, filesystem |
-| **L1 Services** | Device drivers | Thin wrappers that hide *how* to talk to each external system: the database, the LLM, the embedding model, image search, Graphviz, the `.apkg` writer and AnkiWeb | `warehouse.py`, `llm.py`, `dedup.Embedder`, `images.py`, `visuals.py`, `export.py`, `push.py` | `duckdb`, `pyarrow`, `openai` SDK, Claude Code CLI, `google-genai`, `requests`, Pillow, `dot`, `genanki`, `anki` |
+| **L1 Services** | Device drivers | Thin wrappers that hide *how* to talk to each external system: the database, the LLM, the embedding model, image search, Graphviz, the `.apkg` writer and AnkiWeb | `warehouse.py`, `llm.py`, `dedup.Embedder`, `images.py`, `visuals.py`, `export.py`, `push.py` | `duckdb`, `pyarrow`, `openai` SDK, Claude Code CLI, `requests`, Pillow, `dot`, `genanki`, `anki` |
 | **L2 Domain** | Instruction set (ISA) | The vocabulary every stage shares: a `Note` read from Anki, a `Profile`, a `GenerationRequest`, a generated `Card` | `ingest.Note`, `profile.py`, `targeting.GenerationRequest`, `generate.Card` | `dataclasses`, `pydantic` |
 | **L3 Stages** | Pipeline stages | Ten functions, each doing one job: read its input from the warehouse, write its output back | `ingest.py` … `export.py`, listed in `STAGES` in `pipeline.py` | see §3 |
 | **L4 Orchestration** | Control unit | Decides which stages run, in what order, and records success or failure for each | `pipeline.py` | plain Python, or the Airflow DAG in `infra/airflow/` |
@@ -185,7 +185,7 @@ It makes no network calls, which is why `ankigen plan` is instant.
 |---|---|
 | **Input** | `requests` |
 | **Output** | `generated_cards` (with token counts, and the picture each card asks for: an image query, or a table or diagram described as `visual_json`) |
-| **Tools** | the writer the pipeline names: **Claude** through the Claude Code CLI on the subscription, `google-genai` for **Gemini** (the usual fallback), or the `openai` SDK for any OpenAI-compatible provider (Groq, OpenRouter, NVIDIA, Mistral, SambaNova, Ollama) |
+| **Tools** | the writer the pipeline names: **Claude** through the Claude Code CLI on the subscription, or the `openai` SDK for any OpenAI-compatible provider (Groq, OpenRouter, NVIDIA, Mistral, SambaNova, Ollama) |
 
 1. Send the prompt and ask for JSON. If a model refuses JSON mode, switch
    to reading the JSON out of plain text, and remember that for the model.
@@ -212,9 +212,9 @@ One call per request checks all of its cards. A card **passes** only if it is
 *correct*, *answerable*, and scores at least 0.7. A table or diagram the
 checker finds wrong is not drawn; the card keeps its text.
 
-If the checker itself fails (outage or rate limit), cards pass through marked
-`unverified` and are tagged so in Anki. A flaky checker should not make the day
-produce nothing, and you review every new card anyway.
+If the checker itself fails (outage, rate limit or its usage limit reached),
+the stage fails: a card nobody checked is not passed on. The next run writes
+the day again, and nothing is pushed in between.
 
 #### ⑤ dedup: hazard check
 
@@ -433,11 +433,11 @@ directly under `data/`.
 | Anki is open (collection locked) | ingest retries 3 times, then asks you to close Anki | Anki holds the file exclusively |
 | Profile names a deck that doesn't exist | target stops before any LLM call | fail early and cheaply |
 | A provider cannot work at all | the run stops before ingest, in a second | say so once, not once per request |
-| One generation request errors | logged; the other requests continue | one bad topic shouldn't cost the day |
+| One generation request errors | the stage fails and writes nothing; the next run writes the whole day | a day that ran short is not a finished one |
 | Rate limited | wait as long as the provider says, then retry | respect the free tier |
 | A model's daily allowance is spent | the next model in the pipeline's list takes over | the day still gets written |
 | Model refuses JSON mode | read JSON from plain text and remember it | providers differ |
-| Fact-checker unavailable | cards pass, tagged `ankigen::unverified` | human triage is the last line of defence |
+| Fact-checker unavailable | the stage fails; nothing is pushed | no card goes to Anki unchecked |
 | Embeddings unavailable | fuzzy check only; the report says so | degrade, don't crash |
 | Refill's allowance runs out | refill stops; the day keeps what it has | the drops are a shortfall, not a failure |
 | A picture can't be checked | the card goes without one | no picture beats the wrong one |
@@ -604,7 +604,6 @@ See [`android/README.md`](../android/README.md).
 | PyYAML | read the profile and `pipeline.yaml` | target, the tick |
 | `string.Template` + `importlib.resources` | prompt templates shipped inside the package | every stage that calls a model |
 | Claude Code CLI | Claude as writer and checker, on the subscription; editing plans | generate, verify, refill, images, guide; `edit-plan` |
-| `google-genai` | Gemini, usually the fallback when Claude's allowance is spent | the same |
 | `openai` SDK | any OpenAI-compatible provider, for both chat and embeddings | the same, and dedup |
 | Ollama, OpenRouter or fastembed | embeddings for dedup | dedup, refill |
 | NumPy | vectorised similarity | dedup |

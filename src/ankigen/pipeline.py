@@ -143,8 +143,8 @@ def stage_verify(ctx: Context, run_date: date) -> dict:
 
     Reads: generated_cards. Writes: verified_cards (replaces the partition).
 
-    A checker that fails or runs out of quota does not fail the stage: its
-    cards pass, marked unverified, and the report counts them.
+    A checker that fails or runs out of quota fails the stage: no card goes on
+    unchecked, and the next run writes the day again.
     """
     return verify.run(ctx.wh, run_date, ctx.profile)
 

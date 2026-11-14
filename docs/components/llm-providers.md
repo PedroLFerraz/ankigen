@@ -34,16 +34,15 @@ Settings come from the environment and `.env`; a pipeline's `pipeline.yaml`
 
 | Role | Settings | Providers |
 |---|---|---|
-| writer | `LLM_PROVIDER`, `LLM_API_KEY`, `LLM_BASE_URL`, `LLM_MODEL`; `GEMINI_MODEL` or `CLAUDE_MODEL` for those two | `ollama`, `groq`, `nvidia`, `openrouter`, `sambanova`, `mistral` (any OpenAI-compatible endpoint), `gemini` (google-genai), `claude` (the Claude Code CLI) |
+| writer | `LLM_PROVIDER`, `LLM_API_KEY`, `LLM_BASE_URL`, `LLM_MODEL`; `CLAUDE_MODEL` for Claude | `ollama`, `groq`, `nvidia`, `openrouter`, `sambanova`, `mistral` (any OpenAI-compatible endpoint), `claude` (the Claude Code CLI) |
 | checker | `VERIFY_PROVIDER`, `VERIFY_MODEL` | the same; empty means the writer checks its own cards |
 | fallback | `FALLBACK_PROVIDER`, `FALLBACK_VERIFY_MODEL` | where every request goes once the writer cannot answer at all |
-| embeddings | `EMBEDDING_PROVIDER`, `EMBEDDING_MODEL_NAME`, `EMBEDDING_API_KEY`, `EMBEDDING_BASE_URL`, `SEMANTIC_THRESHOLD` | `fastembed` (in-process), `ollama`, `nvidia`, `openrouter`, `mistral`, `gemini` |
+| embeddings | `EMBEDDING_PROVIDER`, `EMBEDDING_MODEL_NAME`, `EMBEDDING_API_KEY`, `EMBEDDING_BASE_URL`, `SEMANTIC_THRESHOLD` | `fastembed` (in-process), `ollama`, `nvidia`, `openrouter`, `mistral` |
 | guards | `MAX_LLM_CALLS`, `ALLOW_PAID_MODELS` | a per-run call cap; and a refusal to call any OpenRouter model without `:free` |
 
-Model settings are **chains**, best first (`GEMINI_MODEL=a,b,c`). Free tiers
+Model settings are **chains**, best first (`LLM_MODEL=a,b,c`). Free tiers
 meter each model separately, so the run walks down the chain as models run
-out or stay busy, then tries `GEMINI_FALLBACK_MODELS` (`gemini-3-flash-preview`
-and Gemma 4), which have daily allowances of their own. A busy model is tried
+out or stay busy. A busy model is tried
 once and skipped for ten minutes: on the free tier even a 503 seems to count
 against the day.
 
@@ -52,27 +51,30 @@ Three setups are worth knowing:
 | | Generation | Free limits (measured Sept 2026) |
 |---|---|---|
 | **Most headroom** | `groq` | 1000 requests/day |
-| **Best cards** | `gemini` | 20 requests/day **per model**, far tighter than the blog posts claim |
+| **Best cards** | `claude` | the subscription's usage limit |
 | **Offline** | `ollama` | unlimited, and noticeably weaker cards |
 
 A run costs about seven generation calls and seven checking calls, plus one
 per searched picture and two per chapter of the study guide. That is why
-`VERIFY_MODEL` pointing at a second model matters on Gemini: it doubles the
-allowance *and* gives an independent opinion.
+`VERIFY_MODEL` pointing at a second model matters on a metered free tier: it
+doubles the allowance *and* gives an independent opinion.
 
 ```
-LLM_PROVIDER=gemini
-GOOGLE_API_KEY=...
-VERIFY_MODEL=gemini-3.5-flash   # a different model checks what the first wrote
+LLM_PROVIDER=claude
+VERIFY_MODEL=claude-sonnet-5   # a different model checks what the first wrote
 ```
 
 **Claude** runs through the Claude Code CLI on a Claude subscription (Pro or
 Max): a local `claude` login, or `CLAUDE_CODE_OAUTH_TOKEN` from `claude
 setup-token`. The CLI is called with no tools, no settings and a one-line
 system prompt, and every Anthropic API key is removed from its environment,
-so a call can only ever run on the subscription. Once Claude says its usage
-limit is reached (or there is no login, or no CLI), the rest of the run goes
-to `FALLBACK_PROVIDER`.
+so a call can only ever run on the subscription. It also looks at the web
+pictures `check_image` is asked about: the picture is written to a temporary
+directory that is the CLI's working directory, and `Read` is the one tool it
+is given. Once Claude says its usage limit is reached (or there is no login,
+or no CLI), the run fails before anything is pushed, unless `FALLBACK_PROVIDER`
+names an OpenAI-compatible provider to take over. A short or unchecked day
+never counts as a finished one.
 
 **Embeddings** are configured separately, because most free chat APIs serve
 none. Left unset they come from the chat provider when it has them, and
@@ -85,8 +87,7 @@ run only new or edited notes are embedded.
 
 ## Depends on
 
-The `openai` SDK for every OpenAI-compatible provider; `google-genai` for
-Gemini (the `[gemini]` extra); the `claude` binary on `PATH` for Claude;
+The `openai` SDK for every OpenAI-compatible provider; the `claude` binary on `PATH` for Claude;
 `fastembed` and NumPy for embeddings. Writes nothing itself except the
 embedding cache, through the [warehouse](warehouse.md).
 
@@ -112,8 +113,6 @@ and fallbacks.
 - Free-tier limits and model ids change often; the presets in `PROVIDERS`
   are starting points. `ankigen providers` shows a retired model as a failed
   connection.
-- Moving pictures and checking to Claude, and removing Gemini:
-  [#76](https://github.com/PedroLFerraz/ankigen/issues/76).
 - The English-only fastembed model embeds Portuguese cards too:
   [#75](https://github.com/PedroLFerraz/ankigen/issues/75).
 - Amazon Bedrock as a provider:

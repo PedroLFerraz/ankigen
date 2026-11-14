@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 class GenerationFailed(RuntimeError):
-    """Every request failed, so the run has nothing to carry forward."""
+    """A request failed or produced nothing, so the day is not carried forward."""
 
 CLOZE_PLAIN = re.compile(r"\{\{c\d+::(.*?)(?:::[^}]*)?\}\}")
 
@@ -299,26 +299,22 @@ def card_rows(run_date: date, req: dict, cards: list[Card], result: llm.LLMResul
 
 
 def run(wh, run_date: date, requests: list[dict]) -> dict:
-    rows, failures = [], []
+    """Write the day's cards, one model request per entry of `requests`.
+
+    One request that fails fails the stage, and nothing is written: a day that
+    ran short is not a finished one, and a half-written day must not reach
+    Anki. The next run writes the whole day again.
+    """
+    rows = []
     total_prompt = total_completion = 0
-    for i, req in enumerate(requests):
+    for req in requests:
         try:
             cards, result, p_tok, c_tok = generate_for_request(req)
-        except llm.QuotaExhausted as e:
-            # The day's allowance is gone, so the remaining requests would each
-            # fail the same way after the same backoff. Asking anyway once cost
-            # a CI job twenty minutes of sleeping.
-            logger.error("Daily quota exhausted at request %d of %d: %s",
-                         i + 1, len(requests), e)
-            failures.extend(
-                {"request_id": r["request_id"], "deck": r["deck"], "error": str(e)}
-                for r in requests[i:]
-            )
-            break
-        except Exception as e:  # one bad request must not sink the whole run
-            logger.error("Request %s (%s) failed: %s", req["request_id"], req["deck"], e)
-            failures.append({"request_id": req["request_id"], "deck": req["deck"], "error": str(e)})
-            continue
+        except Exception as e:
+            raise GenerationFailed(
+                f"Request {req['request_id']} ({req['deck']}) failed, so nothing was "
+                f"written: {str(e)[:400]}"
+            ) from e
         total_prompt += p_tok
         total_completion += c_tok
         rows.extend(card_rows(run_date, req, cards, result, p_tok, c_tok))
@@ -331,19 +327,15 @@ def run(wh, run_date: date, requests: list[dict]) -> dict:
     wh.replace_partition("generated_cards", run_date, WRITTEN_COLUMNS, unique)
     if requests and not unique:
         # Downstream stages treat "no cards" as "nothing to do", so without this
-        # a run that lost every request to a rate limit finishes green with an
-        # empty package — the one outcome you would want an alert for.
-        detail = failures[0]["error"] if failures else "the model returned no usable cards"
+        # a run whose answers held no card finishes green with an empty
+        # package — the one outcome you would want an alert for.
         raise GenerationFailed(
-            f"All {len(requests)} request(s) produced nothing. First failure: {detail[:400]}"
+            f"All {len(requests)} request(s) produced nothing: "
+            "the model returned no usable cards"
         )
-    if failures:
-        logger.warning("%d of %d request(s) failed; continuing with %d card(s)",
-                       len(failures), len(requests), len(unique))
     return {
         "cards": len(unique),
         "requested": sum(r["n"] for r in requests),
-        "failed_requests": failures,
         "with_image_query": sum(1 for r in unique if r[8]),
         "with_visual": sum(1 for r in unique if r[12]),
         "prompt_tokens": total_prompt,

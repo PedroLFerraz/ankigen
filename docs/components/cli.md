@@ -56,7 +56,7 @@ DuckDB, the embedding model or the `anki` package.
 ## How to run and test it
 
 ```bash
-pip install -e ".[dev]"      # or ".[dev,gemini,push,guide]" for every command
+pip install -e ".[dev]"      # or ".[dev,push,guide]" for every command
 ankigen --help
 ankigen providers            # does the configured model answer?
 ```

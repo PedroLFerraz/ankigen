@@ -15,12 +15,12 @@ RUN npm install -g @anthropic-ai/claude-code
 
 # The package and its extras into a venv, which the runtime copies whole:
 # no pip, no wheels and no build tools left behind.
-# [gemini] for the fallback provider, [push] for AnkiWeb, [guide] for the PDF.
+# [push] for AnkiWeb, [guide] for the PDF.
 FROM python:3.12-slim-bookworm AS build
 RUN python -m venv /opt/venv
 COPY pyproject.toml /src/
 COPY src /src/src
-RUN /opt/venv/bin/pip install --no-cache-dir "/src[gemini,push,guide]"
+RUN /opt/venv/bin/pip install --no-cache-dir "/src[push,guide]"
 
 FROM python:3.12-slim-bookworm
 

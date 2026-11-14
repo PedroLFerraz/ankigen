@@ -44,7 +44,7 @@ and how it went) and `curriculum.json` (every topic, and which are done or
 next). This is what the app reads.
 
 **Shared allowances.** Every pipeline uses the same Claude subscription and
-the same Gemini free tier; `budget.max_llm_calls_per_run` caps one run's share
+the same fallback provider's allowance, if one is set; `budget.max_llm_calls_per_run` caps one run's share
 ([Profiles and pipelines](components/profiles-and-pipelines.md#the-pipeline-file)).
 
 ## Setup
@@ -52,19 +52,17 @@ the same Gemini free tier; `budget.max_llm_calls_per_run` caps one run's share
 Secrets, under Settings → Secrets and variables → Actions. They are shared by
 every pipeline.
 
-**`CLAUDE_CODE_OAUTH_TOKEN`** — optional, and what writes the cards when set:
-Claude Opus writes them and Claude Sonnet checks them, on your Claude
+**`CLAUDE_CODE_OAUTH_TOKEN`** — what writes and checks the cards, and looks at
+the pictures: Claude Opus writes them and Claude Sonnet checks them, on your Claude
 subscription (Pro or Max), through the Claude Code CLI. Make one locally with
 `claude setup-token` and store it with `gh secret set CLAUDE_CODE_OAUTH_TOKEN`
 (it prompts for the value). The code removes any Anthropic API key from the
 CLI's environment, so these calls can only ever run on the subscription.
 Whenever Claude cannot answer (the plan's usage limit reached, a missing or
-expired token), the rest of that run goes to the pipeline's fallback, Gemini
-unless it says otherwise. Keep *extra usage* off at claude.ai/settings/usage if
-a reached limit should mean Gemini rather than paid overage.
-
-**`GOOGLE_API_KEY`** — your Gemini key: the fallback above, and what checks
-pictures found on the web.
+expired token), the run fails before the push step and the next tick writes the
+whole day again, unless the pipeline names a `fallback` provider. Keep *extra
+usage* off at claude.ai/settings/usage if a reached limit should mean a failed
+run rather than paid overage.
 
 **`ANKIWEB_KEY`** — a sync token, not your password. Get one locally:
 
@@ -182,8 +180,8 @@ Losing the collection cache costs a fresh download; losing a warehouse cache
 costs about ninety seconds of re-embedding and the memory of which cards were
 already made.
 
-**Gemini's free tier is 20 chat requests per day, per model**, which is why both
-model settings are chains; what a run costs is on
+**A run that Claude cannot finish fails** instead of pushing a short or
+unchecked day; what a run costs is on
 [LLM providers](components/llm-providers.md).
 
 **Snapshots are kept for 14 days.** Each run stores a full snapshot of your

@@ -124,10 +124,6 @@ class Embedder:
         ensure_free(self.cfg["provider"], self.model, settings.allow_paid_models)
         if self.cfg["provider"] == "fastembed":
             return [v.tolist() for v in _fastembed(self.model).embed(texts)]
-        if self.cfg["provider"] == "gemini":
-            client = llm._get_gemini_client()
-            result = client.models.embed_content(model=self.model, contents=texts)
-            return [e.values for e in result.embeddings]
         client = llm._get_openai_client(self.cfg["base_url"], self.cfg["api_key"])
         result = client.embeddings.create(model=self.model, input=texts)
         return [d.embedding for d in result.data]

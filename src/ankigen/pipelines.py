@@ -37,7 +37,7 @@ from cronsim import CronSim, CronSimError
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
 
 from ankigen import config
-from ankigen.config import CLAUDE, NATIVE_PROVIDERS, provider_names
+from ankigen.config import CLAUDE, provider_names
 from ankigen.profile import Profile, load_profile
 
 ID = re.compile(r"^[a-z0-9][a-z0-9-]{0,39}$")
@@ -95,19 +95,17 @@ class Outputs(BaseModel):
 
 class Models(BaseModel):
     """Who writes and who checks. The defaults are what the daily run has used:
-    Claude on the subscription, with Gemini's free tier behind it."""
+    Claude on the subscription, with no fallback: a day Claude cannot answer
+    fails before anything is pushed."""
     model_config = ConfigDict(extra="forbid")
 
     writer: str = "claude"
     writer_models: list[str] = ["claude-opus-5-5", "claude-sonnet-5"]
     checker: str = "claude"
     checker_models: list[str] = ["claude-sonnet-5"]
-    fallback: str = Field("gemini", description="Takes over when the writer's provider cannot "
-                                                "answer at all. Empty: none.")
-    fallback_models: list[str] = ["gemini-3.8-flash", "gemini-3.7-flash",
-                                  "gemini-3.6-flash", "gemini-3.5-flash"]
-    fallback_checker_models: list[str] = ["gemini-3.5-flash-lite", "gemini-flash-lite-latest",
-                                          "gemini-3.1-flash-lite"]
+    fallback: str = Field("", description="Takes over when the writer's provider cannot "
+                                          "answer at all: an OpenAI-compatible provider, "
+                                          "with its model from LLM_MODEL. Empty: none.")
 
     @field_validator("writer", "checker", "fallback")
     @classmethod
@@ -124,7 +122,7 @@ class Models(BaseModel):
             raise ValueError("the fallback must be another provider than the writer")
         if self.fallback and model_var(self.fallback) == model_var(self.writer):
             raise ValueError(f"{self.writer} and {self.fallback} would both be set by "
-                             f"{model_var(self.writer)}; pick claude or gemini for one of them")
+                             f"{model_var(self.writer)}; pick another provider for one of them")
         return self
 
 
@@ -170,8 +168,6 @@ def model_var(provider: str) -> str:
     """The setting a provider's model chain goes in (see config.Settings)."""
     if provider == CLAUDE:
         return "CLAUDE_MODEL"
-    if provider in NATIVE_PROVIDERS:
-        return "GEMINI_MODEL"
     return "LLM_MODEL"
 
 
@@ -225,10 +221,6 @@ def env(p: Pipeline) -> dict[str, str]:
         out[model_var(m.writer)] = ",".join(m.writer_models)
     if m.checker_models:
         out["VERIFY_MODEL"] = ",".join(m.checker_models)
-    if m.fallback and m.fallback_models:
-        out[model_var(m.fallback)] = ",".join(m.fallback_models)
-    if m.fallback and m.fallback_checker_models:
-        out["FALLBACK_VERIFY_MODEL"] = ",".join(m.fallback_checker_models)
     return out
 
 
